@@ -3,29 +3,72 @@ name: Publish HTML help
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
   group: help-pages
-  cancel-in-progress: false
+  queue: max
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.changes.outputs.publish }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check whether to publish
+        id: changes
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          help_paths=(docs/user-help scripts/build_help.js .github/workflows/help-pages.yml)
+          if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+            BEFORE_SHA=$(git hash-object -t tree -w /dev/null)
+          elif ! git cat-file -e "${BEFORE_SHA}^{commit}"; then
+            git fetch --no-tags origin "$BEFORE_SHA"
+          fi
+          changed=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- "${help_paths[@]}")
+          if [[ -z "$changed" ]]; then
+            echo 'No help changes in this push.'
+            exit 0
+          fi
+
+          # CIの完了順が前後しても、古いヘルプで上書きしない。
+          git fetch --no-tags origin refs/heads/main
+          newer=$(git diff --name-only "$GITHUB_SHA" FETCH_HEAD -- "${help_paths[@]}")
+          if [[ -n "$newer" ]]; then
+            echo 'The help on main has changed since this run started.'
+            exit 0
+          fi
+          echo 'publish=true' >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.publish == 'true'
         with:
           node-version: '24'
-      - run: node scripts/build_help.js
-      - run: node scripts/build_help.js --check
+      - name: Generate and check HTML help
+        if: steps.changes.outputs.publish == 'true'
+        run: |
+          node scripts/build_help.js
+          node scripts/build_help.js --check
       - uses: actions/upload-pages-artifact@v4
+        if: steps.changes.outputs.publish == 'true'
         with:
           path: artifacts/help-site
   deploy:
     needs: build
+    if: needs.build.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       pages: write
