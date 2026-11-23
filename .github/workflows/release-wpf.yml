@@ -1,0 +1,111 @@
+name: Release UWSC# for Windows
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - .github/workflows/release-wpf.yml
+      - scripts/package-wpf-release.ps1
+      - src/UWSCSharp.DllRelay/UWSCSharp.DllRelay.csproj
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wpf-release-${{ github.ref }}
+  queue: max
+
+jobs:
+  package:
+    if: github.event_name != 'push' || !github.event.deleted
+    runs-on: windows-2025
+    timeout-minutes: 35
+    outputs:
+      filename: ${{ steps.version.outputs.filename }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      commit: ${{ steps.version.outputs.commit }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve release version
+        id: version
+        run: |
+          $version = "0.0.0-ci.$env:GITHUB_RUN_NUMBER"
+          $commit = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'ビルド対象のコミットを取得できません。' }
+          if ($env:GITHUB_EVENT_NAME -eq 'push') {
+            if ($env:GITHUB_REF_NAME -cnotmatch '^v(?<version>(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$') {
+              throw 'タグは v1.2.3 または v1.2.3-preview.1 の形式で指定してください。'
+            }
+            $version = $Matches.version
+            git merge-base --is-ancestor $commit refs/remotes/origin/main
+            if ($LASTEXITCODE -ne 0) { throw 'タグは main のコミットを指定してください。' }
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "filename=UWSCSharp-$version-win-x64.zip" >> $env:GITHUB_OUTPUT
+          "prerelease=$($version.Contains('-').ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          "commit=$commit" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build and run headless tests for the tag
+        if: github.event_name == 'push'
+        run: |
+          dotnet build UWSCSharp.slnx -c Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pwsh -NoProfile -File scripts/test-headless.ps1 -Configuration Release
+
+      - name: Build and verify the self-contained ZIP
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/package-wpf-release.ps1 -Version $env:VERSION -OutputDirectory artifacts/wpf-package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wpf-win-x64
+          path: |
+            artifacts/wpf-package/${{ steps.version.outputs.filename }}
+            artifacts/wpf-package/${{ steps.version.outputs.filename }}.sha256
+          if-no-files-found: error
+
+  release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wpf-win-x64
+
+      - name: Publish the verified ZIP to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FILENAME: ${{ needs.package.outputs.filename }}
+          PRERELEASE: ${{ needs.package.outputs.prerelease }}
+          PACKAGE_COMMIT: ${{ needs.package.outputs.commit }}
+        shell: bash
+        run: |
+          sha256sum --check "$FILENAME.sha256"
+          tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/tags/$GITHUB_REF_NAME" --jq .sha)
+          if [[ "$tag_sha" != "$PACKAGE_COMMIT" ]]; then
+            echo 'The tag no longer points to the packaged commit.' >&2
+            exit 1
+          fi
+          options=(--repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --title "UWSC# $GITHUB_REF_NAME")
+          if [[ "$PRERELEASE" == true ]]; then
+            options+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" "$FILENAME" "$FILENAME.sha256" "${options[@]}"
