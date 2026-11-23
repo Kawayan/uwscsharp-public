@@ -1,0 +1,24 @@
+<p class="lead">現行実装に登録された関数と、表示文PRINTを分野別に調べられます。各項目に書式・引数・戻り値・制限を記載しています。</p>
+<div class="notice">台帳では多くの機能が「一部実装」です。この一覧は動作する採用範囲の案内であり、原版ヘルプにある全引数・全フラグ・全環境への対応を意味しません。未実装の関数を利用可能として掲載していません。</div>
+<h2 id="categories">分類から探す</h2>
+<table><thead><tr><th>分類</th><th>主な項目</th></tr></thead><tbody>
+<tr><td><a href="functions-windows.html">ウィンドウ関連</a></td><td>GETID、STATUS、CTRLWIN、ACW、IDTOHND、HNDTOID</td></tr>
+<tr><td><a href="functions-input.html">マウス・キーボード入力</a></td><td>MOUSEORG、MMV、BTN、KBD、SENDSTR</td></tr>
+<tr><td><a href="functions-controls.html">コントロール・アクセシビリティ</a></td><td>CLKITEM、GETSTR、CHKBTN、GETITEM、GETSLCTLST、GETSLIDER、SETSLIDER、POSACC</td></tr>
+<tr><td><a href="functions-images.html">画面・画像</a></td><td>PEEKCOLOR、CHKIMG、SAVEIMG</td></tr>
+<tr><td><a href="functions-display.html">ダイアログ・表示関連</a></td><td>INPUT、MSGBOX、SLCTBOX、PRINT文。POPUPMENUなどは未実装</td></tr>
+<tr><td><a href="functions-strings.html">文字列</a></td><td>COPY、POS、BETWEENSTR、LENGTH、TRIM、VAL、FORMAT、TOKENなど</td></tr>
+<tr><td><a href="functions-numbers.html">数値・数学</a></td><td>INT、ROUND、SQRT、POWER、SIN、LOGN、RANDOMなど</td></tr>
+<tr><td><a href="functions-arrays.html">配列</a></td><td>SPLIT、JOIN、SLICE、RESIZE、SETCLEAR、SHIFTARRAY、CALCARRAY、QSORT</td></tr>
+<tr><td><a href="functions-files.html">ファイル・INI</a></td><td>FOPEN、FGET、FPUT、FCLOSE、FDELLINE、GETDIR、DELETEFILE、READINI、WRITEINI、DELETEINI</td></tr>
+<tr><td><a href="functions-system.html">システム・時間・待機</a></td><td>KINDOFOS、CPUUSERATE、SLEEP、GETTIME</td></tr>
+<tr><td><a href="functions-com.html">COM連携</a></td><td>CREATEOLEOBJ、GETACTIVEOLEOBJ、GETOLEITEM</td></tr>
+</tbody></table>
+<h2 id="read">書式と動作環境の読み方</h2>
+<p>角括弧は省略可能な引数を示します。書式の角括弧は、スクリプトへそのまま入力する記号ではありません。途中の引数を省略する場合はGETID("対象", , 1)のように区切りのカンマを残します。</p>
+<p>Windows操作・画像・COMはWindowsの対象やproviderが必要です。</p>
+<p>副作用を伴わない例は掲載原稿から取り出して出力を検査しています。対象ウィンドウやCOMの準備が必要な使用例は、実操作未確認と明記しています。回帰テスト成功を原版互換の確認として扱いません。</p>
+<h2 id="language">言語機能を調べる</h2>
+<ul><li><a href="routines.html">FUNCTION・PROCEDURE・引数・スコープ</a></li>
+<li><a href="control-flow.html">IF・ループ・中断・例外処理・CALL</a></li>
+<li><a href="data-types.html">変数・配列・HASHTBL・OPTION</a></li></ul>

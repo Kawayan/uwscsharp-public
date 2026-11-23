@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- WPF画面に依存しない設定・保存・記録制御をテストから参照できるよう分離します。 -->
+  <PropertyGroup>
+    <RootNamespace>UWSCSharp.Wpf</RootNamespace>
+    <AssemblyName>UWSCSharp.Wpf.Logic</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../UWSCSharp.IO/UWSCSharp.IO.csproj" />
+    <ProjectReference Include="../UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource
+      Include="../../docs/user-help/index.html"
+      LogicalName="UWSCSharp.Help/%(Filename)%(Extension)"
+    />
+    <EmbeddedResource
+      Include="../../docs/user-help/pages/*.html"
+      LogicalName="UWSCSharp.Help/pages/%(Filename)%(Extension)"
+    />
+    <EmbeddedResource
+      Include="../../docs/user-help/assets/help.css;../../docs/user-help/assets/help.js;../../docs/user-help/assets/search-index.js"
+      LogicalName="UWSCSharp.Help/assets/%(Filename)%(Extension)"
+    />
+  </ItemGroup>
+</Project>

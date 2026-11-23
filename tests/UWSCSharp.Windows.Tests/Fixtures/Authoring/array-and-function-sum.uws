@@ -1,0 +1,10 @@
+DIM values[2] = 2, 4, 6
+PRINT SumValues(values)
+
+FUNCTION SumValues(items[])
+    DIM total = 0
+    FOR index = 0 TO LENGTH(items) - 1
+        total = total + items[index]
+    NEXT
+    RESULT = total
+FEND

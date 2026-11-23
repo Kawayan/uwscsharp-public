@@ -1,0 +1,6 @@
+DIM id = GETID("UWSC# Authoring Fixture", "", 5)
+IFB id > 0
+    CTRLWIN(id, ACTIVATE)
+ELSE
+    PRINT "未発見"
+ENDIF

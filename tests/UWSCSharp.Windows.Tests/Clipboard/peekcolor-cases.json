@@ -1,0 +1,220 @@
+[
+  {
+    "name": "dib-1",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQABAAAAAAAIAAAAAAAAAAAAAAACAAAAAAAAAFY0EgDvzasAgAAAAEAAAAA=",
+    "expected": [
+      1193046,
+      11259375,
+      11259375,
+      1193046
+    ]
+  },
+  {
+    "name": "dib-4",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAEAAAAAAAIAAAAAAAAAAAAAAAEAAAAAAAAAFY0EgDvzasAutz+ADAgEAAjAAAAAQAAAA==",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-8",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAIAAAAAAAIAAAAAAAAAAAAAAAEAAAAAAAAAFY0EgDvzasAutz+ADAgEAACAwAAAAEAAA==",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-16-rgb555",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAQAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAB8A/38AfOAD",
+    "expected": [
+      16711680,
+      65280,
+      255,
+      16777215
+    ]
+  },
+  {
+    "name": "dib-16-rgb565",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAQAAMAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAD4AADgBwAAHwAAAB8A//8A+OAH",
+    "expected": [
+      16711680,
+      65280,
+      255,
+      16777215
+    ]
+  },
+  {
+    "name": "dib-24",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAYAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAALrc/jAgEAAAVjQS782rAAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-24-top-down",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAD+////AQAYAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAFY0Eu/NqwAAutz+MCAQAAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-32",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAgAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAALrc/gAwIBAAVjQSAO/NqwA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-32-bitfields",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAgAAMAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA/wAA/wAA/wAAALrc/gAwIBAAVjQSAO/NqwA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-v4",
+    "kind": "bytes",
+    "format": 8,
+    "data": "bAAAAAIAAAACAAAAAQAgAAMAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA/wAA/wAA/wAAAAAAAABCR1JzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAutz+ADAgEABWNBIA782rAA==",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-v5",
+    "kind": "bytes",
+    "format": 17,
+    "data": "fAAAAAIAAAD+////AQAgAAMAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA/wAA/wAA/wAAAAAAAABCR1JzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFY0EgDvzasAutz+ADAgEAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-rle8",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAIAAEAAAAOAAAAAAAAAAAAAAAEAAAAAAAAAFY0EgDvzasAutz+ADAgEAABAgEDAAABAAEBAAAAAQ==",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "dib-rle4",
+    "kind": "bytes",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAEAAIAAAAKAAAAAAAAAAAAAAAEAAAAAAAAAFY0EgDvzasAutz+ADAgEAACIwAAAgEAAAAB",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "bitmap",
+    "kind": "bitmap",
+    "format": 2,
+    "data": "KAAAAAIAAAD+////AQAgAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAFY0EgDvzasAutz+ADAgEAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "delayed",
+    "kind": "delayed",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAYAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAALrc/jAgEAAAVjQS782rAAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "slow-delayed",
+    "kind": "slow-delayed",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAYAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAALrc/jAgEAAAVjQS782rAAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "locked",
+    "kind": "locked",
+    "format": 8,
+    "data": "KAAAAAIAAAACAAAAAQAYAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAALrc/jAgEAAAVjQS782rAAA=",
+    "expected": [
+      1193046,
+      11259375,
+      16702650,
+      1056816
+    ]
+  },
+  {
+    "name": "empty",
+    "kind": "empty",
+    "format": 0,
+    "data": "",
+    "expected": null
+  },
+  {
+    "name": "text-only",
+    "kind": "bytes",
+    "format": 13,
+    "data": "bwB3AG4AZQBkACAAdABlAHgAdAAAAA==",
+    "expected": null
+  }
+]

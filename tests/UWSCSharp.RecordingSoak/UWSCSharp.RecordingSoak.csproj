@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>UWSCSharp.RecordingSoak</AssemblyName>
+    <RootNamespace>UWSCSharp.RecordingSoak</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
+  </ItemGroup>
+</Project>

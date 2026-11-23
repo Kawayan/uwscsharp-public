@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>UWSCSharp.Smoke</RootNamespace>
+    <AssemblyName>UWSCSharp.Smoke</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/UWSCSharp.Core/UWSCSharp.Core.csproj" />
+  </ItemGroup>
+</Project>

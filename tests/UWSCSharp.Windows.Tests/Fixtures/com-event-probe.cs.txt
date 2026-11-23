@@ -1,0 +1,575 @@
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.IO;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text;
+using TYPEATTR = System.Runtime.InteropServices.ComTypes.TYPEATTR;
+using FUNCDESC = System.Runtime.InteropServices.ComTypes.FUNCDESC;
+
+#if NATIVE_EVENT_TYPES
+[ComImport]
+[ComVisible(true)]
+[Guid("B196B283-BAB4-101A-B69C-00AA00341D07")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface INativeEventClassInfo
+{
+    [PreserveSig]
+    int GetClassInfo(out ITypeInfo information);
+}
+
+[ComVisible(true)]
+[ClassInterface(ClassInterfaceType.None)]
+public sealed class NativeEventClassInfo : INativeEventClassInfo
+{
+    private readonly EventProbe owner;
+
+    public NativeEventClassInfo(EventProbe owner)
+    {
+        this.owner = owner;
+    }
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode)]
+    private static extern int LoadTypeLibEx(string file, int registration, out ITypeLib library);
+
+    [DllImport("ComEventTypeInfoProxy.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int WrapTypeInfo(ITypeInfo inner, int point, int result,
+        out ITypeInfo information);
+
+    public int GetClassInfo(out ITypeInfo information)
+    {
+        Interlocked.Increment(ref owner.ClassInfoCalls);
+        information = null;
+        if (owner.ClassInfoResult < 0 || owner.EmptyClassInfo)
+        {
+            return owner.ClassInfoResult;
+        }
+
+        ITypeLib library;
+        Marshal.ThrowExceptionForHR(LoadTypeLibEx(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory, "native-events.tlb"), 2, out library));
+        try
+        {
+            Guid classId = new Guid("NATIVE_CLASS_ID");
+            library.GetTypeInfoOfGuid(ref classId, out information);
+            if (owner.TypeInfoPoint != 0)
+            {
+                ITypeInfo original = information;
+                try
+                {
+                    Marshal.ThrowExceptionForHR(WrapTypeInfo(original,
+                        owner.TypeInfoPoint, owner.TypeInfoResult, out information));
+                }
+                finally
+                {
+                    Marshal.ReleaseComObject(original);
+                }
+            }
+            return 0;
+        }
+        finally
+        {
+            Marshal.ReleaseComObject(library);
+        }
+    }
+}
+#endif
+
+#if INHERITED_EVENT_INTERFACE
+[ComVisible(true)]
+[Guid("BASE_ID")]
+[InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+public interface IEventProbeBase
+{
+    [DispId(1)]
+    void Changed(int number, [In, Out] ref bool cancel);
+}
+#endif
+
+[ComVisible(true)]
+[Guid("EVENT_ID")]
+[InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+public interface IEventProbeEvents
+#if INHERITED_EVENT_INTERFACE
+    : IEventProbeBase
+#endif
+{
+#if !INHERITED_EVENT_INTERFACE
+    [DispId(1)]
+    void Changed(int number, [In, Out] ref bool cancel);
+#endif
+
+    [DispId(2)]
+    void Other(string text);
+}
+
+[ComVisible(true)]
+public delegate void ChangedHandler(int number, [In, Out] ref bool cancel);
+
+[ComVisible(true)]
+public delegate void OtherHandler(string text);
+
+// ゲスト内だけに登録し、同期通知と参照引数を観測します。
+[ComVisible(true)]
+[Guid("CLASS_ID")]
+[ProgId("PROG_ID")]
+[ClassInterface(ClassInterfaceType.AutoDual)]
+[ComSourceInterfaces(typeof(IEventProbeEvents))]
+public sealed class EventProbe
+#if HIDE_EVENT_CLASS_INFO || NATIVE_EVENT_TYPES
+    : ICustomQueryInterface
+#endif
+{
+    public event ChangedHandler Changed;
+    public event OtherHandler Other;
+    private volatile int asynchronousDone;
+    private volatile int asynchronousCaptured;
+    private int asynchronousResult;
+    private int asynchronousError;
+    private uint asynchronousWorkerControl;
+    private EventProbe marker;
+
+#if NATIVE_EVENT_TYPES
+    internal int ClassInfoResult;
+    internal int ClassInfoCalls;
+    internal bool EmptyClassInfo;
+    internal int TypeInfoPoint;
+    internal int TypeInfoResult;
+
+    [DllImport("ComEventTypeInfoProxy.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int TypeInfoProxyState(int metric);
+
+    public int TypeInfoState(int metric)
+    {
+        return TypeInfoProxyState(metric);
+    }
+
+    public void SetTypeInfoFailure(int point, int result)
+    {
+        TypeInfoPoint = point;
+        TypeInfoResult = result;
+    }
+
+    public void SetClassInfoFailure(int result, int empty)
+    {
+        ClassInfoResult = result;
+        EmptyClassInfo = empty != 0;
+    }
+
+    public int ClassInfoCallCount()
+    {
+        return Interlocked.CompareExchange(ref ClassInfoCalls, 0, 0);
+    }
+#endif
+
+
+    public string EventTypeShape()
+    {
+        IntPtr pointer = Marshal.GetITypeInfoForType(typeof(IEventProbeEvents));
+        ITypeInfo information = null;
+        try
+        {
+            information = (ITypeInfo)Marshal.GetObjectForIUnknown(pointer);
+            IntPtr attributes = IntPtr.Zero;
+            information.GetTypeAttr(out attributes);
+            TYPEATTR value;
+            try
+            {
+                value = (TYPEATTR)Marshal.PtrToStructure(attributes, typeof(TYPEATTR));
+            }
+            finally
+            {
+                information.ReleaseTypeAttr(attributes);
+            }
+
+            var result = new StringBuilder();
+            result.Append(value.typekind).Append("|").Append(value.cFuncs)
+                .Append("|").Append(value.cImplTypes);
+            for (int index = 0; index < value.cFuncs; index++)
+            {
+                IntPtr description;
+                information.GetFuncDesc(index, out description);
+                try
+                {
+                    FUNCDESC function = (FUNCDESC)Marshal.PtrToStructure(description, typeof(FUNCDESC));
+                    string name, documentation, helpFile;
+                    int context;
+                    information.GetDocumentation(function.memid, out name,
+                        out documentation, out context, out helpFile);
+                    result.Append("|").Append(function.memid).Append(":").Append(name);
+                }
+                finally
+                {
+                    information.ReleaseFuncDesc(description);
+                }
+            }
+
+            for (int index = 0; index < value.cImplTypes; index++)
+            {
+                int reference;
+                information.GetRefTypeOfImplType(index, out reference);
+                ITypeInfo inherited;
+                information.GetRefTypeInfo(reference, out inherited);
+                try
+                {
+                    string name, documentation, helpFile;
+                    int context;
+                    inherited.GetDocumentation(-1, out name,
+                        out documentation, out context, out helpFile);
+                    result.Append("|base:").Append(name);
+                }
+                finally
+                {
+                    if (Marshal.IsComObject(inherited))
+                    {
+                        Marshal.ReleaseComObject(inherited);
+                    }
+                }
+            }
+
+            return result.ToString();
+        }
+        finally
+        {
+            if (information != null && Marshal.IsComObject(information))
+            {
+                Marshal.ReleaseComObject(information);
+            }
+
+            Marshal.Release(pointer);
+        }
+    }
+
+#if HIDE_EVENT_CLASS_INFO || NATIVE_EVENT_TYPES
+    [ComVisible(false)]
+    public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr result)
+    {
+        result = IntPtr.Zero;
+#if NATIVE_EVENT_TYPES
+        if (iid == new Guid("B196B283-BAB4-101A-B69C-00AA00341D07"))
+        {
+            result = Marshal.GetComInterfaceForObject(new NativeEventClassInfo(this),
+                typeof(INativeEventClassInfo), CustomQueryInterfaceMode.Ignore);
+            return CustomQueryInterfaceResult.Handled;
+        }
+#endif
+        return iid == new Guid("B196B283-BAB4-101A-B69C-00AA00341D07")
+            || iid == new Guid("A6BC3AC0-DBAA-11CE-9DE3-00AA004BB851")
+            ? CustomQueryInterfaceResult.Failed : CustomQueryInterfaceResult.NotHandled;
+    }
+#endif
+
+    public int ClassInfoStatus(int version)
+    {
+        Guid iid = new Guid(version == 1
+            ? "B196B283-BAB4-101A-B69C-00AA00341D07"
+            : "A6BC3AC0-DBAA-11CE-9DE3-00AA004BB851");
+        IntPtr unknown = Marshal.GetIUnknownForObject(this);
+        IntPtr information = IntPtr.Zero;
+        try
+        {
+            return Marshal.QueryInterface(unknown, ref iid, out information);
+        }
+        finally
+        {
+            if (information != IntPtr.Zero)
+            {
+                Marshal.Release(information);
+            }
+
+            Marshal.Release(unknown);
+        }
+    }
+
+    public EventProbe Marker()
+    {
+        if (marker == null)
+        {
+            marker = new EventProbe();
+        }
+
+        return marker;
+    }
+
+    public void BeginFire(int number)
+    {
+        StartAsynchronous(() => Fire(number, false, () => asynchronousCaptured = 1));
+    }
+
+    public void BeginFireWithX87Control(int number, int control)
+    {
+        StartAsynchronous(() =>
+        {
+            asynchronousWorkerControl = ReadX87Control();
+            return FireWithX87Control(number, 0, control);
+        });
+    }
+
+    public int AsyncWorkerControl()
+    {
+        return checked((int)asynchronousWorkerControl);
+    }
+
+    private void StartAsynchronous(Func<int> fire)
+    {
+        asynchronousDone = 0;
+        asynchronousCaptured = 0;
+        asynchronousResult = 0;
+        asynchronousError = 0;
+        var worker = new Thread(() =>
+        {
+            try
+            {
+                asynchronousResult = fire();
+            }
+            catch (Exception error)
+            {
+                asynchronousError = Marshal.GetHRForException(error);
+            }
+            finally
+            {
+                asynchronousDone = 1;
+            }
+        });
+        worker.IsBackground = true;
+        worker.SetApartmentState(ApartmentState.MTA);
+        worker.Start();
+    }
+
+    public int AsyncDone()
+    {
+        return asynchronousDone;
+    }
+
+    public int AsyncCaptured()
+    {
+        return asynchronousCaptured;
+    }
+
+    public int AsyncResult()
+    {
+        return asynchronousResult;
+    }
+
+    public int AsyncError()
+    {
+        return asynchronousError;
+    }
+
+    public int ListenerCount()
+    {
+        return Changed == null ? 0 : Changed.GetInvocationList().Length;
+    }
+
+    public int OtherListenerCount()
+    {
+        return Other == null ? 0 : Other.GetInvocationList().Length;
+    }
+
+    [DllImport("DefDllAbiFixture.dll", CallingConvention = CallingConvention.Cdecl,
+        ExactSpelling = true)]
+    private static extern uint ReadX87Control();
+
+    [DllImport("DefDllAbiFixture.dll", CallingConvention = CallingConvention.Cdecl,
+        ExactSpelling = true)]
+    private static extern uint ReadSseControl();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate int ControlledEvent();
+
+    [DllImport("DefDllAbiFixture.dll", CallingConvention = CallingConvention.Cdecl,
+        ExactSpelling = true)]
+    private static extern int InvokeWithX87Control(ushort control,
+        ControlledEvent callback);
+
+    private double beforeEvent;
+    private double afterEvent;
+
+    public int ReadProcessBits()
+    {
+        return IntPtr.Size * 8;
+    }
+
+    public int ReadProcessId()
+    {
+        return System.Diagnostics.Process.GetCurrentProcess().Id;
+    }
+
+    public double ReadControl()
+    {
+        return ReadX87Control() * 65536.0 + ReadSseControl();
+    }
+
+    public double ReadEventBefore()
+    {
+        return beforeEvent;
+    }
+
+    public double ReadEventAfter()
+    {
+        return afterEvent;
+    }
+
+    public int FireWithControl(int number)
+    {
+        return FireWithControl(number, false);
+    }
+
+    public int FireWithX87Control(int number, int initiallyCancelled, int control)
+    {
+        try
+        {
+            return InvokeWithX87Control(checked((ushort)control), delegate
+            {
+                beforeEvent = ReadX87Control();
+                return Fire(number, initiallyCancelled != 0);
+            });
+        }
+        finally
+        {
+            afterEvent = ReadX87Control();
+        }
+    }
+
+    public int FireWithInitialCancel(int number)
+    {
+        return FireWithControl(number, true);
+    }
+
+    private int FireWithControl(int number, bool cancel)
+    {
+        beforeEvent = ReadControl();
+        int result = Fire(number, cancel);
+        afterEvent = ReadControl();
+        return result;
+    }
+
+    public int Fire(int number)
+    {
+        return Fire(number, false);
+    }
+
+    private int Fire(int number, bool cancel, Action beforeDispatch = null)
+    {
+        ChangedHandler handler = Changed;
+        if (handler != null)
+        {
+            if (beforeDispatch != null)
+            {
+                beforeDispatch();
+            }
+            handler(number, ref cancel);
+        }
+
+        return cancel ? 1 : 0;
+    }
+
+    public void FireOther(string text)
+    {
+        OtherHandler handler = Other;
+        if (handler != null)
+        {
+            handler(text);
+        }
+    }
+
+    public int AddToReference(int delta, ref object entry)
+    {
+        int before = Convert.ToInt32(entry);
+        entry = before + delta;
+        return before;
+    }
+}
+
+// 別プロセスではCLRを混在させず、同じ接続点をROT経由で公開します。
+public static class EventServer
+{
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Message
+    {
+        internal IntPtr Window;
+        internal uint Id;
+        internal UIntPtr WParam;
+        internal IntPtr LParam;
+        internal uint Time;
+        internal int X;
+        internal int Y;
+        internal uint Private;
+    }
+
+    [STAThread]
+    public static int Main(string[] arguments)
+    {
+        if (Environment.UserName != "WDAGUtilityAccount" || arguments.Length != 2)
+        {
+            return 90;
+        }
+
+        Marshal.ThrowExceptionForHR(CoInitializeEx(IntPtr.Zero, 2));
+        uint cookie = 0;
+        bool registered = false;
+        var source = new EventProbe();
+        try
+        {
+            Guid classId = new Guid("CLASS_ID");
+            Marshal.ThrowExceptionForHR(RegisterActiveObject(source,
+                ref classId, 0, out cookie));
+            registered = true;
+            File.WriteAllText(arguments[0], "ready");
+            while (!File.Exists(arguments[1]))
+            {
+                Message message;
+                while (PeekMessage(out message, IntPtr.Zero, 0, 0, 1))
+                {
+                    TranslateMessage(ref message);
+                    DispatchMessage(ref message);
+                }
+
+                Thread.Sleep(10);
+            }
+
+            return 0;
+        }
+        catch (Exception failure)
+        {
+            Console.Error.WriteLine(failure);
+            return 1;
+        }
+        finally
+        {
+            if (registered)
+            {
+                Marshal.ThrowExceptionForHR(RevokeActiveObject(cookie, IntPtr.Zero));
+            }
+
+            GC.KeepAlive(source);
+            CoUninitialize();
+        }
+    }
+
+    [DllImport("ole32.dll")]
+    private static extern int CoInitializeEx(IntPtr reserved, uint flags);
+
+    [DllImport("ole32.dll")]
+    private static extern void CoUninitialize();
+
+    [DllImport("oleaut32.dll")]
+    private static extern int RegisterActiveObject(
+        [MarshalAs(UnmanagedType.IUnknown)] object value,
+        ref Guid classId, uint flags, out uint cookie);
+
+    [DllImport("oleaut32.dll")]
+    private static extern int RevokeActiveObject(uint cookie, IntPtr reserved);
+
+    [DllImport("user32.dll", EntryPoint = "PeekMessageW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool PeekMessage(out Message message,
+        IntPtr window, uint minimum, uint maximum, uint remove);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool TranslateMessage(ref Message message);
+
+    [DllImport("user32.dll", EntryPoint = "DispatchMessageW")]
+    private static extern IntPtr DispatchMessage(ref Message message);
+}

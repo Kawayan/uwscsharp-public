@@ -1,0 +1,67 @@
+import "oaidl.idl";
+
+[
+    uuid(AD38F40A-68D1-4A45-A049-DFA1848931D4),
+    version(1.0)
+]
+library EventTypeProbe
+{
+    importlib("stdole2.tlb");
+
+    [uuid(6A41A5A1-28BC-430F-B108-D67CD5C54FB4), object, oleautomation]
+    interface IEventBase : IDispatch
+    {
+        [id(1)] HRESULT Changed([in] LONG number, [in, out] VARIANT_BOOL* cancel);
+    };
+
+    [uuid(66FEF659-BFA6-4581-9CBB-424E86885EA6), object, oleautomation]
+    interface IEventDerived : IEventBase
+    {
+        [id(2)] HRESULT Other([in] BSTR text);
+    };
+
+    [uuid(BAB08F1D-5246-43C6-86D9-987E806FF0E5)]
+    dispinterface IFlattenedEvents
+    {
+        interface IEventDerived;
+    };
+
+    [uuid(5FA097DE-0B89-477B-A310-EC0F04B5C1E6)]
+    dispinterface IDirectEvents
+    {
+        properties:
+        methods:
+        [id(1)] void Changed([in] LONG number, [in, out] VARIANT_BOOL* cancel);
+        [id(2)] void Other([in] BSTR text);
+    };
+
+    [uuid(E6072F22-9815-441F-8C18-76AA6D4DB460), object, dual, oleautomation]
+    interface IDualEventBase : IDispatch
+    {
+        [id(1)] HRESULT Changed([in] LONG number, [in, out] VARIANT_BOOL* cancel);
+    };
+
+    [uuid(BB8543C4-D70A-482E-9136-14D428EAE59B), object, dual, oleautomation]
+    interface IDualEventDerived : IDualEventBase
+    {
+        [id(2)] HRESULT Other([in] BSTR text);
+    };
+
+    [uuid(DA938D5F-0C25-47A2-A73C-826C42B07927)]
+    coclass DirectSource
+    {
+        [default, source] dispinterface IDirectEvents;
+    };
+
+    [uuid(E6588F93-D347-4477-8488-13899DF8CBBA)]
+    coclass FlattenedSource
+    {
+        [default, source] dispinterface IFlattenedEvents;
+    };
+
+    [uuid(AB864D73-E3C7-4F66-A5E8-2D9293D0A1F1)]
+    coclass DualSource
+    {
+        [default, source] interface IDualEventDerived;
+    };
+};

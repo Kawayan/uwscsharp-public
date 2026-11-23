@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>変数・配列・OPTION | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section" open><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a aria-current="page" href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 変数・配列・OPTION</p>
+<h1>変数・配列・OPTION</h1><p class="lead">変数・定数・配列・ハッシュと、利用できるOPTIONを説明します。</p>
+<h2 id="variables">DIM・PUBLIC・CONST</h2>
+<pre data-example="verified" data-name="variables" data-expected="30&#10;"><code>CONST Unit = 10
+PUBLIC shared = 2
+DIM count = 3
+PRINT Unit * count</code></pre>
+<p>名前は大小文字を区別しません。DIMは現在の領域、PUBLICは共有する変数、CONSTは変更できない値を宣言します。通常のPUBLICはメインの直下に書きます。MODULE・CLASS内の宣言は<a href="routines.html#modules">MODULE・CLASS</a>の規則に従います。未初期化の通常変数はEMPTYです。</p>
+<p><code>PUBLIC first = 2, second = first + 3</code>のように、カンマで複数の変数を宣言できます。初期値は左から右へ評価します。<code>PUBLIC items[1] = 10, 20</code>や<code>PUBLIC items[] = 10, 20</code>で共有配列も作れます。上限添字や多次元配列の規則はDIM配列と同じです。初期値付き配列の後のカンマは要素の区切りになるため、次の変数は別のPUBLIC文に書いてください。</p>
+<p>PUBLICの初期値には先行するPUBLIC・CONSTと組み込み関数を使えます。例：<code>PUBLIC Total = ABS(-7)</code>。初期化はメイン処理より前に宣言順で行います。後続宣言、最初の宣言での自己参照、未初期化名はエラーです。ユーザー関数、COMメンバー、添字を含む初期化式は対象外です。関数の既定引数からPUBLICを参照することもできます。</p>
+<p>同じ名前のPUBLICを再宣言した場合、初期値を省略すると既存の値を保ち、初期値があればその値で初期化し直します。配列では次元数と各次元の上下限をそろえる必要があります。通常変数・配列・HASHTBLの宣言形式は混在させられません。<code>OPTION OPTPUBLIC</code>を先頭に指定すると、同名PUBLICの再宣言を拒否します。CONSTや組み込み名との衝突も拒否します。</p>
+<h2 id="const">CONST：実行前に値を確定する</h2>
+<p><code>CONST 名前 = 初期化式</code>で定数を宣言します。メインの直下のほか、対応する構造化ブロックや関数・手続きの中でも宣言できます。未実行の分岐や未呼出しの関数にある宣言も、実行全体で共有します。</p>
+<p>CONSTは1文につき一つの定義です。複数の定数は文を分けて宣言してください。同名のCONSTやPUBLICとの重複は拒否します。MODULE・CLASS内のCONSTは、そのまとまりの定数として扱います。</p>
+<p>初期化はメイン処理より前に、各ファイル内の宣言順で一度だけ行います。CALLを含む場合は主ファイル、直接のCALL先、その子の順に処理し、同じ深さでは最初に参照した順を使います。同じファイルを再び初期化しません。<code>CONST Size = ABS(-7)</code>のように組み込み関数を使えます。先行するPUBLIC・CONST、PARAM_STR、先行GETTIMEの出力も参照できます。後続宣言・自己参照・未初期化名はエラーです。関数内で宣言しても、その関数の仮引数やDIMを初期化式から参照することはできません。</p>
+<p>数値・文字列・EMPTY・NULL・NOTHINGなどの単一の値を保持します。配列・HASHTBL・外部object参照を最終結果にする初期化、添字・COMメンバー・ユーザー関数の初期化呼出しは採用範囲外です。通常代入や参照更新では定数を変更できません。DIMや仮引数で同名のローカル変数を作った場合、その変数の変更は共有定数に影響しません。</p>
+<p>RANDOM・GETTIME・FOPENなども初期化時に一度実行します。初期化失敗時はメイン処理やそのFINALLYを実行せず、作成済みのセッションを解放します。先に行った外部操作は巻き戻しません。ファイルIDをCONSTに保存しても、そのファイルは通常どおりFCLOSEで閉じます。</p>
+<p>NULLの比較・表示や各組み込み関数の動作は共通の値・関数仕様に従い、CONSTだけの原版互換変換は追加していません。</p>
+<h2 id="values">文字列・数値・特殊値</h2>
+<p>文字列は二重引用符で囲み、+で結合します。数値の基本型はdoubleです。$で始まる16進リテラルは64bit全体を符号付き整数として読み、doubleへ変換します。2^53を超える整数は丸められる場合があります。</p>
+<p>TRUE、FALSE、EMPTY、NULL、NOTHINGを使用できます。ERRORはCOMなどから返るエラー値として保持しますが、任意のERROR値をソース定数で作る書式は未実装です。これらの値がすべて同じ表示・比較・数値化となるわけではありません。</p>
+<p>文字列の特殊マーカーには&lt;#CR&gt;、&lt;#TAB&gt;、&lt;#DBL&gt;があります。OPTION SPECIALCHARでリテラルのマーカーを展開せず保持します。</p>
+<pre data-example="verified" data-name="special-markers" data-expected="2&#10;1&#10;1&#10;6&#10;"><code>PRINT LENGTH("&lt;#CR&gt;")
+PRINT LENGTH("&lt;#TAB&gt;")
+PRINT LENGTH("&lt;#DBL&gt;")
+PRINT LENGTH("&lt;#" + "TAB&gt;")</code></pre>
+<p>通常はリテラルの&lt;#CR&gt;をCRLFの2文字、&lt;#TAB&gt;をタブ、&lt;#DBL&gt;を二重引用符へ展開します。大小文字は区別せず、未知・不完全・内部に空白がある表記は保持します。展開で生成した引用符・改行・コメント記号をソースとして再解釈しません。連結したマーカーや、ファイル・引数・外部機能から受け取った文字列は再展開しません。</p>
+<pre data-example="verified" data-name="special-markers-preserved" data-expected="6&#10;"><code>OPTION SPECIALCHAR
+PRINT LENGTH("&lt;#TAB&gt;")</code></pre>
+<p>保持設定はCONSTや関数の既定引数にも適用します。CALL先は親の設定を継承し、子自身のOPTION SPECIALCHARで保持を明示できます。子の設定は親を変更しません。異なる設定から同じCALL先を共有する場合、共有先自身の保持指定がなければ実行前に拒否します。保持する共有先にはOPTION SPECIALCHARを明示し、通常展開で共有したい場合は呼出し側の設定をそろえてください。</p>
+<pre data-example="verified" data-name="special-options-combined" data-expected="6&#10;0&#10;"><code>OPTION EXPLICIT,SAMESTR,SPECIALCHAR,OPTFINALLY
+CONST marker="&lt;#TAB&gt;"
+PRINT LENGTH(marker)
+PRINT "a"="A"</code></pre>
+<p>SPECIALCHARはソースの先頭のOPTION群で指定します。EXPLICIT・SAMESTR・OPTFINALLYとの併用順で保持動作は変わりません。先頭ログOPTIONの式も、この先頭群で確定した保持設定を使います。PUBLICの初期化式・関数本文・既定引数と、取消後に実行するFINALLYのリテラルにも同じ設定を適用します。実行中に式で有効・無効を切り替える書式はありません。</p>
+<p>原版では通常モードで動的な文字列も再変換される条件を確認しました。本実装は、取得した文字列を意図せず変えないよう、リテラルだけを展開します。原版のSPECIALCHAR指定下でも既知マーカーを含むリテラルが展開された条件があり、本実装のリテラル保持とは異なります。</p>
+<h2 id="hexadecimal">16進数リテラル</h2>
+<p>$の直後に0–9・A–F・a–fを1桁以上書きます。$FFは255、$FFFFFFFFは4294967295、$8000000000000000は負の最小値、$FFFFFFFFFFFFFFFFは-1です。最上位ビットを符号として解釈し、単項の+・-は変換後の数値に適用します。</p>
+<pre data-example="verified" data-name="hexadecimal" data-expected="255&#10;-1&#10;1&#10;1&#10;"><code>PRINT $fF
+PRINT $FFFFFFFFFFFFFFFF
+PRINT -$FFFFFFFFFFFFFFFF
+PRINT $20000000000001 = $20000000000000</code></pre>
+<p>先行ゼロの桁数に専用の上限は設けません。64bitを超える値、不正な数字や接尾辞、$単独はコンパイル時に行番号付きエラーになります。未実行の分岐でも検査します。文字列の"$FF"やVALの変換規則とは別です。</p>
+<p>数値はdoubleへ変換するため、2^53を超える整数は丸められる場合があります。原版とは大きい値の表示桁数が異なり、原版が期限内に終了しなかった長い先行ゼロ付き値も読み込めます。原版のエラー画面や全精度を再現する仕様ではありません。</p>
+<h2 id="arrays">DIM配列</h2>
+<pre data-example="verified" data-name="arrays" data-expected="2&#10;20&#10;"><code>DIM values[1] = 10, 20
+PRINT LENGTH(values)
+PRINT values[1]</code></pre>
+<p>DIM values[1]は添字0と1の2要素を作ります。指定する値は要素数ではなく上限添字です。1次元のほか多次元配列にも対応しますが、要素数の合計上限は1,000,000です。範囲外添字はエラーです。</p>
+<p>配列の代入は内容をコピーし、片方の後続の更新をもう片方へ反映しません。COM参照を含む場合、外部object自体を複製する意味ではありません。</p>
+<h3 id="array-copy">コピーとVAR引数</h3>
+<pre data-example="verified" data-name="array-empty-coordinate" data-expected="1,2&#10;9,2&#10;1&#10;"><code>DIM original[] = 1,2
+copied = original
+copied[""] = 9
+PRINT JOIN(original,",")
+PRINT JOIN(copied,",")
+DIM one[""]
+PRINT LENGTH(one)</code></pre>
+<p>添字と宣言上限は数値や数値文字列をゼロ方向へ切り捨てます。EMPTYと空文字は0です。空白だけの文字列、非数値、NULL、整数範囲外はエラーになります。これは配列の座標の規則で、通常の数値変換が空文字を受理する意味ではありません。</p>
+<p>全体代入は配列の形状も置き換えます。部分配列への代入は、残る各次元の上下限が一致する場合に限ります。形状が違えば親配列を変更せずエラーにします。DIM values[]は空の1次元配列を作り、残りの初期値を省略した要素はEMPTYです。</p>
+<p>通常の同期呼出しのVAR引数は、正常終了またはEXITでFINALLYを終えた後、仮引数の順に呼出し元へ書き戻します。添字は書戻し時に再評価します。同じ配列を複数引数へ渡すと、後の書戻しが優先します。後続の書戻しが失敗しても、それまでの更新を巻き戻しません。本体・FINALLYの未捕捉エラー、取消、EXITEXITでは通常の書戻しをしません。<a href="routines.html#thread">THREADで起動した処理</a>はVARでも書き戻しません。外部object自身の副作用を取り消す意味ではありません。</p>
+<p>COM由来の配列は非ゼロの上下限を保持します。JOIN・SLICE・CALCARRAY等の範囲は、添字の下限とは別に、全要素を行優先で並べたゼロ起点の位置です。SLICEの結果はゼロ起点の1次元配列になります。原版では代入形式や異常終了時の書戻しが異なる条件があります。本実装は内容の独立と上記の書戻し規則を採用し、全型・全停止方式の互換を保証しません。</p>
+<h2 id="hashtbl">HASHTBL：キーで値を管理する</h2>
+<p>HASH_EXISTSとHASH_REMOVEの戻り値は数値として1/0を保持する論理型です。Windowsの通常のコマンドライン版とUWSC# アプリでVARTYPEに渡すと11を返します。キーの存在確認と削除の規則は変わりません。</p>
+<pre data-example="verified" data-name="hashtbl" data-expected="UWSC#&#10;1&#10;1&#10;"><code>HASHTBL settings
+settings["name"] = "UWSC#"
+PRINT settings["name"]
+PRINT settings["name", HASH_EXISTS]
+PRINT LENGTH(settings)</code></pre>
+<p>既定ではキーの大小文字を区別せず、書込み順に管理します。HASHTBL settings = HASH_CASECAREで大小文字を区別し、HASH_SORTでキー順にできます。設定はORで組み合わせます。PUBLIC HASHTBLも採用範囲です。</p>
+<p>存在しないキーの読取りはEMPTY、HASH_EXISTSは1/0を返します。削除は式の中でsettings[key, HASH_REMOVE]を評価します。settings = HASH_REMOVEALLで設定を保持したまま全消去します。順序付きのキーと値はsettings[n, HASH_KEY]とsettings[n, HASH_VAL]で取得し、nは0始まりです。</p>
+<p>順列番号の範囲外とEMPTYはエラーになります。キーとしてのEMPTYは空文字列を表すため、settings[EMPTY]はsettings[""]と同じ要素です。通常のTRUE/FALSEはキーでも1/0へ変換します。</p>
+<p>上書きでは最初のキー表記と位置を保ち、削除後に登録し直すと末尾へ置きます。HASH_SORTでは比較にOrdinalIgnoreCase、HASH_CASECARE付きではOrdinalを使います。原版とは英字の大小・アクセント文字・全角文字の並び順が異なる条件があります。OPTION SAMESTRはこの設定を変えません。</p>
+<p>連想配列の代入は内容と設定をコピーし、その後の更新は独立します。格納した配列・連想配列の内容も独立して保持し、外部オブジェクトは同じ参照を保持します。通常変数と連想配列で同じ名前の別領域は作らず、既存の連想配列へ一般の数値や文字列は代入できません。</p>
+<pre data-example="verified" data-name="hashtbl-parameters" data-expected="1&#10;7&#10;"><code>HASHTBL values
+values["count"]=1
+EditCopy(values)
+PRINT values["count"]
+EditVar(values)
+PRINT values["count"]
+PROCEDURE EditCopy(x[])
+    x["count"]=9
+FEND
+PROCEDURE EditVar(VAR x[])
+    x["count"]=7
+FEND</code></pre>
+<p>VARのない引数は呼出し元へ書き戻しません。明示したVAR引数は、正常終了またはEXITでFINALLYを終えた後、仮引数の順に書き戻します。未捕捉エラー・取消・EXITEXITでは書き戻しません。既に発生した外部オブジェクトの副作用を取り消すものではありません。</p>
+<p>要素数は1,000,000までです。上限でも既存キーの上書きと削除、全消去はできます。FOR INはキーを一度収集して列挙します。連想配列をCOMへ直接渡す機能と、MODULE・CLASS直下のHASHTBL宣言は対象外です。THREADへ渡した引数はVARでも書き戻しません。</p>
+<h2 id="options">対応するOPTION</h2>
+<table><thead><tr><th>指定</th><th>動作と範囲</th></tr></thead><tbody>
+<tr><td>OPTION EXPLICIT</td><td>実行時の未宣言名への書込みを拒否します。未実行の分岐まで静的に検査する仕様ではありません。</td></tr>
+<tr><td>OPTION SAMESTR</td><td>比較・SELECT・POS・REPLACE/CHGMOJ・BETWEENSTRの採用経路で大小文字を区別します。全関数やlocaleへ一律に適用するものではありません。</td></tr>
+<tr><td>OPTION ONLYSAPI</td><td>最初にSPEAKで文字列を指定する前に実行すると、読み上げにSAPI5だけを使います。</td></tr>
+<tr><td>OPTION SPECIALCHAR</td><td>コンパイル対象の文字列リテラルにある特殊マーカーを保持します。</td></tr>
+<tr><td>OPTION OPTFINALLY</td><td>取消後の保留中FINALLYを協調上限付きで実行します。</td></tr>
+<tr><td>OPTION OPTPUBLIC</td><td>同名PUBLICの再宣言を拒否します。通常変数と配列が対象です。</td></tr>
+<tr><td>OPTION LOGPATH=文字列</td><td>ログの保存先を変更します。相対パスは主スクリプトのフォルダーが基準、空文字は同じフォルダーのUWSC.LOGへ戻します。</td></tr>
+<tr><td>OPTION LOGLINES=整数</td><td>保存と専用ログ画面の履歴件数を0～100,000件で指定します。0では以後の保存と履歴保持を無効にします。</td></tr>
+<tr><td>OPTION LOGFILE=整数</td><td>0～7で保存形式を指定します。下位2bitは0:分付き日時、1:保存しない、2:本文のみ、3:秒付き日時、値4のフラグは次の保存時に既存ログを消去します。</td></tr>
+</tbody></table>
+<p>EXPLICIT・SAMESTR・SPECIALCHAR・OPTFINALLY・OPTPUBLICはソースの先頭で指定します。ログ設定3種類はコマンドライン版とUWSC# アプリで実行中にも変更でき、分岐・ループ・関数・CALL先にも書けます。対応していないOPTION名はエラーになります。</p>
+<h3 id="logpath">LOGPATH：ログの保存先</h3>
+<pre data-example="verified" data-name="logpath" data-expected="selected&#10;default&#10;"><code>OPTION LOGFILE=2, LOGPATH="run.log"
+PRINT "selected"
+OPTION LOGPATH=""
+PRINT "default"</code></pre>
+<p>制御文字のない文字列を指定してください。既存のディレクトリか末尾が区切り文字のパスにはUWSC.LOGを補います。存在しないフォルダーは作成しません。パス長はWindowsと保存先の制限に従い、従来の260文字の制限は追加していません。</p>
+<p>変更前の未保存出力を旧パスへ保存してから、新しい保存先を適用します。旧パスへの保存が失敗した場合は設定と未保存出力を保持し、失敗を通知します。新しい保存先が書込み可能かどうかは、実際の保存時に判定します。LOGPATHは画面の表示状態や履歴件数を変えません。CALL先で変更した設定は呼出し元へ戻っても有効です。</p>
+<p>複数のログ設定を同じOPTIONに書いた場合は、左から順に式を評価して適用します。途中で失敗しても、それ以前の設定と式の副作用は巻き戻しません。制御文字や型のエラーはスクリプトのEXCEPTで捕捉できますが、保存などのhostの失敗は実行を終了して通知します。</p>
+<p>原版はLOGPATH変更前の保留出力も新しい保存先へ移す条件があります。本実装は変更時点を保存先の境界にします。数値などをパスへ自動変換せず、保存失敗も通知する方針です。原版の空文字指定と、全ストレージ・権限・共有条件の互換性は確認していません。</p>
+<h3 id="logfile">LOGFILE：保存形式と消去</h3>
+<table><thead><tr><th>値</th><th>保存内容</th></tr></thead><tbody>
+<tr><td>0、4</td><td>本文の前にローカル時刻をyy/MM/dd HH:mmの形式と空白2個で付けます。</td></tr>
+<tr><td>1、5</td><td>以後の出力を保存しません。画面表示と標準出力は続けます。</td></tr>
+<tr><td>2、6</td><td>日時を付けずに本文だけを保存します。</td></tr>
+<tr><td>3、7</td><td>本文の前にローカル時刻をyy/MM/dd HH:mm:ssの形式と空白2個で付けます。</td></tr>
+</tbody></table>
+<p>0～7の整数を指定します。数値文字列、TRUE（1）、FALSE（0）、EMPTY（0）も共通の数値変換で受け付けます。小数部のある値、範囲外、NULL・NOTHING・不正な数値文字列・非有限数はエラーです。</p>
+<pre data-example="verified" data-name="logfile" data-expected="saved&#10;display only&#10;saved again&#10;"><code>OPTION LOGPATH="mode.log", LOGFILE=6
+PRINT "saved"
+OPTION LOGFILE=1
+PRINT "display only"
+OPTION LOGFILE=2
+PRINT "saved again"</code></pre>
+<p>4～7は消去フラグを含みます。未保存の出力がある最初の保存が成功したときに既存ログを置き換え、続く保存では追記します。出力がない場合と、保存しないモード5では既存ファイルを消しません。保存に失敗した場合は出力と消去フラグを保持して再試行します。</p>
+<p>LOGFILEを再指定すると、未使用の消去フラグも新しい指定で置き換えます。たとえば6を指定してから出力せずに2へ変えると、既存ログへ追記します。6を指定して出力し、再度6を指定して出力すると、2回目の保存で前回のログを置き換えます。</p>
+<p>モード変更前の保留出力は旧モードで保存します。時刻は出力を受け取ったときに確定し、保存時刻や後のモードへ変えません。無効期間の出力は後で有効にしても保存せず、LOGFILEはログ画面の表示状態と履歴件数を変えません。原版には、変更後のモードで保留出力をまとめて保存する条件があり、本実装とは異なります。</p>
+<h3 id="loglines">LOGLINES：保存と表示の保持件数</h3>
+<p>0～100,000の整数を指定します。数値文字列、TRUE（1）、FALSE（0）、EMPTY（0）も共通の数値変換で受け付けます。小数部のある値、範囲外、NULL・NOTHING・不正な数値文字列・非有限数はエラーです。</p>
+<pre data-example="verified" data-name="loglines" data-expected="one&#10;two&#10;three&#10;display only&#10;after&#10;"><code>OPTION LOGPATH="line-limit.log", LOGFILE=6, LOGLINES=2
+PRINT "one"
+PRINT "two"
+PRINT "three"
+OPTION LOGLINES=0
+PRINT "display only"
+OPTION LOGLINES=2
+PRINT "after"</code></pre>
+<p>新しい出力から指定件数を保持します。改行入りのPRINTも1件として扱い、空のPRINTも1件です。0を指定すると専用ログ画面の履歴を消去し、以後の保存と履歴追加を止めます。標準出力は続け、ログ画面の表示・非表示は変えません。再開しても、0件の期間に出した本文や、上限で取り除いた本文は復活しません。</p>
+<p>件数の変更前に、保留出力を旧件数で保存してから新しい設定を適用します。保存済みファイルを指定だけで縮めず、新たな出力を保存するときに新件数へ制限します。旧出力の保存に失敗した場合は、旧設定と保留出力を維持して失敗を通知します。専用ログ画面の履歴は、件数を減らした時点で古い出力から取り除きます。</p>
+<p>専用ログ画面は件数とは別に、改行を含む100,000文字の上限も使います。この文字数を超える場合は、指定した件数より少ない出力だけが残ります。保存したファイルが同じ実行で変更されていない間はPRINT単位を維持しますが、別実行や外部変更後の既存ファイルは物理行として読みます。</p>
+<p>原版には、変更後の件数を保留出力へ適用したり、0件の期間の出力を再開後に保存したりする条件があります。本実装は変更時点を設定の境界とし、取り除いた本文を後から復活させない方針です。原版の全表示条件や上限との互換性は確認していません。</p>
+<h3 id="optfinally">OPTFINALLY：取消後の後処理</h3>
+<p>先頭のOPTION OPTFINALLYで、実行の取消後も保留中のFINALLYを内側から実行します。通常終了・実行エラー・EXIT/EXITEXITによるFINALLYは、この指定がなくても実行します。</p>
+<pre data-example="verified" data-name="optfinally-normal-cleanup" data-expected="body&#10;cleanup&#10;"><code>OPTION OPTFINALLY
+TRY
+    PRINT "body"
+FINALLY
+    PRINT "cleanup"
+ENDTRY</code></pre>
+<p>取消後の最初の後処理から、5秒の協調期限と10,000回の取消確認上限を共有します。入れ子や外側へ進んでも上限を戻しません。確認回数は文数ではなく、式評価やループ等の確認点も含みます。通常経路で実行中のFINALLYに取消が届いた場合、その残りを再開せず、外側の保留FINALLYへ進みます。</p>
+<p>後処理を終えても取消結果を保持し、後続のメイン処理へ進みません。後処理でEXIT/EXITEXITを使っても取消を成功に変えません。後処理から漏れたエラーや上限超過は、元の取消を置き換えずFINALLY:付きの追加診断として表示します。スクリプトのエラーにはファイル名と行番号も付きます。実行セッションの解放はOPTFINALLYの有無によらず行います。</p>
+<p>コマンドライン版とUWSC# アプリの静的CALL先のどこかにOPTFINALLYがあれば、プログラム全体へ適用します。未実行のCALL先の指定も集約します。別の実行や並行実行へ設定を漏らしません。</p>
+<p>期限は協調的に取消を確認する処理に対する制限です。復帰しない同期Windows/COM処理や出力先の処理、解放処理を強制中断する機能はありません。原版の全停止方式や、実行プロセスの強制終了時までFINALLYを保証する仕様ではありません。</p>
+<h3 id="explicit">EXPLICIT：実行時に書込み先を確認する</h3>
+<pre data-example="verified" data-name="explicit-catch" data-expected="7&#10;"><code>OPTION EXPLICIT
+DIM count = 7
+TRY
+    coutn = 2
+EXCEPT
+    PRINT count
+ENDTRY</code></pre>
+<p>DIM・PUBLIC・仮引数・関数のRESULTなど、既存の実行領域にある名前へ書き込めます。名前の大小文字は区別しません。未実行の分岐や未呼出しの関数内にある未宣言名への書込みは静的に検査せず、実行時に失敗した書込みはTRYで捕捉できます。EXPLICITがなくても、未定義名の読取りはエラーです。</p>
+<p>DIMはその文を実行したときに宣言します。偽の分岐内や代入より後のDIMは、その代入先を宣言したことにはなりません。条件分岐をまたいで使う名前は、分岐より前でDIMしてください。PUBLIC・CONSTはメイン実行前に登録・初期化します。</p>
+<p>通常の代入は右辺を評価した後に書込みを検査します。未宣言名への代入でも右辺の関数や外部操作は実行されるため、外部操作を伴う式は、代入先のDIMを確実に実行してから呼び出してください。原版では右辺からの記録ファイルが作られない条件を確認し、本実装との差を記録しています。</p>
+<p>コマンドライン版とUWSC# アプリのCALLでは、静的に読み込んだファイルのどこかにEXPLICITがあれば、親も含むコンパイル全体へ適用します。未実行のCALL先の指定も含み、SPECIALCHARのファイル別継承とは異なります。外部objectのメンバー名はローカル変数の宣言とは別に扱います。再利用や並行実行で、別のプログラムへ設定を持ち越しません。</p>
+<h3 id="samestr">SAMESTR：文字列の大小文字を区別する</h3>
+<pre data-example="verified" data-name="samestr-policy" data-expected="0&#10;2&#10;Ax&#10;1&#10;"><code>OPTION SAMESTR
+PRINT "A" = "a"
+PRINT POS("a", "Aa")
+PRINT REPLACE("Aa", "a", "x")
+PRINT "A" &lt; "a"</code></pre>
+<p>文字列同士の比較演算・SELECT、POSの正逆検索、REPLACE/CHGMOJ、BETWEENSTRの区切り検索に適用します。通常は大小文字を区別しないOrdinalIgnoreCase、指定時は区別するOrdinal比較です。実行環境の言語設定に依存せず、正規化・全角半角・ひらがなカタカナの同一視はしません。原版とは一部のUnicode文字や大小関係の結果が異なります。</p>
+<p>変数名・関数名・特殊マーカーの認識、SPLIT/TOKENの区切り、QSORTの各モード、HASHTBLのキー設定は、それぞれの規則を使います。SAMESTRで一律には変更しません。数値と文字列の混在やNULL/外部objectの比較も、通常の値の変換・参照規則に従います。</p>
+<p>コマンドライン版とUWSC# アプリのCALLでは、静的に読み込んだファイルのどこかにSAMESTRがあれば、親と子の比較・CONST/関数・既定引数にも適用します。未実行CALL先の指定も集約します。別のプログラムや並行実行へ設定を漏らしません。</p>
+<h3 id="dialog-options">ダイアログの表示設定</h3>
+<p>コマンドライン版とUWSC# アプリでは、OPTION DLGTITLE="確認" で次に開くMSGBOX・INPUT・SLCTBOXのタイトルを指定できます。OPTION DEFAULTFONT="Arial,18" は、この3つのダイアログと、フォント指定を省略したFUKIDASI・BALLOONに適用します。</p>
+<p>どちらのOPTIONも、スクリプトの先頭や実行中に指定できます。変更は同じ実行のCALLとTHREADで共有し、実行終了後へ持ち越しません。設定を変更した時点で開いている画面は、そのまま表示されます。先頭の設定も実行文として扱うため、PUBLICなどの初期化式より後に適用します。</p>
+<p>OPTION POSITION=x,yは、コマンドライン版では所有する停止画面、UWSC# アプリでは停止画面とログ画面の配置を変更します。座標は物理ピクセルで、小数部を0方向へ切り捨てた32ビット整数を使います。コマンドライン版の標準出力先のコンソールや、MSGBOX・INPUT・SLCTBOXの省略位置は変えません。停止画面は操作可能な作業領域へ補正し、ログ画面は停止画面の上、収まらなければ下へ配置します。表示・非表示を切り替える指定ではありません。最小化中のログ画面は通常状態へ戻した際の位置を更新します。最大化時の復元位置は検証中です。DEFAULTFONTは本文・項目・入力欄・ボタンを同じフォントにする採用仕様であり、原版の表示とは異なります。詳細は<a href="functions-display.html#msgbox">MSGBOX</a>を参照してください。</p>
+<p>コマンドライン版とUWSC# アプリは実行開始時に、Roaming AppDataのUWSC/UWSC.INIの[SET]にあるDefaultFontを読みます。たとえばDefaultFont=Arial,18を指定すると、PUBLICなどの初期化式より前からMSGBOX・INPUT・SLCTBOXと、フォント指定を省略したFUKIDASI・BALLOONへ適用します。UWSC# アプリの予約実行でも、同じプロセスと別プロセスの両方で読み込みます。実行内のOPTION DEFAULTFONTはその後の表示を上書きし、INIへは書き戻しません。</p>
+<p>INIの値が未指定・空ならTahoma・9ptを使います。名前とサイズをカンマで区切り、小数サイズは整数部を使います。サイズの省略・不正値・0以下は名前を保って9ptへ戻し、名前だけが空ならTahomaを使います。余分な3項目目以降は読みません。名前に制御文字などの使用できない文字がある場合は既定値へ戻します。これはINI読込みの規則であり、実行内OPTIONの検査規則は変わりません。UWSC# アプリの「本体設定」から名前と正の整数ptを入力して保存でき、次の実行から適用します。画面では不正値を補正せず、エラーとして入力を保持します。停止画面等への適用は未対応です。</p>
+<p>FUKIDASI・BALLOONでは、名前とサイズを個別に省略できます。明示した項目だけを優先し、省略した項目は現在のDEFAULTFONTを使います。次の呼出しでは前回の明示フォントを引き継ぎません。設定変更だけでは表示済みの吹出しを変えず、次の表示・更新で反映します。</p>
+<h3 id="fixed-balloon">吹出しのFIXBALLOON</h3>
+<p>OPTION FIXBALLOONは値を取らない指定です。コマンドライン版とUWSC# アプリの先頭または実行中に指定すると、次のFUKIDASI・BALLOONの表示・更新から、Windowsの仮想デスクトップ切替後も表示する方式へ変更します。表示済みの吹出しには、次の更新時に反映します。</p>
+<p>原版から移行する場合、初回から固定するには、最初の吹出しを表示する前に OPTION FIXBALLOON を実行してください。原版では、実行されない分岐や固定名の CALL 先にだけ指定を書いても、初回表示から有効になる例を確認しています。</p>
+<p>設定は同じ実行のCALLとTHREADで共有します。吹出しはTHREADごとの1枚で、消去後の再表示は同じIDを使います。実行終了時に画面と設定を解放します。無効へ戻す指定やFALSEの代入はありません。作業領域内への配置と長文の折返しは維持します。通常のコマンドライン版とUWSC# アプリの別プロセスで表示・更新と終了時の解放を確認しました。全DPI・複数画面での受入は継続中です。</p>
+<pre><code>OPTION FIXBALLOON
+BALLOON("処理中",80,90)
+SLEEP(2)
+BALLOON()</code></pre>
+<h2 id="layout">コメント・行結合・複文</h2>
+<p>文字列の外の//から行末まではコメントです。末尾の_で次の物理行へつなげ、文字列の外の;で文を区切れます。診断の行番号は結合を開始した物理行を基準にします。</p>
+<p>行結合では_と改行、次行の字下げを取り除き、空白を追加せずにつなぎます。たとえば1_と次行の2は12になります。単語を分ける場合は_の前に空白を置いてください。結合途中のコメントだけの行は飛ばしますが、空行は行の終端になります。末尾に_を残したまま終了すると構文エラーです。</p>
+<pre><code>PRINT "日本" + _ // 続きは次行
+    // このコメント行も飛ばします
+    "語"
+// 出力: 日本語</code></pre>
+<p>行結合で前行末の/と次行先頭の/がつながった場合も、//から物理行末までがコメントになります。コメント内の引用符、;、_は処理しません。この結合でできたコメント末尾の_を無視する規則は原版と異なります。文字列内の//はそのまま残り、閉じていない文字列をコメントで終えることはできません。</p>
+<h3 id="multiple-statements">セミコロンで複数の文を書く</h3>
+<p>文字列の外のASCIIの;で文を区切り、左から順に実行します。先頭・末尾・連続する;による空文は無視します。文字列内の;や、全角の；は文の区切りになりません。</p>
+<pre><code>DIM v=1;v=v+2;PRINT v
+IF FALSE THEN PRINT 1;PRINT 2
+IFB TRUE;PRINT "日本語;";PRINT 7;ENDIF
+// 出力: 3、2、日本語;、7</code></pre>
+<p>単行IFの条件は、;の後の文には適用されません。複数の文を条件付きで実行するときはIFBからENDIFで囲んでください。コメント内の;や特殊文字の展開で生じた記号も、文の区切りとして再解釈しません。</p>
+<p>同じ行の後続文に構文エラーがある場合は、先行文も実行しません。実行時エラーでは先行文の副作用は残ります。診断は論理行の開始物理行を表示し、同一行内の列番号は表示しません。コマンドライン版とUWSC# アプリの静的CALL先も同じ規則です。</p>
+
+<h2 id="stop-options">停止画面と停止キーのOPTION</h2>
+<p><code>OPTION TOPSTOPFORM, NOSTOPHOTKEY</code>のように値を付けずに指定します。TOPSTOPFORMは停止画面を最前面へ固定し、非表示の画面を表示したり入力先を切り替えたりしません。NOSTOPHOTKEYはUWSC# アプリの停止ホットキーだけを無効にします。停止ボタン・閉じる操作・コマンドライン版のCtrl+Cは維持します。コマンドライン版はグローバル停止キーを登録しません。</p>
+<p>CALL・THREADとEVALから呼んだ関数でも同じ実行の設定を共有します。変更した項目だけを、すべての子THREADの終了後に復元します。正常終了・取消・エラーでも復元を試みますが、復元が失敗した場合は診断を残します。TOPSTOPFORM=TRUEなどの値指定と、対応しない実行元への指定はエラーです。</p>
+<nav class="pager" aria-label="前後のページ"><a href="language.html">← スクリプトの基本</a> <a href="routines.html">次へ：関数の定義</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#variables">DIM・PUBLIC・CONST</a></li><li><a href="#const">CONST：実行前に値を確定する</a></li><li><a href="#values">文字列・数値・特殊値</a></li><li><a href="#hexadecimal">16進数リテラル</a></li><li><a href="#arrays">DIM配列</a></li><li><a href="#hashtbl">HASHTBL：キーで値を管理する</a></li><li><a href="#options">対応するOPTION</a></li><li><a href="#layout">コメント・行結合・複文</a></li><li><a href="#stop-options">停止画面と停止キーのOPTION</a></li></ul></nav>
+</div></div></body></html>

@@ -1,0 +1,234 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
+
+[ComImport]
+[Guid("00020400-0000-0000-C000-000000000046")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IRawArrayDispatch
+{
+    [PreserveSig]
+    int GetTypeInfoCount(out uint count);
+
+    [PreserveSig]
+    int GetTypeInfo(uint index, uint locale, out IntPtr info);
+
+    [PreserveSig]
+    int GetIDsOfNames(ref Guid iid, IntPtr names, uint count,
+        uint locale, IntPtr ids);
+
+    [PreserveSig]
+    int Invoke(int id, ref Guid iid, uint locale, ushort flags,
+        IntPtr parameters, IntPtr result, IntPtr exception, IntPtr argumentError);
+}
+
+[ComVisible(true)]
+[Guid("CLASS_ID")]
+[ProgId("PROG_ID")]
+[ClassInterface(ClassInterfaceType.None)]
+public class ArrayProbe : IRawArrayDispatch, ICustomQueryInterface
+{
+    public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr pointer)
+    {
+        pointer = IntPtr.Zero;
+        if (iid != typeof(IRawArrayDispatch).GUID)
+        {
+            return CustomQueryInterfaceResult.NotHandled;
+        }
+        pointer = Marshal.GetComInterfaceForObject(this,
+            typeof(IRawArrayDispatch), CustomQueryInterfaceMode.Ignore);
+        return CustomQueryInterfaceResult.Handled;
+    }
+
+    public int GetTypeInfoCount(out uint count)
+    {
+        count = 0;
+        return 0;
+    }
+
+    public int GetTypeInfo(uint index, uint locale, out IntPtr info)
+    {
+        info = IntPtr.Zero;
+        return unchecked((int)0x80004001);
+    }
+
+    public int GetIDsOfNames(ref Guid iid, IntPtr names, uint count,
+        uint locale, IntPtr ids)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            string name = Marshal.PtrToStringUni(Marshal.ReadIntPtr(names, i * 4));
+            int id = string.Equals(name, "Control", StringComparison.OrdinalIgnoreCase) ? 1
+                : string.Equals(name, "Describe", StringComparison.OrdinalIgnoreCase) ? 2
+                : string.Equals(name, "BooleanTrue", StringComparison.OrdinalIgnoreCase) ? 3
+                : string.Equals(name, "BooleanFalse", StringComparison.OrdinalIgnoreCase) ? 4 : -1;
+            Marshal.WriteInt32(ids, i * 4, id);
+            if (id < 0)
+            {
+                return unchecked((int)0x80020006);
+            }
+        }
+        return 0;
+    }
+
+    public int Invoke(int id, ref Guid iid, uint locale, ushort flags,
+        IntPtr parameters, IntPtr result, IntPtr exception, IntPtr argumentError)
+    {
+        try
+        {
+            if (result == IntPtr.Zero || IntPtr.Size != 4)
+            {
+                throw new InvalidOperationException("32bitの返値領域が必要です。");
+            }
+            int count = Marshal.ReadInt32(parameters, 8);
+            if ((id == 3 || id == 4) && count == 0)
+            {
+                Marshal.GetNativeVariantForObject(id == 3, result);
+                return 0;
+            }
+            if (id == 1 && count == 0)
+            {
+                // 対照はCLR側で作り、受信側の軸順と独立に照合します。
+                Array control = Array.CreateInstance(typeof(int), new[] { 2, 3 }, new[] { -2, 5 });
+                for (int row = -2; row <= -1; row++)
+                {
+                    for (int column = 5; column <= 7; column++)
+                    {
+                        control.SetValue(row * 100 + column, row, column);
+                    }
+                }
+                Marshal.GetNativeVariantForObject(control, result);
+                return 0;
+            }
+            if (id != 2 || count != 1)
+            {
+                return unchecked((int)0x8002000E);
+            }
+            string description = DescribeRaw(Marshal.ReadIntPtr(parameters));
+            Marshal.GetNativeVariantForObject(description, result);
+            return 0;
+        }
+        catch (Exception error)
+        {
+            File.AppendAllText(Path.Combine(Path.GetDirectoryName(
+                typeof(ArrayProbe).Assembly.Location), "native.log"), error.ToString() + "\n");
+            return Marshal.GetHRForException(error);
+        }
+    }
+
+    private static string DescribeRaw(IntPtr value)
+    {
+        ushort type = unchecked((ushort)Marshal.ReadInt16(value));
+        int depth = 0;
+        while (type == 0x400C)
+        {
+            if (++depth > 8)
+            {
+                throw new InvalidOperationException("VARIANT参照が深すぎます。");
+            }
+            value = Marshal.ReadIntPtr(value, 8);
+            type = unchecked((ushort)Marshal.ReadInt16(value));
+        }
+        if ((type & 0x2000) == 0)
+        {
+            throw new InvalidOperationException("配列ではありません。");
+        }
+        IntPtr array = Marshal.ReadIntPtr(value, 8);
+        if ((type & 0x4000) != 0)
+        {
+            array = Marshal.ReadIntPtr(array);
+        }
+        int rank = checked((int)SafeArrayGetDim(array));
+        ushort elementType;
+        Marshal.ThrowExceptionForHR(SafeArrayGetVartype(array, out elementType));
+        if (rank < 1 || rank > 16)
+        {
+            throw new InvalidOperationException("次元数が範囲外です。");
+        }
+        int[] lower = new int[rank];
+        int[] upper = new int[rank];
+        long count = 1;
+        for (int axis = 0; axis < rank; axis++)
+        {
+            Marshal.ThrowExceptionForHR(SafeArrayGetLBound(array, (uint)axis + 1, out lower[axis]));
+            Marshal.ThrowExceptionForHR(SafeArrayGetUBound(array, (uint)axis + 1, out upper[axis]));
+            count = checked(count * ((long)upper[axis] - lower[axis] + 1));
+            if (count < 0 || count > 10000)
+            {
+                throw new InvalidOperationException("観測の要素数が範囲外です。");
+            }
+        }
+        var values = new List<string>();
+        var tags = new List<string>();
+        int[] indices = (int[])lower.Clone();
+        for (long index = 0; index < count; index++)
+        {
+            IntPtr cell = Marshal.AllocCoTaskMem(16);
+            try
+            {
+                Marshal.Copy(new byte[16], 0, cell, 16);
+                IntPtr destination = cell;
+                if (elementType != 12)
+                {
+                    Marshal.WriteInt16(cell, unchecked((short)elementType));
+                    destination = elementType == 14 ? cell : IntPtr.Add(cell, 8);
+                }
+                Marshal.ThrowExceptionForHR(SafeArrayGetElement(array, indices, destination));
+                if (elementType == 14)
+                {
+                    Marshal.WriteInt16(cell, 14);
+                }
+                tags.Add(Marshal.ReadInt16(cell).ToString(CultureInfo.InvariantCulture));
+                object element = Marshal.GetObjectForNativeVariant(cell);
+                values.Add(element == null ? "Empty" : element.GetType().Name + ":"
+                    + Convert.ToString(element, CultureInfo.InvariantCulture));
+            }
+            finally
+            {
+                try
+                {
+                    Marshal.ThrowExceptionForHR(VariantClear(cell));
+                }
+                finally
+                {
+                    Marshal.FreeCoTaskMem(cell);
+                }
+            }
+            for (int axis = rank - 1; axis >= 0; axis--)
+            {
+                if (indices[axis] < upper[axis])
+                {
+                    indices[axis]++;
+                    break;
+                }
+                indices[axis] = lower[axis];
+            }
+        }
+        return "vt=" + (type & ~0x4000) + ";descriptor=" + elementType
+            + ";rank=" + rank
+            + ";lower=" + string.Join(",", lower)
+            + ";upper=" + string.Join(",", upper)
+            + ";values=" + string.Join(",", values)
+            + ";tags=" + string.Join(",", tags);
+    }
+
+    [DllImport("oleaut32.dll")]
+    private static extern uint SafeArrayGetDim(IntPtr array);
+
+    [DllImport("oleaut32.dll")]
+    private static extern int SafeArrayGetVartype(IntPtr array, out ushort type);
+
+    [DllImport("oleaut32.dll")]
+    private static extern int SafeArrayGetLBound(IntPtr array, uint dimension, out int bound);
+
+    [DllImport("oleaut32.dll")]
+    private static extern int SafeArrayGetUBound(IntPtr array, uint dimension, out int bound);
+
+    [DllImport("oleaut32.dll")]
+    private static extern int SafeArrayGetElement(IntPtr array, [In] int[] indices, IntPtr result);
+
+    [DllImport("oleaut32.dll")]
+    private static extern int VariantClear(IntPtr value);
+}

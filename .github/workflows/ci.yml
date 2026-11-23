@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows Release and headless tests
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build Release
+        run: dotnet build UWSCSharp.slnx -c Release
+
+      - name: Run headless tests
+        id: headless
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/test-headless.ps1 -Configuration Release
+
+      - name: Upload test results
+        if: ${{ !cancelled() && steps.headless.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: headless-test-results
+          path: artifacts/test-runs/**/*.trx
+
+  help:
+    name: Help generation and search
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Generate help
+        run: node scripts/build_help.js
+
+      - name: Check committed help files
+        shell: bash
+        run: |
+          git diff --exit-code -- docs/user-help
+          test -z "$(git ls-files --others --exclude-standard -- docs/user-help)"
+
+      - name: Check help generation
+        run: |
+          node scripts/build_help.js --check
+          node scripts/check_help_build.js
+
+      - name: Check help search
+        run: |
+          node scripts/check_help_search.js
+          node scripts/check_help_search.js artifacts/help-site

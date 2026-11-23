@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../UWSCSharp.Core/UWSCSharp.Core.csproj" />
+  </ItemGroup>
+  <Import Project="Native/FloatingPoint/FloatingPointNative.targets"
+          Condition="'$(BuildFloatingPointNative)' == 'true'" />
+</Project>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>記録と再生 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section" open><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a aria-current="page" href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 記録と再生</p>
+<h1>記録と再生</h1><p class="lead">最初は、IMEをオフにした検証用の空のメモ帳などで、短い操作を試してください。対象アプリとUWSC#は通常権限で使用します。</p>
+<h2 id="steps">記録して再生する</h2>
+<ol><li>F8で記録を開始し、対象アプリで文字入力・クリック・ドラッグを行います。</li>
+<li>F8で記録を終了し、生成されたスクリプトを編集欄で確認します。</li>
+<li>「保存」で.uwsファイルへ保存します。</li>
+<li>対象アプリを再生前の状態へ戻し、F7または「再生」で実行します。</li>
+<li>F9で一時停止・再開、F10で停止します。</li></ol>
+<h2 id="keys">既定のホットキー</h2>
+<table><thead><tr><th>キー</th><th>操作</th></tr></thead><tbody>
+<tr><td>F7</td><td>再生開始</td></tr><tr><td>F8</td><td>記録開始・終了</td></tr>
+<tr><td>F9</td><td>再生の一時停止・再開</td></tr><tr><td>F10</td><td>停止</td></tr></tbody></table>
+<p>「ホットキー設定」でF1〜F11と修飾キーの変更、無効化ができます。登録競合が表示された場合は別のキーを設定するか、ボタンで操作してください。</p>
+<p>Ctrl+Alt+Shift+F11は緊急解除専用のため、操作ホットキーに設定できません。無効化して保存する場合も別の組合せを選んでください。保存済みの設定が競合するときはキーを保持し、操作ホットキーを登録せず警告を表示します。「ホットキー設定」を開いて訂正してください。LOCKHARDEXの実行中は、このキーで同じプロセスの対象実行を協調取消し、入力禁止の解除を要求します。終了後に未回収だけが残った場合は再回収を要求します。実物理機器での操作とOS実障害からの回復は未確認です。</p>
+<h2 id="options">記録設定</h2>
+<p>設定は記録開始時に反映されます。記録・再生中は変更できません。</p>
+<table><thead><tr><th>設定</th><th>動作</th></tr></thead><tbody>
+<tr><td>座標・省略の2設定がオフ</td><td>絶対座標で記録します。再生前に対象の配置を確認してください。</td></tr>
+<tr><td>余分な時間、マウス移動は記録しない</td><td>待機時間とボタン非保持中の移動を省略します。通常ドラッグの経路は残します。処理待ちが必要なら設定をオフにするかSLEEPを追加します。</td></tr>
+<tr><td>マウス座標を相対座標で記録する</td><td>各入力時点のアクティブウインドウの外枠左上を基準にします。ACWとSTATUSの式を生成します。対象取得に失敗した入力は絶対座標になります。</td></tr></tbody></table>
+<h2 id="high-level">Win32ボタンを高レベル記録する</h2>
+<p>高レベル記録の保存・読戻し・再生と、背景再生用記録の入力・再生は、検証用Win32ウィンドウを使ってWindows Sandboxで確認しました。物理入力による長時間運用と原版との比較は未確認です。</p>
+<p>「高レベル記録（Win32ボタン）」をオンにすると、識別できるWin32プッシュボタンの左クリックや、クリックでオン・オフが切り替わる2状態のWin32チェックボックスを<code>CLKITEM</code>で記録します。チェックボックスは操作後に確認できた状態を記録します。状態を確認できなかった場合、押下と解放の位置が変わった場合、対象を識別できない場合は、通常の入力として記録します。右クリック、ドラッグ、キー入力は通常の入力として記録します。待ち時間を残す設定では、マウスボタンを離した時点をクリックの時刻として使います。既定はオフです。設定は保存され、記録開始時の値を使用します。</p>
+<p>Win32メニューバーから直接実行できる項目も、押下と解放が同じ位置で項目を識別できれば、<code>CLKITEM</code>で高レベル記録します。サブメニューを開いて選ぶ操作や、同じパスを持つ項目は通常の入力として残ります。 記録後にメニュー構成が変わると、再生時に同じパスで最初に一致する項目が選ばれます。項目名や並び順を変更した場合は、再生前に対象を確認してください。</p>
+<h2 id="background-playback">Win32ボタンを背景で再生する</h2>
+<ol>
+<li>「背景再生用に記録する（Win32ボタン）」をオンにします。設定は保存され、次に記録を始めるときに反映されます。オンの間は高レベル記録より優先されます。</li>
+<li>「記録」またはF8で記録を開始し、対象アプリのWin32プッシュボタン、またはクリックでオン・オフが切り替わる2状態のWin32チェックボックスを左クリックします。</li>
+<li>記録を終了し、編集欄のスクリプトを確認します。必要なら「保存」で<code>.uws</code>ファイルに保存します。</li>
+<li>対象ウインドウを開いたまま「再生」またはF7で実行します。生成した<code>CLKITEM</code>は対象を前面に出さずに操作します。</li>
+</ol>
+<p>再生時はウインドウとボタンの表示名で対象を探します。同じ名前のボタンが複数ある場合は、記録時の候補順も使います。対象ウインドウを閉じたり、ボタンの名前や候補順が変わったりしたときは、対象を確認してから再生してください。</p>
+<p>チェックボックスは、クリック後に確認できたオン・オフを記録します。続けてクリックすると、状態を確認できなかった操作が省略されることがあります。チェックが切り替わってから次の操作を行い、記録終了後に編集欄の内容を確認してください。再生時にすでに指定した状態なら、その状態を維持します。 対象のチェックボックスが見つからない場合や、非表示または無効で指定した状態に切り替えられない場合は、<code>CLKITEM</code> が <code>FALSE</code> を返します。</p>
+<p>再生を途中で停止しても、すでに切り替わったチェック状態は残ります。最初から再生する場合は、対象アプリを再生前の状態に戻してください。</p>
+<p>ボタンを押した位置と離した位置が、ボタンのクライアント領域（ウインドウ枠などを除いた内側）にある場合に記録します。キーボード入力、ドラッグ、メニューの選択、識別できない対象への操作は省略されます。変換できない操作を省略すると、記録終了時に画面と生成スクリプトに警告が出ます。背景再生用の記録は既定でオフです。</p>
+<h2 id="clipboard">記録後にクリップボードへコピーする</h2>
+<p>「記録後クリップボードへコピーする」をオンにすると、正常に開始した記録をF8・F10・「記録終了」・「停止」で終了したとき、生成したスクリプトをコピーします。既定はオフです。設定は保存され、記録開始時の値を使用します。</p>
+<p>空白だけの結果、上限超過、警告付きの記録、開始や終了の失敗、停止の再試行ではコピーしません。本体を閉じる際の記録回収や、監視による停止検出も対象外です。編集欄には、取得できた記録結果を表示します。</p>
+<p>コピーに失敗しても、新しい記録は未保存のまま編集欄に残ります。内容を保存するか、クリップボードの競合が解消してから編集欄の必要な範囲を選んでコピーしてください。自動では再試行しません。開けない段階の失敗では元の内容を変更しませんが、クリップボードを空にした後の書込み失敗では元の内容を保証できません。</p>
+<h2 id="stop">一時停止と停止</h2>
+<p>再生中は「UWSC# 再生コントロール」が最前面に表示されます。本体を最小化しても、この画面のボタンから一時停止・再開と停止ができます。［×］も停止を要求します。</p>
+<p>キーやボタンを押下中は、スクリプトのUPまで一時停止を保留します。停止要求では保持入力を解放します。同期Windows/COM処理は、処理が戻るまで停止できない場合があります。</p>
+<p>「一時停止要求中」は、まだ処理が止まっていない状態です。「停止を要求しました」と表示された後は、FINALLYなどの後処理が終わるまで待ってください。実行が終わると再生コントロールは非表示になり、再び編集・実行できます。</p>
+<p>実行中に本体を閉じると、まず停止を要求します。実行停止後、もう一度本体を閉じてください。再生コントロールは本体の終了時に破棄されます。<a href="functions-display.html#stopform">STOPFORM</a>で表示・非表示と位置を変更できます。OPTION TOPSTOPFORMで停止画面を最前面へ固定できます。OPTION NOSTOPHOTKEYは停止ホットキーだけを無効にし、停止ボタンと閉じる操作は維持します。変更した設定は、同じ実行の子THREADがすべて終了した後に復元します。</p>
+<h2 id="recording-recovery">記録の失敗と復旧</h2>
+<p>記録の開始や監視に失敗した場合、編集欄の元の内容は保持されます。終了処理が完了すると、再び編集や記録を開始できます。</p>
+<p>記録の終了待ちになった場合は、画面の「停止」または「記録終了」から停止を再試行できます。開始・停止処理中の終了要求は保留されるため、処理後にもう一度閉じてください。</p>
+<p>記録終了時にフックがすでに解除されていた場合は、入力の欠落を知らせる警告と、それまでの記録結果を表示します。生成スクリプトにも警告を残します。再生前に内容を確認し、必要に応じて記録し直してください。</p>
+<p>ウインドウ移動の記録、相対記録、長時間記録には未確認の条件があります。<a href="troubleshooting.html">制限と困ったとき</a>も確認してください。</p>
+
+<p>入力禁止フックの未回収が表示されている場合は、新しい記録を開始できません。<a href="editor.html#input-cleanup">入力フックの再回収</a>を確認してください。記録器自身の終了待ちとは別の状態です。</p>
+<nav class="pager" aria-label="前後のページ"><a href="editor.html">← 読込・編集・保存</a> <a href="scheduler.html">次へ：スクリプトを予約実行する</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#steps">記録して再生する</a></li><li><a href="#keys">既定のホットキー</a></li><li><a href="#options">記録設定</a></li><li><a href="#high-level">Win32ボタンを高レベル記録する</a></li><li><a href="#background-playback">Win32ボタンを背景で再生する</a></li><li><a href="#clipboard">記録後にクリップボードへコピーする</a></li><li><a href="#stop">一時停止と停止</a></li><li><a href="#recording-recovery">記録の失敗と復旧</a></li></ul></nav>
+</div></div></body></html>

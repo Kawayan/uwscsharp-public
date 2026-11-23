@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>はじめに | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="assets/help.css"><script src="assets/search-index.js" defer></script>
+<script src="assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a aria-current="page" href="index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="pages/getting-started.html">導入と最初の実行</a></li><li><a href="pages/editor.html">読込・編集・保存</a></li><li><a href="pages/recording.html">記録と再生</a></li><li><a href="pages/scheduler.html">スクリプトを予約実行する</a></li><li><a href="pages/cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="pages/authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="pages/language.html">スクリプトの基本</a></li><li><a href="pages/data-types.html">変数・配列・OPTION</a></li><li><a href="pages/routines.html">関数の定義</a></li><li><a href="pages/control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="pages/functions.html">関数一覧</a></li><li><a href="pages/functions-windows.html">ウィンドウ関連</a></li><li><a href="pages/functions-input.html">マウス・キーボード入力</a></li><li><a href="pages/functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="pages/functions-images.html">画面・画像</a></li><li><a href="pages/functions-display.html">ダイアログ・表示関連</a></li><li><a href="pages/functions-strings.html">文字列</a></li><li><a href="pages/functions-numbers.html">数値・数学</a></li><li><a href="pages/functions-arrays.html">配列</a></li><li><a href="pages/functions-files.html">ファイル・INI</a></li><li><a href="pages/functions-system.html">システム・時間・待機</a></li><li><a href="pages/functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="pages/troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / はじめに</p>
+<h1>はじめに</h1><p class="lead">UWSC#（UWSCSharp）は、UWSCスクリプトを実行するための再実装です。このヘルプでは、UWSC# アプリの基本操作とコマンドライン版の使い方を説明します。</p>
+<p>このヘルプは、UWSC# アプリ（<code>UWSCSharp.Wpf.exe</code>）とコマンドライン版（<code>UWSCSharp.Cli.exe</code>）の製品バージョン <code>0.1.0</code> に対応しています。EXEのプロパティでは、ファイル バージョンは <code>0.1.0.0</code> と表示されます。</p>
+<div class="notice">現在はプレビュー段階です。実装済みの機能にも制限や未確認の条件があります。原版UWSCとの完全互換は確認していません。</div>
+<h2 id="choose">使い方を選ぶ</h2>
+<ul><li><a href="pages/getting-started.html">初めて使う：導入と最初の実行</a></li>
+<li><a href="pages/recording.html">マウスやキーボードの操作を記録する</a></li>
+<li><a href="pages/language.html">スクリプトを書いて実行する</a></li>
+<li><a href="pages/scheduler.html">スクリプトを予約実行する</a></li>
+<li><a href="pages/cli.html">コマンドラインから実行する</a></li></ul>
+<h2 id="editions">UWSC# アプリとコマンドライン版</h2>
+<table><thead><tr><th>種類</th><th>用途と前提</th></tr></thead><tbody>
+<tr><td>UWSC# アプリ</td><td>Windows 11 x64向け。画面で読込・編集・保存・基本記録・再生を操作します。ランタイム同梱版には.NETランタイムが含まれます。</td></tr>
+<tr><td>コマンドライン版</td><td>スクリプトと引数を指定して実行します。ソースからの実行には.NET 10 SDKが必要です。</td></tr>
+</tbody></table>
+<h2 id="scope">このヘルプの範囲</h2>
+<p>UWSC# アプリ配布案内と既知の問題に加え、現行実装・機能台帳・テストを照合した言語と関数のリファレンスを掲載しています。原版ヘルプの分類を参考に、実装のある範囲を自作の説明へまとめました。<a href="pages/routines.html">関数の定義</a>、<a href="pages/control-flow.html">制御文</a>、<a href="pages/functions.html">分野別のスクリプト関数</a>を参照してください。</p>
+<p>全引数・全フラグの原版互換を示すものではありません。</p>
+<nav class="pager" aria-label="前後のページ"><a href="pages/getting-started.html">次へ：導入と最初の実行</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#choose">使い方を選ぶ</a></li><li><a href="#editions">UWSC# アプリとコマンドライン版</a></li><li><a href="#scope">このヘルプの範囲</a></li></ul></nav>
+</div></div></body></html>

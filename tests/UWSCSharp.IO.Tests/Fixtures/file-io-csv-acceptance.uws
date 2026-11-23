@@ -1,0 +1,22 @@
+// 自動受入テスト側が専用作業ディレクトリのfixture_pathを渡します。
+id = FOPEN(fixture_path, F_WRITE8B)
+IF id < 1 THEN PRINT 1 / 0
+FPUT(id, "名前,値")
+FPUT(id, "項目,123")
+IF FGET(id, F_LINECOUNT) <> 2 THEN PRINT 1 / 0
+IF FCLOSE(id) <> TRUE THEN PRINT 1 / 0
+id = FOPEN(fixture_path)
+IF FGET(id, 2, 1) <> "項目" THEN PRINT 1 / 0
+IF FGET(id, 2, 2) <> 123 THEN PRINT 1 / 0
+IF FCLOSE(id) <> TRUE THEN PRINT 1 / 0
+id = FOPEN(fixture_path, F_READ OR F_WRITE8B OR F_EXCLUSIVE)
+IF id < 1 THEN PRINT 1 / 0
+FPUT(id, 456, 2, 2)
+FPUT(id, "a" + CHR(34) + "b", 2, 3, 2)
+IF FGET(id, 2, 2) <> 456 THEN PRINT 1 / 0
+IF FGET(id, 2, 3, 2) <> "a" + CHR(34) + "b" THEN PRINT 1 / 0
+IF FCLOSE(id) <> TRUE THEN PRINT 1 / 0
+id = FOPEN(fixture_path)
+IF FGET(id, 2, 2) <> 456 THEN PRINT 1 / 0
+IF FCLOSE(id) <> TRUE THEN PRINT 1 / 0
+PRINT "file-ok"

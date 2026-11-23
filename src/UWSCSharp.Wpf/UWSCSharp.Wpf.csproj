@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <Version Condition="'$(Version)' == ''">0.1.0</Version>
+    <IncludeSourceRevisionInInformationalVersion Condition="'$(Version)' == '0.1.0'">false</IncludeSourceRevisionInInformationalVersion>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- DPI認識はWPFの既存マニフェストで設定します。 -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets/UWSCSharp.ico</ApplicationIcon>
+    <RootNamespace>UWSCSharp.Wpf</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Resource Include="Assets/UWSCSharp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../UWSCSharp.Core/UWSCSharp.Core.csproj" />
+    <ProjectReference Include="../UWSCSharp.IO/UWSCSharp.IO.csproj" />
+    <ProjectReference Include="../UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
+    <ProjectReference Include="../UWSCSharp.Wpf.Logic/UWSCSharp.Wpf.Logic.csproj" />
+    <ProjectReference Include="../UWSCSharp.DllRelay/UWSCSharp.DllRelay.csproj"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="DllRelayBuildOutput"
+                      GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishSingleFile" />
+  </ItemGroup>
+  <Import Project="../UWSCSharp.DllRelay/CopyDllRelay.targets" />
+  <Import Project="../UWSCSharp.Windows/Native/FloatingPoint/FloatingPointNative.targets"
+          Condition="'$(BuildFloatingPointNative)' == '' and '$(RuntimeIdentifier)' == 'win-x64'" />
+</Project>

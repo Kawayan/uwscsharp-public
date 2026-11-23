@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>画面・画像 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a aria-current="page" href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 画面・画像</p>
+<h1>画面・画像</h1><p class="lead">色の取得、画像探索と保存の採用範囲を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="peekcolor">PEEKCOLOR</h2>
+<p>画面またはクリップボード画像の1画素の色を取得します。</p>
+<h3>書式</h3><pre><code>PEEKCOLOR(x, y, [colorMode, clipboard])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>x, y</code></dt><dd>画面ではMOUSEORG設定を基準、クリップボードでは画像内座標。</dd>
+<dt><code>colorMode</code></dt><dd>0（既定）はBGR、3はRGB、4は赤、5は緑、6は青。</dd>
+<dt><code>clipboard</code></dt><dd>0（既定）は画面、0以外はクリップボード画像。</dd>
+</dl><h3>戻り値・結果</h3><p>色または成分の数値。画像・画面の範囲外は-1。</p><h3>対応範囲と注意</h3><ul>
+<li>2～4引数です。座標は0方向へ整数に切り捨てます。colorModeの省略・EMPTYは0、clipboardの省略・EMPTYは0です。未定義の色指定と余分な引数はエラーです。</li>
+<li>MOUSEORGを解除した画面取得は可視デスクトップ、設定中は選択した原点・FORE/BACKに従います。CLIENT/DIRECTではクライアント領域を使います。任意アプリや最小化・非表示時の描画内容は保証しません。</li>
+<li>クリップボードでは画像左上が(0,0)です。MOUSEORGを無視します。標準DIBの1/4/8/16/24/32bit、色表・上下方向・RGB mask・RLE4/8と、OSの形式合成によるCF_BITMAP画像を扱います。</li>
+<li>有効な画像の範囲外は-1です。画像なし、クリップボード使用中、無効対象や取得失敗はEXCEPTで捕捉できる実行エラーです。取消は範囲外返値より優先します。</li>
+<li>画像は最大16777216ピクセル、クリップボードのコピーは最大134217728バイトです。埋込みICCの独自変換、JPEG/PNG圧縮DIB、独自PNG形式、混在DPIや全アプリの受入は対象外です。</li>
+<li>原版と異なり1bitの任意色表を保ち、clipboardの0以外を真とし、未定義の色指定を拒否します。原版との相違と未確認の停止条件は開発資料PEEKCOLOR-COMPLETION.mdを参照してください。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="chkimg">CHKIMG</h2>
+<p>画面から指定の画像を探し、結果座標を公開します。</p>
+<h3>書式</h3><pre><code>CHKIMG([image, mode, x1, y1, x2, y2, number, colorRange])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>image</code></dt><dd>BMPのパス。拡張子なしは.bmpを補います。省略・空文字列・EMPTYはクリップボード画像。</dd>
+<dt><code>mode</code></dt><dd>0は通常、1〜4は指定隅色の透過、-1は色関係による形状判定。既定0。</dd>
+<dt><code>x1, y1, x2, y2</code></dt><dd>右下を含む探索矩形。空欄は取得元の端、EMPTYは0。MOUSEORGを基準とし、範囲へ切り詰めます。</dd>
+<dt><code>number</code></dt><dd>既定1。正数は指定順、0とEMPTYも1。負数は全件を取得します。</dd>
+<dt><code>colorRange</code></dt><dd>上位8bitが青、中位が緑、下位が赤の許容幅。既定0。IMG_MSK定数をORできます。</dd>
+</dl><h3>戻り値・結果</h3><p>正番号は指定順が見つかれば1、なければ0。負番号は検出件数。G_IMG_X/Yは最後の検出座標、未検出は-999999。ALL_IMG_X/Yは負番号で全座標、正番号では空配列です。</p><h3>対応範囲と注意</h3><ul>
+<li>0～8引数です。通常一致、四隅色の透過、-1の色無視に対応します。未定義のmode・範囲外のcolorRange・引数過多や逆転/空範囲はエラーです。</li>
+<li>上から下、左から右へ探索し、一致後は横の重複をテンプレート幅だけ飛ばします。縦は1行ずつ進めます。指定順に足りなくても、途中の最後の検出座標を保ちます。</li>
+<li>BMPはCORE/40/52/56/V4/V5ヘッダー、1/4/8/16/24/32bit、色表、RGB mask、RLE4/8、上下方向に対応します。プロファイルによる色変換やリンク先読込みは行わず、格納されたRGBで比較します。埋込みJPEG/PNGや未知の形式は拒否します。</li>
+<li>1×1の色無視は番号によらず成功1・座標0,0・空配列です。形状判定では色幅を無視し、RGBの同一/相違関係を使います。原版の8bit縮退変換は再現しません。</li>
+<li>実行開始時は座標-999999と空配列です。初回失敗後も読み取れます。失敗・取消時は直前の結果を保ち、正常終了時に更新します。取得中の取消は範囲エラーより優先します。</li>
+<li>画像は最大16777216ピクセル、一致は最大1000000件、DIB部分は最大134217728バイトです。ファイルは毎回読み直し、同じ更新時刻でも古いキャッシュを使いません。</li>
+<li>MOUSEORGのFORE/BACKと原点に従います。CLIENT/DIRECTではクライアント領域を使います。空のクライアントは未検出0です。任意アプリや混在DPI、GPU/保護/最小化描画は一般保証しません。</li>
+<li>画像不在やclipboard使用中、分類済みの取得・形式・ファイルエラーはTRY/EXCEPTで処理できます。取消・メモリ不足・未知のbackend障害をすべて捕捉する仕様ではありません。原版との差と未確認条件はCHKIMG-COMPLETION.mdを参照してください。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="saveimg">SAVEIMG</h2>
+<p>指定した画面またはウィンドウの画像を、BMP・JPEG・クリップボードへ保存します。</p>
+<h3>書式</h3><pre><code>SAVEIMG([image, id, x, y, width, height, client, jpeg, captureMode])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>image</code></dt><dd>保存パス。省略・空文字列・EMPTYはクリップボード。</dd>
+<dt><code>id</code></dt><dd>0（既定）は仮想画面、それ以外は有効なウィンドウID。MOUSEORGとは独立。</dd>
+<dt><code>x, y</code></dt><dd>画面は絶対物理座標、ウィンドウは選んだ原点からの物理座標。空欄は取得元の左上、EMPTYは0。</dd>
+<dt><code>width, height</code></dt><dd>0（既定）は残りの範囲。負数・空範囲・取得元を越える範囲はエラー。</dd>
+<dt><code>client</code></dt><dd>0（既定）は外枠、1はクライアント。その他はエラー。</dd>
+<dt><code>jpeg</code></dt><dd>0（既定）は24bit BMP。-1/-4/-8/-16/-24/-32は各色深度のBMP。1～100はJPEG品質。</dd>
+<dt><code>captureMode</code></dt><dd>0（既定）は遮蔽に応じた自動取得、IMG_FORE=1は画面、IMG_BACK=2は背景描画。id=0は常に画面。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。失敗は例外で通知されます。</p><h3>対応範囲と注意</h3><ul>
+<li>自動取得は、要求範囲が画面内で上位の可視ウィンドウに覆われていなければ画面、それ以外は背景を使います。FOREには覆うウィンドウも写り、BACKは画面外でも使えます。描画内容は対象アプリによります。</li>
+<li>BMPは.bmp、JPEGは.jpg/.jpe/.jpegを大文字小文字を区別せず判定し、一致しない名前には.bmpまたは.jpgを末尾へ追加します。末尾のドットは除きます。JPEG指定のimage.bmpはimage.bmp.jpgとなります。</li>
+<li>画像名を省略した場合は非圧縮CF_DIBを公開します。負の品質は指定色深度、0と正のJPEG品質は24bitです。</li>
+<li>画像は最大16777216ピクセル。背景描画ではウィンドウ全体にも上限を適用します。ファイルは一時ファイル完成後に置き換え、置換前の失敗・取消では旧ファイルを保持します。</li>
+<li>原版の不正な16bitヘッダーや独自の減色を再現せず、標準BMPを使います。外枠はGetWindowRectを基準にします。原版差・設計案・未確認環境はSAVEIMG-COMPLETION.mdを参照してください。</li>
+<li>無効ID・範囲外・識別した保存/取得の操作失敗はTRY/EXCEPTで処理できます。取消・メモリ不足・未知のhost障害は一律に捕捉しません。同期描画/codec自体の強制中断は行いません。</li>
+</ul>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-controls.html">← コントロール・アクセシビリティ</a> <a href="functions-display.html">次へ：ダイアログ・表示関連</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#peekcolor">PEEKCOLOR</a></li><li><a href="#chkimg">CHKIMG</a></li><li><a href="#saveimg">SAVEIMG</a></li></ul></nav>
+</div></div></body></html>

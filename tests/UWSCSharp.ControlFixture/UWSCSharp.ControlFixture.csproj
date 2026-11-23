@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/UWSCSharp.Cli/UWSCSharp.Cli.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.Wpf.Logic/UWSCSharp.Wpf.Logic.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Shared/ProcessReceiptReader.cs" Link="Support/ProcessReceiptReader.cs" />
+    <Using Include="UWSCSharp.Testing" />
+  </ItemGroup>
+</Project>

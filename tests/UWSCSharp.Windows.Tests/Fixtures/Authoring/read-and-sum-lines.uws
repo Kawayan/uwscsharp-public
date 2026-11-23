@@ -1,0 +1,30 @@
+OPTION OPTFINALLY
+IFB LENGTH(PARAM_STR) = 0
+    PRINT "入力ファイルのパスを指定してください"
+    EXIT
+ENDIF
+DIM fileId = FOPEN(PARAM_STR[0], F_READ)
+IFB fileId = -1
+    PRINT "入力ファイルを開けません"
+    EXIT
+ENDIF
+TRY
+    DIM lineCount = FGET(fileId, F_LINECOUNT)
+    IFB lineCount = 3
+        DIM total = 0
+        DIM count = 0
+        FOR row = 1 TO lineCount
+            total = total + FGET(fileId, row)
+            count = count + 1
+        NEXT
+        PRINT "合計: " + total
+        PRINT "件数: " + count
+    ELSE
+        PRINT "入力は整数だけの3行にしてください"
+    ENDIF
+FINALLY
+    DIM closed = FCLOSE(fileId, TRUE)
+    IFB closed = 0
+        PRINT "ファイルの解放を確認できません"
+    ENDIF
+ENDTRY

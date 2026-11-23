@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>スクリプトの基本 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section" open><summary>言語リファレンス</summary><ul><li><a aria-current="page" href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / スクリプトの基本</p>
+<h1>スクリプトの基本</h1><p>以下は基本構文の例です。全構文・全条件の原版互換を示すものではありません。</p>
+<p>式は4,096トークンまでです。名前・値・演算子・括弧・カンマなどをそれぞれ数え、空白は数えません。式の入れ子は128までに制限しています。これらはUWSC#側の制限であり、原版と同じ上限を保証するものではありません。グラフ描画などに使う限定数値式には、別の文字数・要素数・深さの制限があります。</p>
+<h2 id="variables">変数・文字列・コメント</h2>
+<pre><code>// 行末までコメントです
+DIM name = "UWSC#"
+PRINT "こんにちは、" + name
+PRINT 10 + 20</code></pre>
+<p>文字列は二重引用符で囲みます。DIMで変数を宣言し、PRINTで値を出力します。</p>
+<h2 id="string-literals">文字列リテラルと連続引用符</h2>
+<p>末尾の二重引用符が連続する場合、最後の1個を閉じ引用符とし、その前の引用符は文字列に含めます。<code>"""</code>は引用符1個、<code>""""</code>は引用符2個の文字列です。<code>"a""</code>はaと引用符1個になります。一般的な二重引用符エスケープとは個数の数え方が異なります。</p>
+<pre data-example="verified" data-name="consecutive-quotes" data-expected="1&#10;2&#10;a&quot;&#10;ab&#10;"><code>PRINT LENGTH(""")
+PRINT LENGTH("""")
+PRINT "a""
+PRINT "a" + "b"</code></pre>
+<p>途中へ引用符を入れる場合は<code>"a&lt;#DBL&gt;b"</code>と書けます。<code>"a""b"</code>や、空白を挟んで文字列を並べる書き方は拒否します。文字列の連結には<code>+</code>を使ってください。閉じ引用符がない場合は、実行前に行番号付きのエラーになります。</p>
+<h2 id="string-operations">文字列の連結と比較</h2>
+<p><code>+</code>の片方が文字列なら連結します。他方には文字列・EMPTY・有限の数値を使えます。EMPTYは空文字列、数値は環境に依存しない書式になります。通常のTRUE/FALSEは1/0として連結します。NULL・NOTHING・ERROR・配列・HASHTBL・外部オブジェクトは暗黙に文字列化せず、エラーになります。</p>
+<pre data-example="verified" data-name="string-expressions" data-expected="0012&#10;001&#10;-2.5&#10;1&#10;error&#10;"><code>PRINT "001" + 2
+PRINT +"001"
+PRINT -"2.5"
+PRINT !"0"
+TRY
+    PRINT "x" + NULL
+EXCEPT
+    PRINT "error"
+ENDTRY</code></pre>
+<p>単項の<code>+</code>は値と型を保ちます。<code>-</code>と<code>!</code>は数値変換し、<code>!</code>は0なら1、それ以外なら0です。不正な数値文字列やNULLの数値変換はエラーになります。両方が文字列の比較は通常大小文字を区別せず、OPTION SAMESTRで区別します。カルチャーに依存する照合やUnicode正規化は行いません。数値との混在比較は数値変換を使い、変換できない文字列はエラーになります。</p>
+<h2 id="branches">条件と繰返し</h2>
+<pre><code>DIM count = 3
+IFB count &gt; 0
+    PRINT "開始"
+ELSE
+    PRINT "対象なし"
+ENDIF
+
+FOR i = 1 TO count
+    PRINT i
+NEXT</code></pre>
+<p>複数行の条件分岐はIFBからENDIF、回数を指定する繰返しはFORからNEXTで記述します。OPTION EXPLICITを指定する場合は、ループ変数も宣言してください。</p>
+<h2 id="functions">関数を定義する</h2>
+<pre><code>PRINT Twice(3)
+
+FUNCTION Twice(value)
+    RESULT = value * 2
+FEND</code></pre>
+<p>関数の戻り値はRESULTへ代入します。この例では関数をメイン処理の後に定義しています。</p>
+<h2 id="array">起動引数と配列</h2>
+<p>コマンドライン版またはUWSC# アプリへスクリプト名の後に渡す追加引数は、0始まりの配列PARAM_STRで参照できます。要素数はLENGTHで確認します。</p>
+<pre><code>IFB LENGTH(PARAM_STR) &gt; 0
+    PRINT PARAM_STR[0]
+ELSE
+    PRINT "引数がありません"
+ENDIF</code></pre>
+<p>引数がない場合、PARAM_STRは0要素です。存在しない要素へのアクセスはエラーになります。</p>
+<p>例：<code>UWSCSharp.Wpf.exe "C:\scripts\sample.uws" "日本語" "a b"</code>。UWSC# アプリは指定したスクリプトを再生し、完了後に終了します。UWSC# アプリを引数なしで起動すると、通常の編集画面を開きます。</p>
+<p>空文字列、001、引用符、末尾のバックスラッシュ、&lt;#CR&gt;は、OSから渡された文字列のまま保持します。原版の空引数の省略や特殊文字展開は再現しません。シェルが先に除去した引用符は復元できません。</p>
+<p>UWSC# アプリの先頭引数<code>--verify-runtime</code>は配布検査専用です。スクリプト名の後なら通常の引数になります。起動時の読込み・実行エラーは終了コード1で終了し、UWSC# アプリのエラーダイアログは開きません。標準エラー出力を接続して診断を取得してください。</p>
+<h2 id="details">詳しい書式を調べる</h2>
+<ul><li><a href="routines.html">関数定義・既定引数・VAR・配列パラメーター</a></li>
+<li><a href="control-flow.html">制御文と例外処理</a></li>
+<li><a href="data-types.html">変数・配列・HASHTBL・OPTION</a></li>
+<li><a href="functions.html">スクリプト関数一覧</a></li></ul>
+
+<h2 id="appdata">アプリケーションデータのフォルダー</h2>
+<p><code>GET_APPDATA_DIR</code>は、実行開始時にOSから取得するApplicationDataのパスです。名前の大小文字は区別しません。値の取得だけではフォルダーを作成しません。空文字の場合もあります。</p>
+<pre><code>PRINT GET_APPDATA_DIR</code></pre>
+<p>代入すると、その実行内の関数やCALL先にも変更が伝わります。DIMや仮引数で同名のローカル変数を宣言できますが、PUBLIC/CONSTによる再定義はエラーです。次の実行はOSの値から開始します。ホストがScriptRunOptions.ApplicationDataDirectoryを指定した場合は、空文字を含むその値を使用します。原版との全条件の互換は未確認です。</p>
+<h2 id="execution-context">Windows・本体のフォルダーとスクリプト名</h2>
+<table><thead><tr><th>特殊変数</th><th>実行開始時の値</th></tr></thead><tbody>
+<tr><td><code>GET_WIN_DIR</code></td><td>OSのWindowsフォルダー。通常は<code>C:\Windows</code>です。</td></tr>
+<tr><td><code>GET_UWSC_DIR</code></td><td>実行しているコマンドライン版またはUWSC# アプリの基底フォルダー。スクリプトの配置先やカレントフォルダーとは別です。</td></tr>
+<tr><td><code>GET_UWSC_NAME</code></td><td>拡張子を含む主スクリプトのファイル名。CALL先でも主スクリプト名を返し、無名ソースでは空文字になります。</td></tr>
+</tbody></table>
+<pre><code>PRINT GET_WIN_DIR
+PRINT GET_UWSC_DIR
+PRINT GET_UWSC_NAME</code></pre>
+<p>名前の大小文字は区別しません。OSとアプリから取得したフォルダーには末尾の区切りを追加しません。アプリの基底フォルダーは末尾の区切りを除きますが、ドライブのルートは保持します。取得だけでフォルダーを作成しません。</p>
+<p>ホストが<code>ScriptRunOptions.WindowsDirectory</code>または<code>ExecutableDirectory</code>を指定した場合、空文字・空白・相対表記・末尾の区切りもそのまま公開します。代入・DIM・仮引数の扱いはGET_APPDATA_DIRと同じです。PUBLIC/CONSTでの再定義はエラーになり、次の実行では初期値へ戻ります。</p>
+<p>コンパイル済みファイルは主スクリプトの情報を保持します。実行時のSourcePathで別の名前を指定しても、その名前へ置き換わりません。コマンドライン版とUWSC# アプリで利用できます。原版との全環境・全操作の互換は未確認です。</p>
+<h2 id="system-information">システムフォルダー・作業フォルダー・UWSC#の版</h2>
+<table><thead><tr><th>特殊変数</th><th>値</th></tr></thead><tbody>
+<tr><td><code>GET_SYS_DIR</code></td><td>実行開始時のOSのシステムフォルダー。Windows 11 x64では通常C:\Windows\system32です。</td></tr>
+<tr><td><code>GET_CUR_DIR</code></td><td>読取り時の相対ファイル操作の基準フォルダー。コマンドライン版とUWSC# アプリでは主スクリプトのフォルダーで、CALL先でも変わりません。</td></tr>
+<tr><td><code>GET_UWSC_VER</code></td><td>UWSC#の実際の版を文字列で返します。0.1.0-preview.1などのprerelease表記を保持し、+以降のビルド情報は除きます。原版の数値5.302とは型も値も異なります。</td></tr>
+<tr><td><code>GET_UWSC_PRO</code></td><td>数値0。UWSC#はPro製品ではありません。</td></tr>
+</tbody></table>
+<pre><code>PRINT GET_SYS_DIR
+PRINT GET_CUR_DIR
+PRINT GET_UWSC_VER
+PRINT GET_UWSC_PRO</code></pre>
+<p>GET_CUR_DIRは読み取り専用で、直接代入はエラーです。他の3変数は実行内で代入でき、次の実行で初期値に戻ります。4変数ともDIMや仮引数で隠蔽できますが、PUBLIC/CONSTによる再定義はエラーです。コマンドライン版とUWSC# アプリで利用できます。</p>
+<p>ホストがScriptRunOptions.SystemDirectoryを指定した場合、空文字・空白・相対表記もそのまま公開します。主ファイルへ固定しないファイルadapter、またはadapterがない場合のGET_CUR_DIRは、プロセスの現在の作業フォルダーを毎回取得します。コマンドライン版とUWSC# アプリは実行ごとの基準を固定し、プロセスの作業フォルダーを変更しません。原版のネイティブコードによる変更への追従とは異なります。</p>
+<p>OS種別と64bit判定は<a href="functions-system.html#kindofos">KINDOFOS</a>を参照してください。</p>
+<h2 id="display-information">現在のマウス座標と主画面</h2>
+<table><thead><tr><th>特殊変数</th><th>読取り時の値</th></tr></thead><tbody>
+<tr><td><code>G_MOUSE_X</code>・<code>G_MOUSE_Y</code></td><td>マウスの物理スクリーン座標。呼出し元のDPI認識にかかわらず物理ピクセルで返します。MOUSEORGの原点には影響されず、負の座標も返します。</td></tr>
+<tr><td><code>G_SCREEN_W</code>・<code>G_SCREEN_H</code></td><td>主画面の幅と高さ。単位は物理ピクセルで、複数画面を合わせた幅や高さではありません。</td></tr>
+<tr><td><code>G_SCREEN_C</code></td><td>主画面の1ピクセル当たりのビット数。たとえば32を返し、色の個数は返しません。</td></tr>
+</tbody></table>
+<pre><code>PRINT G_MOUSE_X
+PRINT G_MOUSE_Y
+PRINT G_SCREEN_W
+PRINT G_SCREEN_H
+PRINT G_SCREEN_C</code></pre>
+<p>値は読取りのたびに取得します。XとYは別々の読取りなので、その間にマウスが動けば異なる時点の値になります。画面情報自体は読み取り専用です。DIMや仮引数で同名のローカル変数を宣言できますが、特殊変数への直接代入とPUBLIC/CONSTでの再定義はエラーです。</p>
+<p>コマンドライン版とUWSC# アプリのWindows実行で利用できます。取得失敗はEXCEPTへ通知し、取消や未知のホスト障害は区別します。モニターごとの情報は<a href="functions-windows.html#monitor">MONITOR</a>で取得できます。</p>
+
+<h2 id="textblock">複数行の定数 TEXTBLOCK</h2>
+<pre><code>TEXTBLOCK message
+  コメント記号 // も ; も _ も本文です。
+ENDTEXTBLOCK
+PRINT message</code></pre>
+<p>本文の字下げ・引用符・空行を保持し、改行はCRLFで結びます。終端直前に余分な改行は付けません。空のブロックも可能です。定数として実行開始時に初期化し、再代入と重複定義はエラーです。ENDTEXTBLOCKは単独行または後続コメントの形で指定します。終端がなければ開始物理行で診断します。</p>
+<p>通常は&lt;#CR&gt;・&lt;#TAB&gt;・&lt;#DBL&gt;を展開し、OPTION SPECIALCHARがあればそのまま保持します。CALL先とmodule/classの定数にも使えます。</p>
+<h2 id="byte-text">バイト文字列と符号化</h2>
+<p>通常の文字列を扱うCOPY・POS・LENGTHと、CP932のバイトを扱う<a href="functions-strings.html#copyb">COPYB</a>・<a href="functions-strings.html#posb">POSB</a>・<a href="functions-strings.html#lengthb">LENGTHB</a>を区別します。NULを含む長さと切出しは保持しますが、POSBの検索はNULで終わり、文字途中のバイトだけは一致しません。</p>
+<p><a href="functions-strings.html#encode">ENCODE</a>は元のバイト列を持つ文字列や型付きバイト配列を返します。表示文字列だけから元の列を作り直しません。配列を復号する場合は対応するCODE_BYTEARRAYまたはCODE_BYTEARRAYWを指定してください。未型付け配列はDECODEへ渡せません。</p>
+<nav class="pager" aria-label="前後のページ"><a href="authoring.html">← .uws作成支援（MCPサーバー）</a> <a href="data-types.html">次へ：変数・配列・OPTION</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#variables">変数・文字列・コメント</a></li><li><a href="#string-literals">文字列リテラルと連続引用符</a></li><li><a href="#string-operations">文字列の連結と比較</a></li><li><a href="#branches">条件と繰返し</a></li><li><a href="#functions">関数を定義する</a></li><li><a href="#array">起動引数と配列</a></li><li><a href="#details">詳しい書式を調べる</a></li><li><a href="#appdata">アプリケーションデータのフォルダー</a></li><li><a href="#execution-context">Windows・本体のフォルダーとスクリプト名</a></li><li><a href="#system-information">システムフォルダー・作業フォルダー・UWSC#の版</a></li><li><a href="#display-information">現在のマウス座標と主画面</a></li><li><a href="#textblock">複数行の定数 TEXTBLOCK</a></li><li><a href="#byte-text">バイト文字列と符号化</a></li></ul></nav>
+</div></div></body></html>

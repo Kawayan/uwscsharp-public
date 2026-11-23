@@ -1,0 +1,29 @@
+<Window x:Class="UWSCSharp.Wpf.StopWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="320" MinWidth="300" SizeToContent="Height"
+    ResizeMode="NoResize" WindowStyle="ToolWindow"
+    ShowActivated="False" ShowInTaskbar="False" Topmost="True"
+    WindowStartupLocation="CenterScreen" Closing="StopWindowClosing"
+    Icon="/Assets/UWSCSharp.ico">
+    <StackPanel Margin="12">
+        <TextBlock x:Name="PlaybackFile" TextTrimming="CharacterEllipsis"
+            Margin="0,0,0,4" AutomationProperties.Name="実行中のスクリプト" />
+        <TextBlock x:Name="PlaybackStatus" Margin="0,0,0,10"
+            AutomationProperties.LiveSetting="Polite" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="PausePlaybackButton" Content="Ⅱ 一時停止"
+                IsEnabled="False" Padding="8,8" Margin="0,0,6,0"
+                Click="PausePlaybackClick"
+                ToolTip="一時停止・再開。押下中のキーやボタンは解放まで一時停止を保留します。" />
+            <Button x:Name="StopPlaybackButton" Content="■ 停止"
+                Grid.Column="1" IsEnabled="False" Padding="8,8"
+                Click="StopPlaybackClick"
+                ToolTip="実行の停止を要求します。後処理が終わるとこの画面が非表示になります。" />
+        </Grid>
+    </StackPanel>
+</Window>

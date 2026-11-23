@@ -1,0 +1,134 @@
+[
+  {
+    "slug": "index",
+    "title": "はじめに"
+  },
+  {
+    "slug": "getting-started",
+    "title": "導入と最初の実行",
+    "group": "使い方"
+  },
+  {
+    "slug": "editor",
+    "title": "読込・編集・保存",
+    "group": "使い方"
+  },
+  {
+    "slug": "recording",
+    "title": "記録と再生",
+    "group": "使い方"
+  },
+  {
+    "slug": "scheduler",
+    "title": "スクリプトを予約実行する",
+    "group": "使い方"
+  },
+  {
+    "slug": "cli",
+    "title": "コマンドライン版の使い方と起動引数",
+    "group": "使い方"
+  },
+  {
+    "slug": "authoring",
+    "title": ".uws作成支援（MCPサーバー）",
+    "group": "使い方"
+  },
+  {
+    "slug": "language",
+    "title": "スクリプトの基本",
+    "group": "言語リファレンス"
+  },
+  {
+    "slug": "data-types",
+    "title": "変数・配列・OPTION",
+    "group": "言語リファレンス"
+  },
+  {
+    "slug": "routines",
+    "title": "関数の定義",
+    "group": "言語リファレンス"
+  },
+  {
+    "slug": "control-flow",
+    "title": "制御文",
+    "group": "言語リファレンス"
+  },
+  {
+    "slug": "functions",
+    "title": "スクリプト関数一覧",
+    "group": "スクリプト関数",
+    "nav_title": "関数一覧"
+  },
+  {
+    "slug": "functions-windows",
+    "title": "ウィンドウ関連",
+    "group": "スクリプト関数",
+    "catalog": "windows"
+  },
+  {
+    "slug": "functions-input",
+    "title": "マウス・キーボード入力",
+    "group": "スクリプト関数",
+    "catalog": "input"
+  },
+  {
+    "slug": "functions-controls",
+    "title": "コントロール・アクセシビリティ",
+    "group": "スクリプト関数",
+    "catalog": "controls"
+  },
+  {
+    "slug": "functions-images",
+    "title": "画面・画像",
+    "group": "スクリプト関数",
+    "catalog": "images"
+  },
+  {
+    "slug": "functions-display",
+    "title": "ダイアログ・表示関連",
+    "group": "スクリプト関数",
+    "catalog": "display"
+  },
+  {
+    "slug": "functions-strings",
+    "title": "文字列",
+    "group": "スクリプト関数",
+    "catalog": "strings"
+  },
+  {
+    "slug": "functions-numbers",
+    "title": "数値・数学",
+    "group": "スクリプト関数",
+    "catalog": "numbers"
+  },
+  {
+    "slug": "functions-arrays",
+    "title": "配列",
+    "group": "スクリプト関数",
+    "catalog": "arrays"
+  },
+  {
+    "slug": "functions-files",
+    "title": "ファイル・INI",
+    "group": "スクリプト関数",
+    "catalog": "files"
+  },
+  {
+    "slug": "functions-system",
+    "title": "システム・時間・待機",
+    "group": "スクリプト関数",
+    "catalog": "system"
+  },
+  {
+    "slug": "functions-com",
+    "title": "COM連携",
+    "group": "スクリプト関数",
+    "catalog": "com"
+  },
+  {
+    "slug": "troubleshooting",
+    "title": "制限と困ったとき",
+    "group": "困ったとき",
+    "nav_title": "制限と既知の問題"
+  }
+]

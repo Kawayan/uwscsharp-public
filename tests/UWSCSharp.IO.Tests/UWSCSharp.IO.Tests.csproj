@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Shared/TemporaryTestDirectory.cs" Link="Support/TemporaryTestDirectory.cs" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <ProjectReference Include="../../src/UWSCSharp.IO/UWSCSharp.IO.csproj" />
+    <None
+      Update="Fixtures/file-io-csv-acceptance.uws"
+      TargetPath="file-io-csv-acceptance.uws"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+    <None
+      Include="../UWSCSharp.Windows.Tests/Fixtures/Authoring/read-and-sum-lines.uws"
+      Link="authoring/read-and-sum-lines.uws"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+    <None
+      Update="Fixtures/ini-directory-acceptance.uws"
+      TargetPath="ini-directory-acceptance.uws"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+  </ItemGroup>
+</Project>

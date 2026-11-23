@@ -1,0 +1,16 @@
+// 自動受入テスト専用です。テスト側がfixture_titleと専用ウィンドウを用意します。
+// 入力送信先は偽物に差し替え、実アプリへの入力は送信しません。
+id = GETID(fixture_title, "STATIC", 0.1)
+IF id < 1 THEN PRINT 1 / 0
+IF STATUS(id, ST_TITLE) <> fixture_title THEN PRINT 1 / 0
+IF HNDTOID(IDTOHND(id)) <> id THEN PRINT 1 / 0
+ACW(id, 50, 60, 300, 200)
+SENDSTR(id, "受入確認", 1, TRUE)
+CTRLWIN(id, HIDE)
+IF STATUS(id, ST_VISIBLE) <> FALSE THEN PRINT 1 / 0
+MOUSEORG(id, MORG_DIRECT)
+MMV(12, 13)
+BTN(LEFT, DOWN, 12, 13)
+KBD(VK_A, DOWN)
+PRINT "held"
+// 終了方法はテスト側が追記します。保持入力は実行終了時に解放されます。

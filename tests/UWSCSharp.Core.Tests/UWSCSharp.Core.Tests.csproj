@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Shared/TemporaryTestDirectory.cs" Link="Support/TemporaryTestDirectory.cs" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <ProjectReference Include="../../src/UWSCSharp.Core/UWSCSharp.Core.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.Mcp/UWSCSharp.Mcp.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.Wpf.Logic/UWSCSharp.Wpf.Logic.csproj" />
+  </ItemGroup>
+</Project>

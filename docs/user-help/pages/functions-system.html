@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>システム・時間・待機 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a aria-current="page" href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / システム・時間・待機</p>
+<h1>システム・時間・待機</h1><p class="lead">OS種別、日時、時間変数、待機、コマンドの実行を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="sleep">SLEEP</h2>
+<p>指定時間だけ実行を待機します。</p>
+<h3>書式</h3><pre><code>SLEEP(seconds)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>seconds</code></dt><dd>0～2147483.647の有限秒数。必須1引数で小数を指定できます。EMPTYは0、通常Booleanは1/0、COM VT_BOOLは-1/0です。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。</p><h3>対応範囲と注意</h3><ul>
+<li>文字列はInvariantCulture/NumberStyles.Floatで変換します。E/e指数と前後の空白を受理し、独自の文字数上限は設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>過不足・省略は評価前に拒否し、有効な引数は1回評価します。負の秒数は拒否し、負の0は0として受理します。COM TRUEは-1となるため範囲外です。NULL・NOTHING・ERROR・配列・連想配列・未変換object・Omitted値も拒否します。</li>
+<li>数値変換後の秒数が0なら、hostの待機後にTask.Yieldで継続をschedulerへ渡します。一定時間の経過や特定のthreadの実行を保証しません。微小な正の秒数がTimeSpanで0へ丸められる場合とは区別します。</li>
+<li>既定hostはTask.Delayを使い、待機中・復帰後と0秒yield後の協調取消に対応します。pause指定時は待機を分割して残時間を保持し、入力押下中はpauseを保留します。OPTFINALLYのcleanup待機はpause対象外です。</li>
+<li>待機精度、原版のSleep/message pump、全locale、非協調hostの強制中断は保証しません。host障害はscriptのEXCEPTへ変換しません。MMVなどのms引数とは異なり、この関数の単位は秒です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="sleep"><code>SLEEP(0)
+PRINT &quot;再開&quot;</code></pre>
+<p>期待出力：</p><pre><code>再開
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="gettime">GETTIME</h2>
+<p>現在または指定した日時を基に日時情報を計算します。</p>
+<h3>書式</h3><pre><code>GETTIME([days, base])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>days</code></dt><dd>加える日数。省略/Omitted/EMPTYは0。共通文法の有限数文字列も受理します。通常Booleanは1/0、COM VT_BOOLは-1/0です。</dd>
+<dt><code>base</code></dt><dd>省略/Omitted/EMPTY/空文字列はローカル現在日時。明示時は時計を参照せず、/・-・:・半角空白を除去した8桁yyyyMMddまたは14桁yyyyMMddHHmmssを解析します。数値による20000101も受理します。</dd>
+</dl><h3>戻り値・結果</h3><p>2000年1月1日からの暦に基づく秒数。ミリ秒以下を含めず、全16のG_TIME変数を更新します。</p><h3>対応範囲と注意</h3><ul>
+<li>日数はInvariantCulture/NumberStyles.Floatで有限doubleへ変換し、DateTime.AddDaysで加えます。E/e指数と前後の空白を受理し、16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値を拒否します。</li>
+<li>基準日の文法は区切り除去後8/14桁です。TAB・全角・NUL・余分な末尾・無効日付や閏秒を拒否します。日時範囲は1～9999年です。ローカル暦へ加算し、DST切替の実経過秒補正は行いません。</li>
+<li>YY/MM/DD/HH/NN/SS/ZZ/WWは数値。WWは日曜0～土曜6です。YY2/MM2/DD2/HH2/NN2/SS2は2桁、YY4は4桁、ZZ2は3桁の文字列です。微小な負の日数で前日へ移ると戻り値が-1秒になる場合があります。</li>
+<li>過剰引数は評価前に拒否し、有効な引数は左から右へ各1回評価します。全変数を準備し、定数書込み先と取消を確認してから公開します。1つでも同名のglobal定数があれば全更新を拒否し、通常の失敗・取消でも以前の全値を保持します。</li>
+<li>G_TIMEは実行ごとの変数で、GETTIME成功前は未定義です。通常代入は可能です。routineからの呼出しもglobalへ公開し、呼出し元の同名localを除きます。原版の1899年の初期値、不正基準日後の部分更新、TDateTimeや全localeの完全再現は採用しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="gettime"><code>PRINT GETTIME(0, &quot;20000101000000&quot;)
+PRINT G_TIME_YY4</code></pre>
+<p>期待出力：</p><pre><code>0
+2000
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="ctrltrd">CTRLTRD</h2>
+<p>THREADで開始したworkerの停止・再開・終了・優先度を制御します。</p>
+<h3>書式</h3><pre><code>CTRLTRD(id, mode)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>0～63の実行内slot番号。最初のTHREADは0から空きslotを使い、終了したslotは再利用されます。OSのthread IDではありません。</dd>
+<dt><code>mode</code></dt><dd>TRD_SUSPEND=1、TRD_QUIT=2、TRD_RESUME=3。優先度はTRD_IDLE=10、TRD_LOWEST=11、TRD_LOWER=12、TRD_NORMAL=13、TRD_HIGHER=14、TRD_HIGHEST=15。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値は空文字列です。範囲外ID、存在しないworker、未定義modeは状態を変えません。</p><h3>対応範囲と注意</h3><ul>
+<li>引数は2個で、省略は評価前に拒否します。数値は有限32bit整数へ0方向に切り捨てます。</li>
+<li>THREAD Worker()のようにユーザー関数を起動します。引数は開始時のコピーで、VAR仮引数でも呼出元へ書き戻しません。PUBLICとmodule fieldは同じ実行内で共有します。</li>
+<li>SUSPEND/RESUMEは文の実行境界に作用します。QUITと実行全体の停止は協調取消で、取消を無視する外部処理を強制終了しません。</li>
+<li>親の正常終了・EXITEXIT・取消では全workerへ終了を要求し、FINALLYと入力解放・Thread終了を待ちます。OPTFINALLYで取消後のFINALLYを有効にし、確認回数10000と5秒で制限します。</li>
+<li>workerの失敗とEXITEXITは実行全体へ伝え、解放失敗を成功へ置き換えません。COMは同じ実行のSTAで管理し、workerは独立した入力原点と保持状態を持ちます。</li>
+<li>OSの物理入力状態は共通です。複数workerから同時に送信する操作の順序は、script側で調整してください。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="kindofos">KINDOFOS</h2>
+<p>OS種別、またはOSが64bitかどうかを取得します。</p>
+<h3>書式</h3><pre><code>KINDOFOS([check64Bit])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>check64Bit</code></dt><dd>省略または0ならOS種別。有限数へ変換した値が非0ならOSの64bit判定。OS_WIN64=1も指定できます。</dd>
+</dl><h3>戻り値・結果</h3><p>OS種別は数値。Windows 11は30。64bit判定は数値1（64bit OS）または0（32bit OS）です。</p><h3>対応範囲と注意</h3><ul>
+<li>OSのbitnessを返し、実行プロセスのbitnessとは区別します。</li>
+<li>種別番号はNT3系10、NT4系11、2000が12、XPが13、Server2003が14、Vistaが20、Server2008系が21、7が22、8が23、Server2012系が24、8.1が25、10/11が30、10.0のServerが31です。旧OS・Serverは偽データでの対応表検証で、実OSの受入はWindows 11 x64だけです。</li>
+<li>未知のOS種別はEXCEPTへ通知します。64bit判定は未知の種別でも利用できます。</li>
+<li>余分な引数は評価前に拒否し、非有限数と不正な数値変換は引数エラーとします。原版のTrue/False表示に対して既存の数値1/0を返します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="kindofos"><code>PRINT KINDOFOS()
+PRINT KINDOFOS(OS_WIN64)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="cpuuserate">CPUUSERATE</h2>
+<p>CPU使用率を1秒以上の差分で取得します。</p>
+<h3>書式</h3><pre><code>CPUUSERATE()</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt>引数なし</dt><dd>引数は指定しません。</dd>
+</dl><h3>戻り値・結果</h3><p>0～100の数値。</p><h3>対応範囲と注意</h3><ul>
+<li>初回は0で基準を作り、1秒未満は直近値を返します。実行とTHREADのForkごとに状態を分けます。待機する関数ではありません。</li>
+<li>64CPU超では呼出しthreadのprimary processor groupを対象とし、全group合計ではありません。時計・カウンター・groupが変われば基準を取り直します。</li>
+<li>原版の初回値との一致、全group構成の実機受入は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="cpuuserate"><code>PRINT CPUUSERATE()
+SLEEP(1.1)
+PRINT CPUUSERATE()</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="doscmd">DOSCMD</h2>
+<p>Windowsのコマンドプロンプトで実行し、出力文字列または終了コードを返します。</p>
+<h3>書式</h3><pre><code>DOSCMD(command, [noWait, showWindow, outputMode])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>command</code></dt><dd>コマンド文字列。改行ごとに前後の空白と空行を除き、 &amp; で連結して実行します。空文字列も指定できます。</dd>
+<dt><code>noWait</code></dt><dd>省略・FALSE・0は待機、TRUEまたは正の整数は非待機です。整数に換算した値が負ならエラーです。</dd>
+<dt><code>showWindow</code></dt><dd>省略・FALSEは非表示、TRUEはコンソールを表示します。</dd>
+<dt><code>outputMode</code></dt><dd>非表示で終了を待つ場合に使います。数値は下位2ビットで判定します。省略・FALSE・0はWindowsのANSIコードページ、TRUE・1はUTF16LEで出力を読みます。数値2・3は終了コードを取得します。</dd>
+</dl><h3>戻り値・結果</h3><p>非表示の待機実行は標準出力と標準エラーをまとめた文字列。出力モードの下位2ビットが2または3なら符号付き32bitの終了コード。非待機または表示ありは空文字列です。</p><h3>対応範囲と注意</h3><ul>
+<li>Windows専用です。コマンドライン版とUWSC# アプリに対応します。実行元の環境変数と作業ディレクトリを継承します。コマンドの引用や演算子はcmd.exeの規則に従います。</li>
+<li>cmd.exe の AutoRun は起動時に実行されます。非表示で終了を待ち、文字列を取得する場合は、AutoRun の出力も戻り値に含まれます。</li>
+<li>取得上限は合計16MiBです。超過・変換不能・取得失敗では途中の文字列を返さず、EXCEPTで捕捉できるエラーにします。上限とANSIコードページは組込みホストのWindowsCommandOptionsで変更できます。</li>
+<li>NULと改行を保持し、UTF16の奇数末尾や不正な文字列もエラーにします。原版のNUL空白化と奇数末尾の切捨てとは異なります。ANSIはUTF8の自動判定ではありません。実行するコマンドの出力文字コードを合わせてください。</li>
+<li>標準入力にはEOFを返します。同期取得は親の終了後も子孫の出力終端を待ちます。停止操作で中断でき、取消・上限超過・取得や変換の失敗時は今回のコマンドと子孫をJob Objectで停止します。直接停止が失敗した場合は、Job Object の最後のハンドルを閉じる際にコマンドと子孫が終了するよう設定を試みます。停止や設定の失敗は、最初に発生した例外の追加情報に記録します。</li>
+<li>表示コンソールで Ctrl+C により実行中のコマンドが終了した場合、終了を待つ呼び出しは空文字列を返します。表示したコンソールが閉じられ、表示用ホストが異常終了した場合、終了を待つ呼び出しでは EXCEPT で捕捉できるエラーになります。原版 5.3.0.2 Free は、表示コンソールの閉じるボタンで実行中のコマンドが終了した場合も空文字列を返しました。</li>
+<li>正常終了と非待機では子孫を停止しません。非待機から返った後は、この関数で子孫を追跡・停止しません。非0の終了コードだけを取得失敗とは扱いません。</li>
+<li>余分な引数と必須引数の省略は式の評価前に拒否します。文字列以外、NULを含むコマンド、32766文字超、不正な数値は起動前に拒否します。cmd.exeや表示起動のコマンド長にも別の上限があり、32766文字までの実行を保証するものではありません。非表示で終了を待つ場合、コマンド行が長すぎて cmd.exe が実行を拒否すると、出力モード 2・3 では cmd.exe の終了コードを返します。全引用・全コードページ・全フラグの原版互換は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="doscmd"><code>PRINT DOSCMD(&quot;echo hello&quot;)</code></pre>
+<p>期待出力：</p><pre><code>hello
+
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="powershell">POWERSHELL</h2>
+<p>Windows PowerShell 5.1でコマンドを実行し、出力とエラーを文字列として取得します。</p>
+<h3>書式</h3><pre><code>POWERSHELL(command, [noWait, display])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>command</code></dt><dd>コマンド文字列。引用符・改行・前後の空白を保持します。空文字列は起動せず空文字列を返します。</dd>
+<dt><code>noWait</code></dt><dd>省略・FALSE・0は終了待ちです。TRUE、または整数に換算した値が0以外なら非待機です。</dd>
+<dt><code>display</code></dt><dd>省略・FALSEは非表示、TRUEは通常表示です。数値は整数に換算し、0は非表示、2は最小化、その他の値は通常表示です。</dd>
+</dl><h3>戻り値・結果</h3><p>待機かつ非表示では標準出力と標準エラーをまとめたUTF8文字列。表示・最小化または非待機では空文字列です。終了コードの数値は返しません。</p><h3>対応範囲と注意</h3><ul>
+<li>通常のコマンドライン版とUWSC# アプリのWindows版に対応します。32bit版Windows PowerShell 5.1を明示して起動し、pwshへ自動変更しません。実行元の環境変数と作業ディレクトリを継承します。</li>
+<li>POWERSHELL は、PowerShell の実行ポリシーを上書きしません。署名のない .ps1 を実行できるかどうかは、PowerShell に適用された設定や、ファイルに記録されたダウンロード元の情報によって決まります。</li>
+<li>NoProfile・NonInteractiveで実行し、プロファイルを読みません。原版 5.3.0.2 Free では、現在のユーザー用と全ユーザー用のそれぞれについて、現在のホスト用と全ホスト共通のプロファイルを起動時に読み込むことを確認しました。Read-Hostなどの対話要求はPowerShellのエラーになります。標準入力はEOFです。</li>
+<li>表示コンソールで Ctrl+C により PowerShell が終了した場合、終了を待つ呼び出しは空文字列を返します。表示コンソールを閉じ、表示用ホストが異常終了した場合、終了を待つ呼び出しでは EXCEPT で捕捉できるエラーになります。原版 5.3.0.2 Free は、閉じるボタンで PowerShell が終了した場合も空文字列を返しました。</li>
+<li>UTF8出力を明示し、NULと改行を保持します。先頭のUTF8 BOMは除去し、不正なUTF8は取得失敗のエラーにします。原版のCP932による絵文字の??化とNULの空白化とは異なります。</li>
+<li>合計取得上限は既定16MiBで、ホストのWindowsCommandOptionsで変更できます。超過・取得失敗・変換失敗は途中の文字列を返さず、EXCEPTで捕捉できるエラーにします。</li>
+<li>同期取得はPowerShell終了後も子孫の出力終端を待ち、停止操作で中断できます。取消や取得失敗時は今回のコマンドと子孫を停止します。直接停止が失敗した場合は、Job Object の最後のハンドルを閉じる際にコマンドと子孫が終了するよう設定を試みます。停止や設定の失敗は、最初に発生した例外の追加情報に記録します。正常終了と非待機では子孫を停止しません。非待機の返却後は追跡しません。</li>
+<li>PowerShell自身のWrite-Errorやthrowの本文も文字列として返します。非0終了コードだけでは取得失敗とせず、EXCEPTへ送らないため、必要な成功判定は実行するコマンド側で行ってください。</li>
+<li>引数の過不足・必須位置の省略は式の評価前に拒否し、文字列以外・NULを含むコマンド・32766文字（UTF16単位）超を起動前に拒否します。引用符の展開や起動引数全体の長さにより、これより短くてもエラーとなる場合があります。</li>
+<li>表示ありの場合は、非表示で実行できる長さのコマンドでも、表示用ホストの起動引数が上限を超えるとエラーになります。</li>
+<li>表形式やエラー本文の整形はPowerShellによって変わります。全引用・全環境・配布形態と原版全条件の互換は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="powershell"><code>PRINT POWERSHELL(&quot;&#x27;hello&#x27;&quot;)</code></pre>
+<p>期待出力：</p><pre><code>hello
+
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="dropfile">DROPFILE</h2>
+<p>受信登録のあるウィンドウへ、ファイルやディレクトリをドロップします。</p>
+<h3>書式</h3><pre><code>DROPFILE(ID, directory, filename, [filename, ...])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>ID</code></dt><dd>GETIDやHNDTOIDで取得した正のウィンドウID。0を前面ウィンドウとして扱いません。</dd>
+<dt><code>x, y</code></dt><dd>両方を数値で指定すると座標ありの形式になります。対象ウィンドウのクライアント領域に対する物理ピクセル座標で、整数部を使います。省略時は実際のクライアント領域の中央です。</dd>
+<dt><code>directory</code></dt><dd>存在するディレクトリの文字列。相対パスは呼出し時の現在ディレクトリを基準に解決します。</dd>
+<dt><code>filename</code></dt><dd>ディレクトリからの相対ファイル名、相対ディレクトリ名、または配列。後続の引数も順に送ります。</dd>
+</dl><h3>戻り値・結果</h3><p>PostMessageが成功すると空文字列を返します。受信側の処理完了や、ファイルを開けたことは保証しません。</p><h3>対応範囲と注意</h3><ul>
+<li>座標を指定する場合はDROPFILE(ID, x, y, directory, filename, ...)と記述します。</li>
+<li>通常のコマンドライン版とUWSC# アプリのWindows版に対応します。OLEのドラッグ＆ドロップだけに対応するアプリは対象外です。</li>
+<li>引数は合計3～36個です。左から右へ各1回だけ評価します。座標ありでは最低5個が必要です。TRUE/FALSEは既存の数値1/0として扱い、座標も1/0、ファイル名への変換も「1」「0」になります。</li>
+<li>配列は行優先の順で展開し、入れ子の配列も順に展開します。空文字列・EMPTY・省略値を除き、数値を文字列へ変換します。送信名は最大100万件で、展開する要素数にも制限があります。残る名前がない場合はエラーです。</li>
+<li>ディレクトリと送信項目の存在を確認してから、絶対パスとして送ります。ファイル名位置の絶対パスとドライブ指定、NUL、不正な型は拒否します。現在ディレクトリは変更しません。</li>
+<li>座標位置の子を順に調べ、WM_DROPFILESを受信登録した最も深いウィンドウへ座標を変換して送ります。非表示、無効、WS_EX_TRANSPARENTを持つ子は探索から除きます。原版では、WS_EX_TRANSPARENTを持つ子へも配送する例を確認しました。子に登録がなければ登録のある祖先を使います。宛先がない場合はEXCEPTで捕捉できるエラーです。</li>
+<li>無効・終了済みのID、非表示の対象、クライアント領域外の座標はエラーです。最小化された受信先を復元するときは、送信前の前面ウィンドウを維持します。原版では復元した受信先が前面に移ることを確認しました。復元を2秒以内に確認できない場合もエラーです。</li>
+<li>送信前の停止操作では送信を取り消します。送信成功後のメッセージは取り消さず、受信アプリも停止しません。</li>
+<li>原版で観測した各軸2pxの加算、式の再評価、相対ディレクトリの失敗、TRUEの「True」への変換は再現しません。失敗時の空文字列もエラー通知へ変更しました。これらは利用者が採用した差です。</li>
+<li>DPIの異なる画面、権限差、ウィンドウ終了との競合、ネットワーク上のパス、大量のファイルと全アプリの受入は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="dropfile"><code>DIM id=GETID(&quot;受信先のタイトル&quot;)
+DROPFILE(id,&quot;C:\work&quot;,&quot;sample.txt&quot;)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="sethotkey">SETHOTKEY</h2>
+<p>ホットキーを登録し、通知された時に指定したProcedureを呼び出します。</p>
+<h3>書式</h3><pre><code>SETHOTKEY(key, [modifiers, procedure])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>key</code></dt><dd>数値化後に0～255となる整数。省略時は0。小数・範囲外はエラーです。</dd>
+<dt><code>modifiers</code></dt><dd>数値化後に0～15となる整数。MOD_ALT=1、MOD_CONTROL=2、MOD_SHIFT=4、MOD_WIN=8の組合せ。省略時は0。小数・範囲外はエラーです。</dd>
+<dt><code>procedure</code></dt><dd>引数なしで呼べるProcedureの名前を文字列で指定します。省略時は解除します。</dd>
+</dl><h3>戻り値・結果</h3><p>通知元が登録・解除に成功すれば1、失敗すれば0。最後の修飾子のみの登録を解除する際、Windowsがフックを無効と返した場合は、解除済みとして1を返します。通知元を提供しないホストでは実行できません。</p><h3>対応範囲と注意</h3><ul>
+<li>メインの実行経路から使います。THREAD内ではエラーになります。</li>
+<li>Procedure内のHOTKEY_VKとHOTKEY_MODにキーと修飾子が入ります。</li>
+<li>原版と異なり再入しません。実行中に届いた通知はProcedure終了後に順番に処理します。Procedure内で別のホットキーProcedureの完了を待つ書き方は使えません。</li>
+<li>保留上限は既定1024件です。ホスト開発者はScriptRunOptions.PendingHotkeyLimitで変更できます。超過時はスクリプトをエラー終了します。</li>
+<li>通常のコマンドライン版とUWSC# アプリの基本入力は確認済みです。全引数条件、全競合と原版との互換性は引き続き検証中です。</li>
+<li>通知元が動作を継続できない異常はスクリプトを終了させます。一時停止中も異常を確認し、通知元の解放処理が失敗しても元の原因を保持します。</li>
+<li>修飾子のみの登録は、押下で指定の組合せが揃った時に1回通知し、左右を同じ修飾子として扱い、長押しでは繰り返さない方針です。登録前から押されているキーに加え、登録時の状態採取中に届いた押下・解放も組合せの判定に使います。登録時点では通知しません。原版は今回のCtrlのみ・Ctrl＋Shiftの観測では解放後に通知されました。背景Sandboxで新実装のCtrl＋Shiftの押下時通知を確認しましたが、通常のコマンドライン版とUWSC# アプリの基本入力でも確認しています。</li>
+<li>Windows通知元で置換時にOSの保留通知が処理枠を超えて残る場合は、FALSEを返して旧登録を維持します。通知が空になったことを確認できた場合に置換します。</li>
+<li>引数なしで呼べるProcedureを登録時に検証します。すべての引数に既定値があるProcedureも指定できます。空文字列・Function・必須引数付きProcedureなどはエラーです。解除はProcedure名を省略してください。</li>
+<li>Ctrl+Alt+Shift+F11 は LOCKHARDEX の緊急解除専用です。SETHOTKEY で登録・解除を指定すると 0 を返し、既存の登録を維持します。通常のF11やWinキーを加えた組合せは、この予約の対象外です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="sethotkey"><code>SETHOTKEY(65,MOD_CONTROL,&quot;Pressed&quot;)
+SLEEP(10)
+SETHOTKEY(65,MOD_CONTROL)
+PROCEDURE Pressed()
+    PRINT HOTKEY_VK
+FEND</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="speak">SPEAK</h2>
+<p>指定した文字列をWindowsの音声エンジンで読み上げます。</p>
+<h3>書式</h3><pre><code>SPEAK([text [, parallel [, interrupt]]])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>読み上げる文字列。引数なしで呼び出すと、まだ音声エンジンに送っていない平行処理の要求を取り消します。空文字列は音声エンジンへ送ります。</dd>
+<dt><code>parallel</code></dt><dd>省略またはFALSEで読み上げの完了まで待ちます。TRUEでは読み上げの要求を登録した時点で戻ります。</dd>
+<dt><code>interrupt</code></dt><dd>省略またはFALSEで先行する読み上げを続けます。TRUEでエンジンに先行する読み上げの中断を要求します。parallelもTRUEの場合は、未送信の平行処理の要求も取り消します。</dd>
+</dl><h3>戻り値・結果</h3><p>EMPTY。</p><h3>対応範囲と注意</h3><ul>
+<li>通常はMicrosoft Speech Platformを優先し、クラス未登録またはクラス文字列が不正ならSAPI5を試します。最初に文字列を指定して呼び出す前にOPTION ONLYSAPIを実行すると、SAPI5だけを使います。一度選択したエンジンは同じスクリプト実行内で使い続けます。</li>
+<li>未送信の平行処理の要求を取り消しても、同期呼出しは完了まで待ち続けます。平行処理で送信に失敗した場合は、呼出しから戻った後の処理や実行終了時にエラーが報告されることがあります。</li>
+<li>テスト用の音声エンジンでスクリプトからの呼出しを確認しました。実際の音声エンジンでの読み上げと中断は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="recostate">RECOSTATE</h2>
+<p>音声認識を開始・停止し、必要に応じて認識する単語を登録します。</p>
+<h3>書式</h3><pre><code>RECOSTATE([start, word, ...])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>start</code></dt><dd>省略・FALSEで停止し、TRUEで開始します。</dd>
+<dt><code>word</code></dt><dd>開始時に登録する語彙。省略時は自由な文章の認識です。内部配列と1～2次元のVariant配列を展開します。</dd>
+</dl><h3>戻り値・結果</h3><p>通常終了時は空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>Windows版の通常のコマンドライン版とUWSC# アプリの実行経路へ接続済みですが、一部対応です。Sandboxではcontext作成が0x80050022で失敗するため、実音声・固定WAVの認識とコマンドライン版とUWSC# アプリでの実認識受入は未確認です。</li>
+<li>フラグは数値への変換後、符号付き64ビット整数へ0方向に切り捨て、0をFALSE、それ以外をTRUEとします。0.75はFALSE、1.75はTRUEです。単純な非0判定とは異なります。</li>
+<li>引数は合計37個までです。途中の引数省略は未対応として、式の評価前にエラーにします。原版の省略位置・特殊な参照経路・型変換の全条件は未比較です。</li>
+<li>停止時は語彙式を評価しません。開始時はフラグを先に評価し、旧文法の停止と結果消去の後に、語彙式を左から評価します。空語は文法から除きます。</li>
+<li>内部配列の要素はSPECIALCHARの設定に従って特殊文字を展開します。通常の式やVariant配列の文字列には、この追加展開を行いません。一般COM参照・未対応型・3次元以上のVariant配列はエラーです。</li>
+<li>認識器と結果欄は同じ実行の親とTHREADで共有し、別実行には渡しません。親の取消・終了で認識を解放し、結果待ちを解除します。原版のTHREAD共有との比較は未完です。</li>
+<li>識別済みの初期化失敗は「SAPIが存在しないか or 初期化エラー」となり、TRY/EXCEPTで捕捉できます。同じ実行での自動再初期化は行いません。COMERRORの汎用COMエラー無視設定は適用しません。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="recostate"><code>RECOSTATE(FALSE)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="dictate">DICTATE</h2>
+<p>認識結果を文字列として取得します。</p>
+<h3>書式</h3><pre><code>DICTATE([wait, ...])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>wait</code></dt><dd>省略・TRUEで次の認識結果を待ち、FALSEで現在の結果を返します。</dd>
+<dt><code>...</code></dt><dd>追加の引数も数値フラグとして左から評価しますが、取得方式には最初の引数だけを使います。</dd>
+</dl><h3>戻り値・結果</h3><p>認識結果の文字列。非待機で結果がなければ空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>Windows版の通常のコマンドライン版とUWSC# アプリの実行経路へ接続済みですが、一部対応です。Sandboxではcontext作成が0x80050022で失敗するため、実音声・固定WAVの認識とコマンドライン版とUWSC# アプリでの実認識受入は未確認です。</li>
+<li>フラグは数値への変換後、符号付き64ビット整数へ0方向に切り捨て、0をFALSE、それ以外をTRUEとします。0.75はFALSE、1.75はTRUEです。単純な非0判定とは異なります。</li>
+<li>引数は合計37個までです。途中の引数省略は未対応として、式の評価前にエラーにします。原版の省略位置・特殊な参照経路・型変換の全条件は未比較です。</li>
+<li>結果は最後の1件を保持する欄で、通知のたびに置き換えます。非待機では返却後に消去します。待機では古い結果を消して次の通知を待ち、返した結果を保持するため、続く非待機の取得で同じ文字列を1回取得できます。</li>
+<li>DICTATE自体は認識を開始しません。RECOSTATE(TRUE, ...)で認識を開始してから待機してください。認識の開始前や停止中に結果を確認する場合はDICTATE(FALSE)を使います。待機は実行の停止操作で取り消せます。</li>
+<li>結果欄は同じ実行の親とTHREADで共有します。認識通知や初期化の失敗は待機へ伝え、親の取消・終了時は待機を解除します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="dictate"><code>PRINT DICTATE(FALSE)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="sensor">SENSOR</h2>
+<p>Windows Sensor APIの機器から指定項目の値を取得します（一部実装）。</p>
+<h3>書式</h3><pre><code>SENSOR(item)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>item</code></dt><dd>SNSR_で始まる取得項目の定数。引数1個が必須で、有限の32bit整数範囲へ0方向に切り捨てます。</dd>
+</dl><h3>戻り値・結果</h3><p>取得項目により数値、論理値、64ビット整数、文字列。該当機器がない場合と未対応番号はEmptyです。</p><h3>対応範囲と注意</h3><ul>
+<li>SNSR_LIGHT_LUX=20、SNSR_BIOMETRIC_HUMANPRESENSE=1、SNSR_SCANNER_RFIDTAG=40、SNSR_SCANNER_BARCODEDATA=41など、原版の固定台帳にある47定数を公開します。CHROMACITYなどの綴りも台帳どおりです。</li>
+<li>同じ分類で最初に登録した機器を使います。機器不在のEmptyと、バーコードgetterの空文字列は別です。reportを取得できても文字列項目が取得できない場合の既定値は&lt;no value&gt;です。</li>
+<li>未対応番号でもmanagerを更新してからEmptyを返します。列挙時にアクセス権限を要求する場合があります。manager生成・分類取得の負のHRESULTで機器がなければEmptyとなり、権限要求・機器report取得などの例外は実行エラーとしてTRYで処理できます。</li>
+<li>位置項目は取得の前後で通知を開始・停止し、毎回新しいreportを取得します。位置のreport取得が失敗した場合は数値がNaN、文字列が空文字列になり、機器不在のEmptyとは区別します。開始・停止の失敗は実行エラーです。</li>
+<li>アクセス拒否や取得APIの未対応エラーもTRYで捕捉できます。位置以外のreport取得失敗は実行エラーとして扱います。</li>
+<li>実行とTHREADのForkでセンサーの所有状態を共有し、専用STAで処理します。実行の終了・取消では受付を止め、開始済みの同期COM呼出しが戻ってから参照を解放します。同期呼出し自体を強制中断しません。</li>
+<li>数値のNaNは取得結果に保持します。数値演算など既存の有限値検査がある操作では実行エラーになる場合があります。RFIDの64ビット整数は取得直後の元の精度と型を保持します。</li>
+<li>Sandboxの通常のコマンドライン版とUWSC# アプリを別processで起動し、SENSORのEmpty返値と終了コード0を確認しました。実機器の値や権限要求を確認した結果ではありません。</li>
+<li>実センサーの値、自然な通知、機器ありの列挙、権限拒否・取消、原版実行比較は未確認です。加速度はWindowsのG用キーを取得し、原版ヘルプのガルへの換算を追加していません。別の位置report経路は未実装で、全項目の実機受入完了ではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="sensor"><code>DIM value=SENSOR(SNSR_LIGHT_LUX)
+PRINT VARTYPE(value)
+PRINT value</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-files.html">← ファイル・INI</a> <a href="functions-com.html">次へ：COM連携</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#sleep">SLEEP</a></li><li><a href="#gettime">GETTIME</a></li><li><a href="#ctrltrd">CTRLTRD</a></li><li><a href="#kindofos">KINDOFOS</a></li><li><a href="#cpuuserate">CPUUSERATE</a></li><li><a href="#doscmd">DOSCMD</a></li><li><a href="#powershell">POWERSHELL</a></li><li><a href="#dropfile">DROPFILE</a></li><li><a href="#sethotkey">SETHOTKEY</a></li><li><a href="#speak">SPEAK</a></li><li><a href="#recostate">RECOSTATE</a></li><li><a href="#dictate">DICTATE</a></li><li><a href="#sensor">SENSOR</a></li></ul></nav>
+</div></div></body></html>

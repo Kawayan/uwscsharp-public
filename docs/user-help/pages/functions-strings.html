@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>文字列 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a aria-current="page" href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 文字列</p>
+<h1>文字列</h1><p class="lead">文字位置、切出し、検索、変換の書式と境界を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="copy">COPY</h2>
+<p>文字列の一部を切り出します。</p>
+<h3>書式</h3><pre><code>COPY(text, start, [count])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>元の文字列。</dd>
+<dt><code>start</code></dt><dd>1始まりの位置。1未満は先頭として扱います。</dd>
+<dt><code>count</code></dt><dd>切り出す論理文字数。省略時は末尾まで。負数は空文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>切り出した文字列。範囲を超えた開始位置では空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>開始位置は1起点で、1以下は先頭、末尾を超えると空文字列になります。有限数は0方向へ切り捨て、非常に大きな位置・長さも文字列境界へ収めます。</li>
+<li>count未指定・省略・EMPTYは末尾まで、負数または0は空文字列です。startのEMPTYは0として扱います。必須引数の省略は式評価前に拒否します。</li>
+<li>有効なサロゲートペアは1文字、孤立したUTF-16単位も各1文字として保存します。NULを保持し、結合文字は別々に数えます。不正UTF-16の数え方は従来のLENGTH/POSと異なります。</li>
+<li>位置・長さの文字列は共通の有限double文法です。前後空白・E/e指数を受理し、16進文字列・NUL・桁区切り・不完全指数・非有限値を拒否します。</li>
+<li>数値textはInvariantCultureで文字列化します。通常Booleanは1/0、COM VT_BOOLは-1/0です。NULL・NOTHING・ERROR・配列・連想配列・未変換objectは型エラーです。</li>
+<li>OPTION SAMESTRによる変化はありません。原版の不正UTF-16や全Variant変換の再現は行いません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="copy"><code>PRINT COPY(&quot;ABCDE&quot;, 2, 3)</code></pre>
+<p>期待出力：</p><pre><code>BCD
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="length">LENGTH</h2>
+<p>文字列の論理長、配列の第1次元の長さ、ハッシュのキー件数などを返します。</p>
+<h3>書式</h3><pre><code>LENGTH(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>文字列・配列・HASHTBL・対応するCOMコレクション。</dd>
+</dl><h3>戻り値・結果</h3><p>文字数または件数。</p><h3>対応範囲と注意</h3><ul>
+<li>有効なサロゲートペアを1文字、それ以外の各UTF-16単位を1文字と数えます。NULと孤立単位も数え、結合文字は独立した文字です。COPYと同じ文字単位です。</li>
+<li>配列は先頭次元の要素数です。多次元の積や入れ子の総和ではありません。HASHTBLはキー数を返します。</li>
+<li>数値はInvariantCultureのG書式で文字列化して数えます。通常Booleanは1/0なので各1文字、COM VT_BOOLのTRUEは-1で2文字です。EMPTYは0、NULL・NOTHING・ERROR・非有限値は型/有限値エラーです。</li>
+<li>通常InterpreterのCOM objectはadapterによる列挙件数を返します。Count propertyを読まず、ALL_OLE_ITEMを変更しません。COM列挙のhost障害は実行元へ伝えます。</li>
+<li>必須1/最大1引数で、個数・省略を式評価前に検査します。OPTION SAMESTRの影響はありません。</li>
+<li>原版のBoolean表記・不正UTF-16・全Variant変換は再現しません。</li>
+<li>採用したCOM生成・取得・名前解決・呼出し・列挙のHRESULT失敗はTRY/EXCEPTで処理できます。メモリ不足・解放失敗・未知のadapter障害まで捕捉するものではありません。</li>
+<li>1要素のScripting.Dictionaryは原版との比較で8、現実装では列挙件数1でした。原版の全COM値の規則を再現する仕様ではありません。</li>
+<li>COMへ渡せない値、表現できない返値、不正な列挙応答の採用した検証エラーもTRY/EXCEPTで処理できます。内部障害を含む変換失敗を一律に捕捉する仕様ではありません。</li>
+<li>列挙できないCOM objectはエラーです。WScript.Shellでは原版が8を返す条件でも、現実装はTRY/EXCEPTで処理できるエラーとします。</li>
+<li>SAFEARRAYで作成した型付き配列も第1次元の長さを返します。原版で型付き配列のLENGTHがエラーになる条件との差は、採用した仕様です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="length"><code>PRINT LENGTH(&quot;ABC&quot;)</code></pre>
+<p>期待出力：</p><pre><code>3
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="lengths">LENGTHS</h2>
+<p>文字列全体のUTF-16コード単位数を返します。</p>
+<h3>書式</h3><pre><code>LENGTHS(text)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>対象文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>UTF-16単位数。空文字列・EMPTYは0。</p><h3>対応範囲と注意</h3><ul>
+<li>必須1引数です。引数の省略・過不足は評価前に拒否します。</li>
+<li>有効なサロゲートペアは2、孤立単位は1として数えます。NULの後も含み、正規化しません。表示幅や書記素数、バイト数とは異なります。</li>
+<li>LENGTHは有効ペアを1として数えます。配列・連想配列の件数にはLENGTHを使い、LENGTHSはそれらを拒否します。</li>
+<li>有限数値は文化設定に依存せず文字列化します。通常TRUE/FALSEの長さは1/1、COM Booleanは-1/0なので2/1です。負の0は-0の2、1e20は1E+20の5です。</li>
+<li>文字列は数値へ解析しません。文字列NaNは3、Infinityは8です。非有限Number、NULL・NOTHING・ERROR・配列・連想配列・objectは型エラーです。</li>
+<li>OPTION SAMESTRと文化設定には依存しません。原版の全Unicode・locale・Variant条件と数値表示の一致は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="lengths"><code>PRINT LENGTHS(&quot;ABC&quot;)</code></pre>
+<p>期待出力：</p><pre><code>3
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="pos">POS</h2>
+<p>指定文字列が現れる位置を探します。</p>
+<h3>書式</h3><pre><code>POS(needle, text, [occurrence])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>needle</code></dt><dd>検索する文字列。</dd>
+<dt><code>text</code></dt><dd>検索対象。</dd>
+<dt><code>occurrence</code></dt><dd>既定1。正数は先頭から、負数は末尾から数えます。0は1へ補正。</dd>
+</dl><h3>戻り値・結果</h3><p>見つかった位置を1始まりの論理文字位置で返します。見つからなければ0。</p><h3>対応範囲と注意</h3><ul>
+<li>重なりを含むn個目を検索します。正数は先頭から、負数は末尾からです。回数の既定・省略・EMPTY・0は1です。</li>
+<li>回数は有限数へ変換して0方向へ切り捨て、可能な一致数を超える場合は0を返します。前後空白・E/e指数の数値文字列を使えますが、16進文字列・不完全指数・NUL・非有限値は拒否します。</li>
+<li>有効サロゲートペアの途中で始まる・終わる一致を除きます。孤立単位とNULは検索でき、戻り位置はCOPY・LENGTHと同じ文字単位の1起点です。空needle/sourceと不一致は0です。</li>
+<li>既定はOrdinalIgnoreCase、OPTION SAMESTRではOrdinalです。culture依存の比較やUnicode正規化は追加しません。原版と異なる大小文字の一致があります。</li>
+<li>数値のneedle/sourceはInvariantCulture G書式で文字列化します。通常Booleanは1/0、COM VT_BOOLは-1/0です。EMPTYは空文字列、NULL・NOTHING・ERROR・配列・連想配列・未変換objectは型エラーです。</li>
+<li>必須2/最大3引数。個数・必須省略は式評価前に拒否し、有効な引数は左から右へ各1回評価します。空needle/sourceでも不正な回数は拒否します。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="pos"><code>PRINT POS(&quot;B&quot;, &quot;ABC&quot;)</code></pre>
+<p>期待出力：</p><pre><code>2
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="betweenstr">BETWEENSTR</h2>
+<p>前後の区切り文字の間にある文字列を取得します。</p>
+<h3>書式</h3><pre><code>BETWEENSTR(text, [before, after, occurrence, fromStart])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>検索対象。</dd>
+<dt><code>before, after</code></dt><dd>前後の区切り。省略時は空文字列。</dd>
+<dt><code>occurrence</code></dt><dd>既定1、負数で逆方向、0は1として扱います。</dd>
+<dt><code>fromStart</code></dt><dd>既定FALSE。次の候補の探索を、TRUEなら前区切りの終端から、FALSEなら後区切りの終端から続けます。</dd>
+</dl><h3>戻り値・結果</h3><p>一致した区間の文字列。該当がなければEMPTY。</p><h3>対応範囲と注意</h3><ul>
+<li>必須1/最大5引数。過不足と必須位置の省略は評価前に拒否します。任意位置の省略は既定値を使います。</li>
+<li>前後の空文字/EMPTYは先頭・末尾を表します。空の内容が見つかれば空String、未検出や回数不足はEMPTYを返します。</li>
+<li>回数は有限数値へ変換し、0方向へ切り捨てます。0は1へ補正し、負は後ろから検索します。EMPTYも0です。巨大な有限回数は不成立になります。</li>
+<li>数え方フラグも有限変換し、切捨て後の非0で真を判定します。真は検索方向内の前区切り後、偽は後区切り後から次を数えます。回数・フラグの16進文字列や非有限値は拒否します。</li>
+<li>textと区切りは共通の有限文字列化を使い、COM Booleanは-1/0です。非有限Number、NULL・NOTHING・ERROR・配列・連想配列・object等は型エラーです。</li>
+<li>両方向とも既定はOrdinalIgnoreCase、OPTION SAMESTRではOrdinalです。有効ペア内部では区切らず、孤立単位とNUL後続は保持します。正規化せず、元の表記と順序を返します。</li>
+<li>文字列リテラルの解析にはOPTION SPECIALCHARが適用されます。関数内で実行時の&lt;#TAB&gt;等を再変換せず、内部markerも挿入しません。</li>
+<li>原版の全Unicode・locale・Variant条件とmarker処理の一致は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="betweenstr"><code>PRINT BETWEENSTR(&quot;a[b]c&quot;, &quot;[&quot;, &quot;]&quot;)</code></pre>
+<p>期待出力：</p><pre><code>b
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="replace">REPLACE</h2>
+<p>文字列中の一致箇所を別の文字列へ置換します。</p>
+<h3>書式</h3><pre><code>REPLACE(text, from, to)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>元の文字列。</dd>
+<dt><code>from</code></dt><dd>検索文字列。</dd>
+<dt><code>to</code></dt><dd>置換後の文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>置換後の文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>元の文字列を左から非重複で置換し、挿入文字列を再検索しません。空fromは変更せず、空toは一致部分を削除します。正規表現ではありません。</li>
+<li>有効サロゲートペアの途中で始まる・終わる一致を除き、孤立単位とNULは扱います。明示したtoの孤立単位も保存し、正規化は行いません。</li>
+<li>既定はOrdinalIgnoreCase、OPTION SAMESTRではOrdinalです。原版と異なる大小文字の一致があります。</li>
+<li>数値はInvariantCulture G書式で文字列化します。通常Booleanは1/0、COM VT_BOOLは-1/0です。EMPTYは空文字列、NULL・NOTHING・ERROR・配列・連想配列・未変換object・非有限Numberは型/有限値エラーです。</li>
+<li>必須3/最大3引数で、省略と個数を式評価前に検査します。空fromや不一致でも指定した全引数の型変換は検査します。</li>
+<li>出力長を先に計算しInt32を超える場合は確保前にエラーとします。100万文字の独自上限はありませんが、CLR上限・空きメモリにより確保に失敗する場合があります。CHGMOJとREPLACEは同じ実装です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="replace"><code>PRINT REPLACE(&quot;a-b&quot;, &quot;-&quot;, &quot;/&quot;)</code></pre>
+<p>期待出力：</p><pre><code>a/b
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="chgmoj">CHGMOJ</h2>
+<p>REPLACEと同じ処理を別名で呼び出します。</p>
+<h3>書式</h3><pre><code>CHGMOJ(text, from, to)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>元の文字列。</dd>
+<dt><code>from</code></dt><dd>検索文字列。</dd>
+<dt><code>to</code></dt><dd>置換後の文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>置換後の文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>元の文字列を左から非重複で置換し、挿入文字列を再検索しません。空fromは変更せず、空toは一致部分を削除します。正規表現ではありません。</li>
+<li>有効サロゲートペアの途中で始まる・終わる一致を除き、孤立単位とNULは扱います。明示したtoの孤立単位も保存し、正規化は行いません。</li>
+<li>既定はOrdinalIgnoreCase、OPTION SAMESTRではOrdinalです。原版と異なる大小文字の一致があります。</li>
+<li>数値はInvariantCulture G書式で文字列化します。通常Booleanは1/0、COM VT_BOOLは-1/0です。EMPTYは空文字列、NULL・NOTHING・ERROR・配列・連想配列・未変換object・非有限Numberは型/有限値エラーです。</li>
+<li>必須3/最大3引数で、省略と個数を式評価前に検査します。空fromや不一致でも指定した全引数の型変換は検査します。</li>
+<li>出力長を先に計算しInt32を超える場合は確保前にエラーとします。100万文字の独自上限はありませんが、CLR上限・空きメモリにより確保に失敗する場合があります。CHGMOJとREPLACEは同じ実装です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="chgmoj"><code>PRINT CHGMOJ(&quot;a-b&quot;, &quot;-&quot;, &quot;/&quot;)</code></pre>
+<p>期待出力：</p><pre><code>a/b
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="trim">TRIM</h2>
+<p>両端の空白・制御文字を取り除きます。</p>
+<h3>書式</h3><pre><code>TRIM(text, [fullWidth])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>元の文字列。</dd>
+<dt><code>fullWidth</code></dt><dd>既定FALSE。TRUEで全角空白U+3000も除去します。</dd>
+</dl><h3>戻り値・結果</h3><p>両端を取り除いた文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>両端のU+0000〜U+0020だけを除去し、内部の対象文字は残します。DEL・NEL・NBSPなど、Unicodeの空白すべてを除く機能ではありません。</li>
+<li>通常版の全角指定が有効な場合はU+3000も除去します。指定は有限数へ変換し、0方向へ切り捨てた結果が非0なら有効です。0.5/-0.5は無効、1.5や大きな有限値は有効です。</li>
+<li>全角指定の既定・省略・EMPTYは無効です。数値文字列は前後空白・E/e指数を受理し、16進表記・不完全指数・NUL・桁区切り・非有限値を拒否します。</li>
+<li>textの数値はInvariantCulture G書式で文字列化します。通常Booleanは1/0、COM VT_BOOLは-1/0。EMPTYは空文字列、NULL・NOTHING・ERROR・配列・連想配列・未変換objectは型エラーです。</li>
+<li>必須1/最大2引数。個数と必須省略は式評価前に拒否し、有効な引数は左から右へ各1回評価します。空textでも全角指定の変換は検査します。</li>
+<li>孤立単位・補助平面・結合文字を正規化せず保持します。OPTION SAMESTRの影響はありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="trim"><code>PRINT TRIM(&quot;  sample  &quot;)</code></pre>
+<p>期待出力：</p><pre><code>sample
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="chknum">CHKNUM</h2>
+<p>文字列が共通文法の有限doubleへ変換できるかを調べます。</p>
+<h3>書式</h3><pre><code>CHKNUM(text)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>判定する文字列。Numberは表示文字列を判定し、EMPTYは空文字列として扱います。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>有限doubleへ変換できれば1、変換できない文字列は0。表示できない型はエラーです。</p><h3>対応範囲と注意</h3><ul>
+<li>InvariantCulture/NumberStyles.Floatで判定します。ASCIIの符号・小数・E/e指数・前後空白を受理し、指数の符号は任意です。独自の文字数上限は設けません。</li>
+<li>16進文字列・全角・桁区切り・D指数・不完全指数・NUL・NaN/Infinity/overflowは0です。underflowで0へ丸められる文字列は1です。数値リテラル$FFは既にNumberなので1です。</li>
+<li>通常/COM Booleanは数値表示として判定するため、TRUE/FALSEのどちらも1になります。EMPTYは0、NULL・NOTHING・ERROR・配列・連想配列・未変換objectは型エラーです。COM既定memberを暗黙に呼びません。</li>
+<li>過不足・省略は式評価前に拒否し、有効な引数は1回評価します。個数・型のエラーはTRY/EXCEPTで捕捉できます。</li>
+<li>原版・旧実装から文法を変更しました。CHKNUM(&quot;1e3&quot;)とCHKNUM(&quot; 12.5 &quot;)は1、CHKNUM(&quot;$FF&quot;)は0です。VALも同じ文字列文法を共有しています。厳密な十進精度や整数精度を保証する判定でもありません。</li>
+<li>戻り値は数値として1/0を保持する論理型です。VARTYPEで照会すると11、整数へ明示変換しても1/0になります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="chknum"><code>PRINT CHKNUM(&quot;123&quot;)
+PRINT CHKNUM(&quot;abc&quot;)</code></pre>
+<p>期待出力：</p><pre><code>1
+0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="val">VAL</h2>
+<p>数値文字列を数値へ変換します。</p>
+<h3>書式</h3><pre><code>VAL(text, [errorValue])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>変換する文字列または数値。必須。EMPTYは空文字列として変換失敗になります。</dd>
+<dt><code>errorValue</code></dt><dd>変換失敗時の有限数。省略/Omittedは-999999。使用時に共通数値変換を行い、EMPTYは0です。</dd>
+</dl><h3>戻り値・結果</h3><p>共通文法で変換した有限Number、または数値化したerrorValue。</p><h3>対応範囲と注意</h3><ul>
+<li>CHKNUMと同じInvariantCulture/NumberStyles.Floatの文字列文法です。E/e指数と前後空白を受理し、独自の文字数上限は設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は変換失敗としてerrorValueを返します。</li>
+<li>有限Numberは直接扱い、数値リテラル$FFは255です。通常TRUE/FALSEは1/0、保持済みCOM VT_BOOLは-1/0になります。underflowした0や負の0も変換成功とし、doubleの精度を超える厳密演算は行いません。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは入力の型エラーです。COM既定memberを暗黙に呼びません。使用するerrorValueも有限数へ変換できなければエラーです。</li>
+<li>必須1/最大2引数を評価前に検査し、正常な引数は左から右へ各1回評価します。入力が成功すればerrorValueの数値化は省略しますが、式の評価は省略しません。VAL(&quot;1&quot;,&quot;bad&quot;)は1、VAL(&quot;1&quot;,1/0)はゼロ除算例外です。</li>
+<li>旧実装・原版からの意図した変更です。VAL(&quot;$FFFFFFFF&quot;)は既定の-999999、数値リテラル$FFFFFFFFは4294967295です。既定エラー値はERR_VALUEと同じ数値であり、原版の任意型fallbackや全localeの再現は採用しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="val"><code>PRINT VAL(&quot;001&quot;)
+PRINT VAL(&quot;abc&quot;, 0)</code></pre>
+<p>期待出力：</p><pre><code>1
+0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="format">FORMAT</h2>
+<p>数値の表示形式を整えるか、文字列を指定幅まで反復します。</p>
+<h3>書式</h3><pre><code>FORMAT(value, width, [digits])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>数値、または反復パターンとして扱う文字列。数値の文字列もパターンになります。</dd>
+<dt><code>width</code></dt><dd>0〜1,000,000。数値では最小幅、文字列ではUTF-16単位の反復幅。</dd>
+<dt><code>digits</code></dt><dd>小数桁数。既定0、-1は切捨て後の符号付きInt64の16進表示。範囲-1〜20。</dd>
+</dl><h3>戻り値・結果</h3><p>整形後の文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>必須2/最大3引数。個数と必須引数の省略は式評価前に検査します。digitsの省略は0です。</li>
+<li>数値はInvariantCultureの固定小数点書式を使い、短い場合は左を空白で埋めます。幅を超えても切り詰めず、負の0の符号を保持します。</li>
+<li>digits=-1では大文字16進を返し、負数は64ビットの2の補数で16桁になります。Int64範囲外はエラーです。doubleの丸めによりInt64.MaxValue相当の入力も上限外になります。</li>
+<li>幅・桁数は有限数へ変換して0方向へ切り捨てます。前後空白・E/e指数の数値文字列は使えますが、16進文字列・NUL・非有限値は拒否します。通常Booleanは1/0、COM VT_BOOLは-1/0です。</li>
+<li>文字列はUTF-16単位で反復し、空文字列は空文字列を返します。サロゲートを途中で切ることがあります。文字列でも指定したdigitsの範囲を検査します。</li>
+<li>EMPTYの数値入力は0。NULL・NOTHING・ERROR・配列・連想配列・未変換objectは型エラーです。原版の丸め・幅0・localeと異なる結果があります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="format"><code>PRINT FORMAT(&quot;ab&quot;, 5)</code></pre>
+<p>期待出力：</p><pre><code>ababa
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="chr">CHR</h2>
+<p>文字コードから文字列を作成します。</p>
+<h3>書式</h3><pre><code>CHR(code)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>code</code></dt><dd>数値または共通文法の数値文字列。0方向への切捨て後0〜0x10FFFF。</dd>
+</dl><h3>戻り値・結果</h3><p>該当するUTF-16文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>0〜0xFFFFは同じ値のUTF-16単位を1個、0x10000〜0x10FFFFは対応するペアを返します。NUL・サロゲート単独・非文字も生成できます。Unicode scalar限定の変換ではありません。</li>
+<li>先に0方向へ切り捨ててから範囲検査します。65.9はA、-0.5はNUL。原版の負値や範囲外のwrapは再現しません。</li>
+<li>数値文字列は前後空白・E/e指数を受理し、独自の長さ上限はありません。空文字列・空白だけ・16進表記・不完全指数・全角・桁区切り・NUL・非有限値は拒否します。</li>
+<li>CHR($1F600)の数値リテラルは利用できます。文字列のCHR(&quot;$1F600&quot;)は拒否し、CHR(&quot;128512&quot;)なら同じ文字を返します。</li>
+<li>通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0です。COM TRUEは範囲外、FALSEとEMPTYはNUL。NULL・NOTHING・ERROR・配列・連想配列・未変換objectは型エラーです。</li>
+<li>必須1/最大1引数で、個数・省略を式評価前に拒否します。OPTION SAMESTRやlocaleの影響はありません。孤立単位は出力時に置換されることがあり、表示と内部値を区別してください。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="chr"><code>PRINT CHR(65)</code></pre>
+<p>期待出力：</p><pre><code>A
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="asc">ASC</h2>
+<p>先頭文字の文字コードを取得します。</p>
+<h3>書式</h3><pre><code>ASC(text)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>対象文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>空文字列は0。先頭がサロゲートペアならUnicode scalar値、それ以外は先頭UTF-16コード単位。</p><h3>対応範囲と注意</h3><ul>
+<li>先頭2単位が有効なサロゲートペアならコードポイント、それ以外は先頭UTF-16単位を返します。孤立単位や非文字も数値として取得でき、常にUnicode scalarとは限りません。</li>
+<li>空文字列・EMPTY・先頭NULは0です。空とNULは戻り値だけでは区別できません。先頭空白を飛ばさず、後続文字や不正な単位の影響は受けません。</li>
+<li>Stringは数値へ解析しません。ASC(&quot;$41&quot;)は$の36、ASC(&quot;NaN&quot;)はNの78です。数値入力のASC(65)は文字列65の先頭6の54を返します。</li>
+<li>数値はInvariantCulture G書式で文字列化します。通常TRUE/FALSEは1/0で49/48、COM VT_BOOLは-1/0で45/48。負の0は先頭-の45です。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換object・非有限Numberは型/有限値エラーです。COM既定memberを暗黙に呼びません。</li>
+<li>必須1/最大1引数で、個数・省略を式評価前に拒否します。正規化・大小文字変換・書記素解析をせず、OPTION SAMESTRの影響も受けません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="asc"><code>PRINT ASC(&quot;A&quot;)</code></pre>
+<p>期待出力：</p><pre><code>65
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="isunicode">ISUNICODE</h2>
+<p>CP932で表現できない文字が含まれるかを調べます。</p>
+<h3>書式</h3><pre><code>ISUNICODE(text)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>対象文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>厳密なCP932変換ができれば0、できなければ1。</p><h3>対応範囲と注意</h3><ul>
+<li>必須1引数です。引数の省略・過不足は評価前に拒否します。</li>
+<li>固定の厳密CP932を使います。髙・①等の拡張文字も含み、OSの既定コードページと文化設定、OPTION SAMESTRには依存しません。</li>
+<li>空文字列・EMPTYは0です。NULの後も調べ、補助平面文字や孤立サロゲート等の符号化不能な文字は1を返します。</li>
+<li>¥・‾・〜・−・¢・£・¬の近似変換や代替文字は許可しません。正規化も行いません。</li>
+<li>有限数値は文化設定に依存せず文字列化します。通常TRUE/FALSEは1/0、COM Booleanは-1/0で、判定結果はいずれも0です。文字列NaN/InfinityもASCIIとして0です。</li>
+<li>非有限Number、NULL・NOTHING・ERROR・配列・連想配列・objectは型エラーです。</li>
+<li>ファイルの文字コードやフォント表示を判別する関数ではありません。原版の全Unicode・locale・Variant条件の一致は未確認です。</li>
+<li>戻り値は数値として1/0を保持する論理型です。VARTYPEで照会すると11、整数へ明示変換しても1/0になります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="isunicode"><code>PRINT ISUNICODE(&quot;ABC&quot;)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="token">TOKEN</h2>
+<p>先頭のトークンを取り出し、元の変数へ残りを書き戻します。</p>
+<h3>書式</h3><pre><code>TOKEN(delimiters, source, [skipEmpty, quotes])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>delimiters</code></dt><dd>区切りとして扱う文字の集合。有効なサロゲートペアは1文字です。</dd>
+<dt><code>source</code></dt><dd>書き戻し可能な変数・配列要素・連想配列の単一キー。文字列または有限数値等を文字列化し、残余をStringまたはEMPTYで書き戻します。</dd>
+<dt><code>skipEmpty</code></dt><dd>TRUEで連続区切りを飛ばします。既定FALSE。</dd>
+<dt><code>quotes</code></dt><dd>TRUEで二重引用符の内側の区切りを無視します。既定FALSE。</dd>
+</dl><h3>戻り値・結果</h3><p>切り出したString。区切り検出後の残余はString、区切りなしで終端まで取り出すとsourceはEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>sourceには書き戻し先が必要です。添字や連想配列キーは一度だけ評価します。定数・関数戻り値・COMプロパティへの直接書戻しは拒否します。</li>
+<li>quotesがTRUEなら二重引用符の内側を保護し、引用符自体も区切りません。引用符は残し、連続引用符も復号しません。閉じていない引用符以降は終端まで保護します。</li>
+<li>区切り文字列全体の一致で分割するSPLITとは異なります。文字ごとの完全一致を使い、OPTION SAMESTRやcultureで変更しません。NULも扱い、有効なサロゲートペアを分断しません。</li>
+<li>末尾の区切りで残余が空になる場合は空Stringです。区切りが見つからず終端まで取り出した場合はEMPTYです。返値は空でもStringです。</li>
+<li>flagは有限数値を0方向へ切り捨て、非0ならTRUEです。数値文字列を扱い、Int32上限はありません。16進文字列・桁区切り・非有限値・不正型は拒否します。</li>
+<li>通常Booleanは1/0、COM Booleanは-1/0として文字列化します。NULL・NOTHING・配列・object等は文字列へ暗黙変換しません。</li>
+<li>必須2/最大4引数で、必須位置の省略や余分な引数は評価前に拒否します。任意位置の省略はFALSEです。引数の評価が既に起こした副作用は巻き戻しません。</li>
+<li>Unicode区切り、参照の一回評価、巨大flag、Booleanや引用符自身の扱い等に原版との差があります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="token"><code>DIM text = &quot;a,b&quot;
+PRINT TOKEN(&quot;,&quot;, text)
+PRINT text</code></pre>
+<p>期待出力：</p><pre><code>a
+b
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="eval">EVAL</h2>
+<p>文字列を呼出元のscopeで式として評価します。</p>
+<h3>書式</h3><pre><code>EVAL(expression)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>expression</code></dt><dd>評価する文字列を1個指定します。空文字・不正な式・非文字列はエラーです。</dd>
+</dl><h3>戻り値・結果</h3><p>通常の式は評価値、:=による代入とTHREAD/CALL実行は空文字列を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>=は比較、:=は代入です。変数・配列・HASHTBL・COM memberを代入先にできます。</li>
+<li>ユーザー関数と公開された通常の組み込み関数を呼べます。定数とEXPLICITの規則は通常の実行と共通です。</li>
+<li>SPECIALCHARはEVALを記述したソースの設定、SAMESTRは実行設定を使用します。EVALの再帰は128段で制限し、取消を伝播します。</li>
+<li>単独の純粋式評価APIと初回コマンドライン版のプレビューでは呼び出せません。動的な式の解析エラーには外側の呼出し行を付けます。</li>
+<li>文字列のTHREADによるユーザー関数起動とCALLによるファイル実行にも対応します。THREADは空文字列を返し、終了コードやworker IDは返しません。動的CALLの初期化中の再入CALLは拒否します。</li>
+<li>CALL先の初期化は同じ実行内で1回です。初期化失敗前に完了したPUBLIC更新や外部操作は戻さず、同じ実行内では失敗fileを再初期化しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="eval"><code>a=2
+b=4
+c=0
+EVAL(&quot;c:=3&quot;)
+PRINT EVAL(&quot;INT(a*b+c-9.9/2)&quot;)</code></pre>
+<p>期待出力：</p><pre><code>6
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="lengthb">LENGTHB</h2>
+<p>CP932のバイト長を取得します。</p>
+<h3>書式</h3><pre><code>LENGTHB(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>文字列。配列・HASHTBLでは既存LENGTHと同じ件数を返します。</dd>
+</dl><h3>戻り値・結果</h3><p>バイト数または件数。</p><h3>対応範囲と注意</h3><ul>
+<li>符号化済み文字列は表示文字列から作り直さず、元のバイト数を返します。通常のCP932変換にはbest-fit/置換を使い、Aあｱ😀は6バイトです。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="lengthb"><code>PRINT LENGTHB(&quot;Aあｱ😀&quot;)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="copyb">COPYB</h2>
+<p>元のバイト列の一部を切り出します。</p>
+<h3>書式</h3><pre><code>COPYB(text, start, [count])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>通常文字列はCP932へ変換。符号化済み文字列は元の列を使用。</dd>
+<dt><code>start</code></dt><dd>1始まり。0以下は1として扱います。</dd>
+<dt><code>count</code></dt><dd>省略/EMPTYは末尾まで。負数は空文字。</dd>
+</dl><h3>戻り値・結果</h3><p>元の符号化を持つ文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>NULと、多バイト文字の途中で切り出したバイトも保持します。途中の0x82は表示上「・」でも1バイトです。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="copyb"><code>PRINT COPYB(&quot;AあB&quot;,2,2)
+PRINT LENGTHB(COPYB(&quot;あ&quot;,1,1))</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="posb">POSB</h2>
+<p>CP932の文字境界を探してバイト位置を返します。</p>
+<h3>書式</h3><pre><code>POSB(needle, text, [occurrence])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>needle</code></dt><dd>探す文字列。空文字は見つからないものとします。</dd>
+<dt><code>text</code></dt><dd>探される文字列。NULで検索を終えます。</dd>
+<dt><code>occurrence</code></dt><dd>省略/0は1。負数は末尾側から数えます。重複も数えます。</dd>
+</dl><h3>戻り値・結果</h3><p>1始まりのバイト位置。見つからなければ0。</p><h3>対応範囲と注意</h3><ul>
+<li>一致の先頭と末尾を文字境界へそろえ、多バイト文字の途中だけは一致しません。既定は大小区別なし、OPTION SAMESTRで区別します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="posb"><code>PRINT POSB(&quot;B&quot;,&quot;AあB&quot;)
+PRINT POSB(&quot;あ&quot;,&quot;あXあ&quot;,-1)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="ascb">ASCB</h2>
+<p>先頭の1バイトを取得します。</p>
+<h3>書式</h3><pre><code>ASCB(text)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>通常文字列はCP932、符号化済み文字列は元の列。</dd>
+</dl><h3>戻り値・結果</h3><p>0～255。空文字は0。</p><h3>対応範囲と注意</h3><ul>
+<li>多バイト文字全体のコードではありません。ASCB(&quot;あ&quot;)は130です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="ascb"><code>PRINT ASCB(&quot;あ&quot;)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="chrb">CHRB</h2>
+<p>下位8bitからCP932の1バイト文字列を作ります。</p>
+<h3>書式</h3><pre><code>CHRB(code)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>code</code></dt><dd>有限の32bit整数へ変換して下位8bitを使用。</dd>
+</dl><h3>戻り値・結果</h3><p>1バイトの文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>負数や256以上も下位8bitを使います。CHRB(256)はNUL、CHRB(255)とCHRB(-1)は同じバイトです。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="chrb"><code>PRINT ASCB(CHRB(255))</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="strconv">STRCONV</h2>
+<p>大小・かな・全半角を変換します。</p>
+<h3>書式</h3><pre><code>STRCONV(text, flags)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>変換する文字列。</dd>
+<dt><code>flags</code></dt><dd>SC_LOWERCASE=256、SC_UPPERCASE=512、SC_HIRAGANA=1048576、SC_KATAKANA=2097152、SC_HALFWIDTH=4194304、SC_FULLWIDTH=8388608。合計指定可。</dd>
+</dl><h3>戻り値・結果</h3><p>変換した文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>Windowsの日本語LCID1041を使います。0は無変換。大小/かな/幅の対立組合せと未知ビットは拒否します。Windowsの日本語変換を利用できない環境は対応外です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="strconv"><code>PRINT STRCONV(&quot;ｶﾞ&quot;,SC_FULLWIDTH+SC_HIRAGANA)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="encode">ENCODE</h2>
+<p>文字列を符号化・エスケープ・型付きバイト配列へ変換します。</p>
+<h3>書式</h3><pre><code>ENCODE(text, code)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>入力文字列。</dd>
+<dt><code>code</code></dt><dd>CODE_ANSI=1、CODE_URL=2、CODE_UTF8=3、CODE_HTML=4、CODE_BYTEARRAY=5、CODE_BYTEARRAYW=6。</dd>
+</dl><h3>戻り値・結果</h3><p>1～3は符号化済み文字列、4はUnicode文字列、5/6は1次元UI1配列。</p><h3>対応範囲と注意</h3><ul>
+<li>ANSIとURLはCP932。URLの空白は+、~は%7Eです。UTF8はBOMを付けず、不正なサロゲートはU+FFFDへ置換します。</li>
+<li>HTMLは&amp; &lt; &gt; と二重引用符の4文字を変換します。</li>
+<li>バイト配列は0始まり、上限100万要素。5はCP932、6はBOMなしUTF16LEで、UTF16の孤立したコード単位も保持します。通常の配列とは型を区別します。</li>
+<li>元のバイトは代入・同じ符号化同士の連結で保持します。混在する型/符号化の全昇格互換は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="encode"><code>DIM bytes=ENCODE(&quot;Aあ&quot;,CODE_BYTEARRAY)
+PRINT LENGTH(bytes)
+PRINT bytes[1]
+PRINT DECODE(bytes,CODE_BYTEARRAY)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="decode">DECODE</h2>
+<p>符号化された文字列・UI1配列を復号します。</p>
+<h3>書式</h3><pre><code>DECODE(value, code)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>CODE_URL/UTF8/HTMLは文字列。5/6は型付き1次元UI1配列。</dd>
+<dt><code>code</code></dt><dd>CODE_URL=2、CODE_UTF8=3、CODE_HTML=4、CODE_BYTEARRAY=5、CODE_BYTEARRAYW=6。CODE_ANSIは非対応。</dd>
+</dl><h3>戻り値・結果</h3><p>復号した文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>URLはCP932で+と%HHを戻します。不正な%表記はエラーです。原版の%Q1は5秒未復帰で動作未確認です。</li>
+<li>UTF8の不正列はU+FFFDへ置換します。HTMLは公開4実体と有効な十進/16進数値実体を戻し、未知・不正な実体を保持します。原版で&amp;apos;がNULとpos;へ変換された観測は再現しません。</li>
+<li>配列は0～255の整数要素を検査します。UTF16LEのバイト数は偶数にしてください。未型付け配列、異なる型・次元・不正な要素は拒否します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="decode"><code>PRINT DECODE(ENCODE(&quot;あ&quot;,CODE_UTF8),CODE_UTF8)
+PRINT DECODE(&quot;%82%A0&quot;,CODE_URL)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-display.html">← ダイアログ・表示関連</a> <a href="functions-numbers.html">次へ：数値・数学</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#copy">COPY</a></li><li><a href="#length">LENGTH</a></li><li><a href="#lengths">LENGTHS</a></li><li><a href="#pos">POS</a></li><li><a href="#betweenstr">BETWEENSTR</a></li><li><a href="#replace">REPLACE</a></li><li><a href="#chgmoj">CHGMOJ</a></li><li><a href="#trim">TRIM</a></li><li><a href="#chknum">CHKNUM</a></li><li><a href="#val">VAL</a></li><li><a href="#format">FORMAT</a></li><li><a href="#chr">CHR</a></li><li><a href="#asc">ASC</a></li><li><a href="#isunicode">ISUNICODE</a></li><li><a href="#token">TOKEN</a></li><li><a href="#eval">EVAL</a></li><li><a href="#lengthb">LENGTHB</a></li><li><a href="#copyb">COPYB</a></li><li><a href="#posb">POSB</a></li><li><a href="#ascb">ASCB</a></li><li><a href="#chrb">CHRB</a></li><li><a href="#strconv">STRCONV</a></li><li><a href="#encode">ENCODE</a></li><li><a href="#decode">DECODE</a></li></ul></nav>
+</div></div></body></html>

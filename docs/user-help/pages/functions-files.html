@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>ファイル・INI | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a aria-current="page" href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / ファイル・INI</p>
+<h1>ファイル・INI</h1><p class="lead">ファイルのバッファ処理、INI、列挙・削除を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="fopen">FOPEN</h2>
+<p>ファイルを読み書き用のバッファへ開きます。</p>
+<h3>書式</h3><pre><code>FOPEN(path, [mode])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>path</code></dt><dd>空でないfile path。文字列/有限Numberを共通文字列化し、コマンドライン版とUWSC# アプリでは相対名を主スクリプトのフォルダーから正規化します。空/EMPTY・ASCII制御文字・不正型は拒否します。</dd>
+<dt><code>mode</code></dt><dd>既定F_READ(2)。F_EXISTS(1)単独、またはRead2/write4/8/16/32/64とNoCr128/Tab256/Exclusive512。writeは1種類だけ。共通有限変換/0方向切捨て後のInt32で検査します。</dd>
+</dl><h3>戻り値・結果</h3><p>実行単位で独立した正のID。通常のIO/権限/復号失敗は-1。F_EXISTSはfile（末尾slash/backslashならdirectory）の存在を1/0で返し、IDを消費しません。</p><h3>対応範囲と注意</h3><ul>
+<li>必須1/最大2引数と必須位置を評価前に検査します。mode省略はRead。十進/指数・長い数値文字列を許し、16進文字列・非有限値・不正なflag合成は拒否します。通常TRUEは1、COM TRUEは-1として扱います。</li>
+<li>Readは厳密BOM判定を使い、BOMなしはUTF-8優先、不成立ならCP932で同じstreamを読み直します。BOMで指定したencodingが破損していれば-1です。2個目のBOMは本文として保持します。</li>
+<li>書込み専用は排他の有無によらず空bufferです。既存内容はopen時にtruncateせず、close/終了時の保存で反映します。Read指定がある場合だけ既存内容を読みます。</li>
+<li>非排他のRead/ReadWriteはShareReadWriteで読み、読取後にhandleを閉じます。新規非排他ReadWriteも空bufferで成功し、物理作成はcloseまで遅らせます。</li>
+<li>排他は同じhandleをcloseまで保持し、新規write/ReadWriteはopen時に空fileを作ります。作成後の取消でも空fileが残る場合があり、全副作用のrollbackは保証しません。</li>
+<li>自動write4の読書き保存は、元のencoding/BOMを優先します。表現不能な文字が増えればUTF-8 BOMなしへ移します。明示encodingはその指定を優先し、入力byte/改行の維持とは別です。</li>
+<li>同時64件まで。IDはセッション内で再利用せず、Int32上限後の新規openは-1。登録前の取消/失敗はIDを消費せず未登録handleを解放します。</li>
+<li>非排他の同時更新snapshot、固定の応答時間、親path/reparseの隔離、原子的保存は保証しません。保存失敗/終了時保存はFCLOSEの契約に従います。</li>
+<li>コマンドライン版とUWSC# アプリはScriptFiles.ForScriptで主スクリプト基準を固定します。CALL先でも基準は同じです。直接APIで従来のScriptFilesコンストラクターを使う場合は、呼出し元の作業ディレクトリを使う既存仕様です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="fget">FGET</h2>
+<p>開いたファイルの行や列を読み取ります。</p>
+<h3>書式</h3><pre><code>FGET(id, line, [column, quoteMode])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>発行済み未closeの正のID。共通有限数値化・0方向切捨て後のInt32で検査します。</dd>
+<dt><code>row</code></dt><dd>1始まり。F_LINECOUNT(-1)でbuffer行数、F_ALLTEXT(-2)でCRLFを付けた全bufferを返します。</dd>
+<dt><code>column</code></dt><dd>既定0で行全体。1以上ならCSV/TABの指定列。有限変換/切捨て後の0以上のInt32。</dd>
+<dt><code>quoteMode</code></dt><dd>既定0。0は内部引用符のない両端引用符だけを除き数値化を抑止、1は保持、2は先頭引用符付きの連続引用符を1個にします。通常TRUEは1、COM TRUEの-1は範囲外です。</dd>
+</dl><h3>戻り値・結果</h3><p>NumberまたはString。行/列数を超えると空文字列。close済み/未知の正のIDはadapterエラーです。</p><h3>対応範囲と注意</h3><ul>
+<li>必須2/最大4引数と必須位置を評価前に検査します。任意引数の省略は0。全引数を有限十進/指数変換し、16進文字列・非有限値・不正型を拒否します。EMPTYは0です。</li>
+<li>行全体の非数値の端の空白は保持します。指定列だけ、端のASCII空白/制御文字をtab以外について除きます。内部NULとliteralの&lt;_#９&gt;を保持します。</li>
+<li>mode0で引用符を除いた場合を除き、有限十進/指数にできる値はNumberになります。元の先頭ゼロ等の表記は保持しません。長い数値や前後空白/tabを許し、$10/NaN/Infinity/overflow文字列はStringです。</li>
+<li>CSVは引用符ごとに引用状態を反転する行単位の処理です。F_TABはtab区切り。行をまたぐ引用フィールドの再構成や厳密な不正CSVの構文エラーは提供しません。</li>
+<li>F_ALLTEXTは空bufferなら空文字列、それ以外は各行にCRLFを付けます。入力byte列・元改行/最終改行をそのまま返すAPIではありません。</li>
+<li>値/個数検査はTRY/EXCEPTで捕捉できます。正の未知/close済みIDのadapterエラーはEXCEPTを通らず行番号なしです。</li>
+<li>読取はbufferを変更しません。事前取消ならIDを保持し再試行できます。以前の編集や終了時の保存まで巻き戻す保証はありません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="fput">FPUT</h2>
+<p>書込みバッファへ値を追加・更新します。</p>
+<h3>書式</h3><pre><code>FPUT(id, value, [line, column, quoteMode])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>発行済み未closeの正の書込み可能ID。共通有限変換/0方向切捨て後のInt32。</dd>
+<dt><code>value</code></dt><dd>String・有限Number・EMPTYを共通文字列化します。EMPTYは空文字列、通常TRUEは1、COM TRUEは-1。NULL/不正型・非有限Numberは拒否します。</dd>
+<dt><code>row</code></dt><dd>既定0で追記。正数で1始まり行置換と空行padding、F_ALLTEXT(-2)で改行を分割して全置換します。</dd>
+<dt><code>column</code></dt><dd>既定0で行全体。正数でCSV/TABの列更新と欠損列padding。行0の追記でも正の列を反映します。F_INSERT(-1)は正の行1～行数+1への挿入。</dd>
+<dt><code>quoteMode</code></dt><dd>既定0。既存拡張の0～3。mode2は値に引用符がある場合だけ引用符を2個にして外側に引用符を付け、mode3は列の引用状態を見ずに分割します。</dd>
+</dl><h3>戻り値・結果</h3><p>EMPTY。行/列/引用符の値検査、未知/close済みID、読み専用、挿入範囲外はエラー。</p><h3>対応範囲と注意</h3><ul>
+<li>必須2/最大5引数と必須位置を評価前に検査します。任意位置の省略は0。整数は有限十進/指数変換・切捨て後のInt32と各範囲で検査し、16進文字列等を拒否します。</li>
+<li>通常の追記/行置換/挿入では値の改行も1つの論理行に保持します。F_ALLTEXTだけが改行を分割し、空値なら0行です。</li>
+<li>NUL・日本語/emoji・引用符等を文字列として保持します。符号化はFCLOSE/終了時で、FPUT自体は物理保存しません。</li>
+<li>CSV/TABの生の前後文字列を保持し、tab以外のASCII空白/制御文字だけの末尾残余は、その前の区切りも含めて落とします。厳密なRFC形式のCSV出力は提供しません。</li>
+<li>結果を別bufferへ準備し、取消確認後に一度反映します。反映前の取消/準備失敗は元bufferを保持しますが、反映後の取消や以前の編集を巻き戻しません。</li>
+<li>値/個数の検査はTRY/EXCEPTで捕捉できます。未知ID・読み専用・挿入範囲外のadapterエラーはEXCEPTを通らず行番号なしです。</li>
+<li>物理保存は既存FCLOSE/Disposeの文字コード・BOM・改行に従います。失敗/取消で終了時保存を止めたり、保存途中のrollbackを保証したりする指定ではありません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="fclose">FCLOSE</h2>
+<p>バッファを保存してファイルIDを破棄します。</p>
+<h3>書式</h3><pre><code>FCLOSE(id, [suppress])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>有限数値へ変換し、小数部を0方向へ切り捨てた後のInt32。未登録IDは抑止時0、非抑止時エラーです。EMPTYは0。</dd>
+<dt><code>suppress</code></dt><dd>既定FALSE。有限数値へ変換し、切捨て後の非ゼロでTRUEと判定します。TRUEなら保存のIO/権限/引数関連エラーと未登録IDを0へ変換します。</dd>
+</dl><h3>戻り値・結果</h3><p>成功は1、抑止指定時の失敗は0。</p><h3>対応範囲と注意</h3><ul>
+<li>必須1/最大2引数と必須位置を評価前に検査します。第2引数の省略はFALSE。十進/指数文字列と前後空白を許し、16進文字列・非有限値・不正型は拒否します。値検査自体は抑止しません。</li>
+<li>通常TRUEの1とCOM TRUEの-1は共に抑止指定として使えます。抑止指定にInt32上限は要求しません。</li>
+<li>読み専用では保存しません。保存失敗でもIDを破棄し排他を解放するため、同IDでの再試行や終了時の再保存はできません。</li>
+<li>保存前に厳密に符号化します。符号化失敗では元byteを保持し、非抑止ならコマンドライン版は診断と終了1を返します。adapter失敗はEXCEPTを通らず行番号なしです。</li>
+<li>物理保存は同handleへtruncate後に書きます。書込み途中の失敗にはrollbackや原子性の保証がありません。入力のbyte列/改行の維持も保証しません。</li>
+<li>事前取消ならID/排他/bufferを保持し再試行できます。保存後の取消では保存とID破棄を巻き戻しません。</li>
+<li>エラー/取消時も終了処理は他の保留bufferを保存し、1件失敗しても残りの保存/解放を試みます。全副作用のrollbackは行いません。</li>
+<li>自動write4の読書きはFOPENで読んだencoding/BOMを優先し、表現不能ならUTF-8 BOMなしへ移します。明示encodingの保存は従来どおり指定を優先します。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="fdelline">FDELLINE</h2>
+<p>ファイルの書込みバッファから1行を削除します。</p>
+<h3>書式</h3><pre><code>FDELLINE(id, line)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>発行済みで未closeの書込み可能ID。有限数値へ変換し、小数部を0方向へ切り捨てた後で正のInt32を要求します。</dd>
+<dt><code>line</code></dt><dd>現在のbuffer内の1始まり行。idと同じ有限変換を行い、行全体を削除します。</dd>
+</dl><h3>戻り値・結果</h3><p>EMPTY。空buffer・存在しない行・無効/close済みID・読み専用はエラー。</p><h3>対応範囲と注意</h3><ul>
+<li>必須2/最大2引数と省略位置を評価前に検査します。十進/指数文字列と前後空白を許し、16進文字列・非有限値・空/不正型は拒否します。</li>
+<li>通常TRUEは1、COM TRUEは-1として扱うため、後者は正の範囲外です。Objectの暗黙の既定memberは呼びません。</li>
+<li>引数検査はTRY/EXCEPTで捕捉できます。正の未知ID・読み専用・行数超過のadapterエラーはEXCEPTを通らず行番号なしです。</li>
+<li>結果bufferを準備して取消確認後に反映します。反映前の取消は元bufferを保持しますが、反映後の取消は削除を巻き戻しません。</li>
+<li>物理保存はFCLOSE/終了時の既存mode・改行/文字コードに従います。実行失敗/取消でも終了時に保存を試みます。以前の編集や書込み専用openの空bufferは取り消しません。</li>
+<li>物理保存は原子的置換ではなく、書込み途中の障害復旧や全取消タイミングの保証はありません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="getdir">GETDIR</h2>
+<p>直下のファイル名またはディレクトリ名を列挙します。</p>
+<h3>書式</h3><pre><code>GETDIR(path, [pattern, hidden, order])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>path</code></dt><dd>空でない対象フォルダー。NUL・不正型は拒否します。コマンドライン版とUWSC# アプリの相対名は主スクリプトのフォルダーから解決します。</dd>
+<dt><code>pattern</code></dt><dd>省略時は*。明示した空文字列/EMPTYは0件。バックスラッシュ1文字ならdirectoryを列挙し、他は名前のwildcardだけを指定します。</dd>
+<dt><code>hidden</code></dt><dd>有限数値へ変換し、0方向への切捨て後の非0ならHidden属性も含めます。既定FALSE。</dd>
+<dt><code>order</code></dt><dd>切捨て後の0～4。0は管理コードの自然順、1はサイズ、2は作成、3は更新、4はアクセス日時の昇順。同値は名前順です。</dd>
+</dl><h3>戻り値・結果</h3><p>件数。名前をGETDIR_FILES[0]以降へ設定します。</p><h3>対応範囲と注意</h3><ul>
+<li>path/patternは文字列・有限数値・EMPTYを共通変換します。hidden/orderは有限の十進/指数文字列も受理し、16進文字列や不正型は拒否します。COM TRUEは-1なのでorderでは拒否します。</li>
+<li>非再帰で大小文字を区別しないWin32 wildcard照合を使います。Hidden以外のSystem属性だけのfileは除外しません。</li>
+<li>名前順はASCII数字列とUTF-16単位の比較、最終同値はOrdinalです。今回観測した原版の名前順とは異なります。</li>
+<li>metadataは収集時に取得します。IO/権限等の列挙失敗では0と空配列、不正な引数は行番号付きのエラーです。</li>
+<li>処理中の取消や入力不備では以前の一覧を保ち、結果確定後に更新します。直接GETDIRとGETDIR_FILESのFOR INは開始時のsnapshotを反復します。件数を返す変数やwrapperは一覧として反復できません。</li>
+<li>コマンドライン版とUWSC# アプリはScriptFiles.ForScriptで主スクリプト基準を固定します。CALL先でも基準は同じです。直接APIで従来のScriptFilesコンストラクターを使う場合は、呼出し元の作業ディレクトリを使う既存仕様です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="deletefile">DELETEFILE</h2>
+<p>指定した通常ファイルを削除します。</p>
+<h3>書式</h3><pre><code>DELETEFILE(path)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>path</code></dt><dd>空でない明示path、または最後の名前に*や?を含むpath。文字列/有限数値を共通文字列化し、空/ASCII制御文字（U+0000～U+001F）/不正型・親path内wildcard・stream等は拒否します。</dd>
+</dl><h3>戻り値・結果</h3><p>候補が1件以上あり、全削除要求が正常終了すれば1。未一致・列挙失敗・個別失敗があれば0。0でも一部のfileは削除済みの場合があります。</p><h3>対応範囲と注意</h3><ul>
+<li>直下のfileだけを対象とし、directoryとdirectory symlinkは残します。Hidden/Systemを含め、個別失敗後も残りを試みます。</li>
+<li>file symlinkはlinkだけを削除し、broken file linkも対象です。wildcardで実体も別の候補になれば実体も対象です。</li>
+<li>コマンドライン版とUWSC# アプリの相対名は主スクリプトのフォルダーから解決します。通常TRUEは1、COM TRUEは-1として名前へ変換します。</li>
+<li>削除は即時で、失敗や取消によるrollbackは行いません。取消は0/1へ丸めず伝えます。</li>
+<li>正常終了は、この呼出しだけが実際に消した件数の証明ではありません。他者の更新・link/別名の解決先や全OS/FSの保証はありません。</li>
+<li>コマンドライン版とUWSC# アプリはScriptFiles.ForScriptで主スクリプト基準を固定します。CALL先でも基準は同じです。直接APIで従来のScriptFilesコンストラクターを使う場合は、呼出し元の作業ディレクトリを使う既存仕様です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="readini">READINI</h2>
+<p>INIの最初のsection内で、最初に一致したキーを読み取ります。</p>
+<h3>書式</h3><pre><code>READINI(section, key, [path])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>section, key</code></dt><dd>前後空白を除いた空でない名前。有限数値/文字列/EMPTYを文字列化します。sectionの角括弧・改行、keyの等号・改行、全引数のNULと不正型は拒否します。</dd>
+<dt><code>path</code></dt><dd>省略・空文字列ならコマンドライン版とUWSC# アプリでは主スクリプトのフォルダー内の実行元スクリプト名.INI。拡張子のない明示名には.INIを補います。</dd>
+</dl><h3>戻り値・結果</h3><p>値の前後空白を除き、有限の十進数・指数なら数値、それ以外は文字列。001は数値1、$10・NaN・Infinityは文字列。ファイル・section・keyがなければ空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>名前はOrdinalIgnoreCaseで比較します。最初のsectionだけを検索し、後の同名sectionを併合しません。先頭空白除去後の;と#はコメントです。</li>
+<li>引用符・値内の等号/コメント文字/NULを保持します。原版のdouble quote解除やNUL終端とは異なります。</li>
+<li>UTF-16LE/BE BOM、UTF-8 BOMを認識し、BOMなしは厳密UTF-8、失敗時は厳密CP932として読みます。</li>
+<li>ディレクトリ・排他・読込/復号失敗は既存のIOエラーとして通知し、EXCEPTでは捕捉できません。引数検査のエラーは行番号付きで捕捉できます。</li>
+<li>取消は協調的に確認します。読取りでファイルを作成・更新しません。</li>
+<li>コマンドライン版とUWSC# アプリはScriptFiles.ForScriptで主スクリプト基準を固定します。CALL先でも基準は同じです。直接APIで従来のScriptFilesコンストラクターを使う場合は、呼出し元の作業ディレクトリを使う既存仕様です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="writeini">WRITEINI</h2>
+<p>INIの最初のsection内の最初のkeyを更新し、なければ追加します。</p>
+<h3>書式</h3><pre><code>WRITEINI(section, key, value, [path])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>section, key</code></dt><dd>前後空白を除いた空でない名前。sectionの角括弧/改行、keyの等号/改行と先頭の;・#・[を拒否します。</dd>
+<dt><code>value</code></dt><dd>空文字列も保存できます。改行/NUL・不正型は拒否します。名前・値・pathは文字列/有限数値/EMPTYを共通変換します。COM TRUEは-1です。</dd>
+<dt><code>path</code></dt><dd>省略・空文字列なら作業ディレクトリの実行元スクリプト名.INI。拡張子のない明示名には.INIを補います。親ディレクトリは作成しません。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。失敗は例外。</p><h3>対応範囲と注意</h3><ul>
+<li>全引数のNULを拒否します。名前は大小文字を区別せず、後の重複key/sectionを統合しません。引用符・内部の等号/コメント文字と他の行は保持します。</li>
+<li>既存の改行と末尾の改行有無を保ち、追加行は最初の改行、なければCRLFを使います。原版のCRLF統一とは異なります。</li>
+<li>UTF-16LE/BE BOM・UTF-8 BOMを保持し、BOMなしは厳密UTF-8、失敗時は厳密CP932として読みます。新規はCP932で、表現できなければUTF-8 BOMなしへ切り替えます。</li>
+<li>同じユーザーの UWSC# が同じ INI を更新する場合、WRITEINI、DELETEINI、設定画面からの保存は順に実行されます。Windows のディレクトリジャンクションを経由しても、同じフォルダーの同じファイル名なら排他を共有します。一時ファイルに準備してから置換します。通常の保存準備や置換の失敗時は元のファイルを保持します。</li>
+<li>別名パス、FOPEN や外部アプリの直接書込みとの競合、全OS/媒体障害/停電時の復旧は保証しません。IOエラーはEXCEPTを通らず行番号を付けない既存の扱いです。取消通知から未保存を推定できません。</li>
+<li>コマンドライン版とUWSC# アプリはScriptFiles.ForScriptで主スクリプト基準を固定します。CALL先でも基準は同じです。直接APIで従来のScriptFilesコンストラクターを使う場合は、呼出し元の作業ディレクトリを使う既存仕様です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="deleteini">DELETEINI</h2>
+<p>INIの最初のsectionまたは最初のkeyを削除します。</p>
+<h3>書式</h3><pre><code>DELETEINI(section, [key, path])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>section</code></dt><dd>前後空白を除いた空でない名前。角括弧・改行・NULは拒否します。</dd>
+<dt><code>key</code></dt><dd>省略・EMPTY・空文字列ならsection全体。空白だけのkey、等号/改行/NUL、先頭;・#・[は拒否します。</dd>
+<dt><code>path</code></dt><dd>省略・空文字列は作業ディレクトリの実行元スクリプト名.INI。拡張子のない明示名には.INIを補います。親ディレクトリは作成しません。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。対象やファイルがない場合も作成せず終了します。</p><h3>対応範囲と注意</h3><ul>
+<li>名前/pathは文字列・有限数値・EMPTYを共通変換します。不正型は拒否し、COM TRUEは-1です。名前は大小文字を区別しません。</li>
+<li>後の重複key/sectionを全削除しません。section削除は見出しから次の見出し直前までで、その範囲のコメントも削除します。</li>
+<li>残る本文・各改行・末尾・encoding/BOMを保持します。全行を削除してもファイルとpreambleは残します。対象がなければ保存しません。</li>
+<li>同じユーザーの UWSC# が同じ INI を更新する場合、WRITEINI、DELETEINI、設定画面からの保存は順に実行されます。Windows のディレクトリジャンクションを経由しても、同じフォルダーの同じファイル名なら排他を共有します。一時ファイルに準備してから置換します。通常の保存準備や置換の失敗時は元のファイルを保持します。</li>
+<li>別名パス、FOPEN や外部アプリの直接書込みとの競合、全OS/媒体障害/停電時の復旧は保証しません。IOエラーはEXCEPTを通らず行番号を付けない既存の扱いです。取消通知から未保存を推定できません。</li>
+<li>コマンドライン版とUWSC# アプリはScriptFiles.ForScriptで主スクリプト基準を固定します。CALL先でも基準は同じです。直接APIで従来のScriptFilesコンストラクターを使う場合は、呼出し元の作業ディレクトリを使う既存仕様です。</li>
+</ul>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-arrays.html">← 配列</a> <a href="functions-system.html">次へ：システム・時間・待機</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#fopen">FOPEN</a></li><li><a href="#fget">FGET</a></li><li><a href="#fput">FPUT</a></li><li><a href="#fclose">FCLOSE</a></li><li><a href="#fdelline">FDELLINE</a></li><li><a href="#getdir">GETDIR</a></li><li><a href="#deletefile">DELETEFILE</a></li><li><a href="#readini">READINI</a></li><li><a href="#writeini">WRITEINI</a></li><li><a href="#deleteini">DELETEINI</a></li></ul></nav>
+</div></div></body></html>

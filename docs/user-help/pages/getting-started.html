@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>導入と最初の実行 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section" open><summary>使い方</summary><ul><li><a aria-current="page" href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 導入と最初の実行</p>
+<h1>導入と最初の実行</h1><p class="lead">最初は、画面への入力を送らないPRINTの例で実行結果を確認します。</p>
+<h2 id="package">UWSC# アプリ配布版を使う</h2>
+<ol><li>入手したUWSC# アプリのZIPを、書込み可能なフォルダーへすべて展開します。</li>
+<li><code>UWSCSharp.Wpf.exe</code>を起動します。ランタイム同梱版では.NETの事前インストールは不要です。初回は通常<code>%TEMP%/.net</code>へ同梱ライブラリが展開されます。</li>
+<li>「読込」で同梱の<code>examples/hello.uws</code>を開き、「再生」を押します。</li>
+<li>「スクリプト編集・実行結果」を展開し、PRINTの出力を確認します。</li></ol>
+<p>配布版番号と発行元コミットは同梱の<code>release.json</code>で確認できます。ライセンス表示と案内も保管してください。ダウンロード先はこのヘルプにはまだ設定していません。</p>
+<h2 id="hello">自分で書いて試す</h2>
+<p>次の内容を編集欄へ入力し、「再生」を押してください。</p>
+<pre><code>PRINT "こんにちは、UWSC#"
+PRINT 1 + 2</code></pre>
+<p>実行結果に挨拶と数値の3が表示されます。保存するときは<code>hello.uws</code>などの名前を指定します。</p>
+<h2 id="association">.uwsを関連付ける（検証中）</h2>
+<p>配布版の「関連付け」で「候補を登録」を選ぶと、現在の配置をWindowsの候補に登録します。既定アプリの選択はWindowsの設定で行います。登録だけでは既定アプリは変わりません。</p>
+<p>解除は同じ配置の画面で「登録を解除」を選びます。ZIPを移動する前に解除し、移動後に登録し直してください。別の配置の登録や変更された登録がある場合は、操作を中止して理由を表示します。</p>
+<p>MSIのセットアップでは「.uwsの関連付け候補を登録」を選べます。初期状態では選択されず、選んでも既定アプリは変わりません。MSIのオプションで登録した候補は、変更されていなければ選択解除またはアンインストール時に解除します。画面から登録した場合や解除後に登録し直した場合は、MSIを削除する前に同じ配置の画面で解除してください。</p>
+<p>関連付けで開いたスクリプトは、スクリプトがあるフォルダーを基準に相対パスを解決します。正常終了後は画面を閉じ、失敗時は画面を残します。Windows シェルからファイルを開く経路は検証済みです。Windows の設定で既定アプリを選択する操作、Explorer 画面からの起動、MSI 画面の操作、原版との比較は未確認です。</p>
+<h2 id="source">ソースから起動する</h2>
+<p>Windowsで.NET 10 SDKを用意し、リポジトリのルートで実行します。SDKの基準は<code>global.json</code>の10.0.301です。</p>
+<pre><code>dotnet run --project src/UWSCSharp.Wpf
+dotnet run --project src/UWSCSharp.Cli -- distribution/wpf-preview/examples/hello.uws</code></pre>
+<p>UWSC# アプリでの編集と保存は<a href="editor.html">読込・編集・保存</a>、引数の指定は<a href="cli.html">コマンドライン版の使い方と起動引数</a>を参照してください。</p>
+<nav class="pager" aria-label="前後のページ"><a href="../index.html">← はじめに</a> <a href="editor.html">次へ：読込・編集・保存</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#package">UWSC# アプリ配布版を使う</a></li><li><a href="#hello">自分で書いて試す</a></li><li><a href="#association">.uwsを関連付ける（検証中）</a></li><li><a href="#source">ソースから起動する</a></li></ul></nav>
+</div></div></body></html>

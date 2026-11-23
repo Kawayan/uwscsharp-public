@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>COM連携 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a aria-current="page" href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / COM連携</p>
+<h1>COM連携</h1><p class="lead">通常のCOM object生成・取得・列挙と、採用範囲のイベント処理を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="createoleobj">CREATEOLEOBJ</h2>
+<p>登録されたCOMクラスからobjectを作成します。</p>
+<h3>書式</h3><pre><code>CREATEOLEOBJ(progId)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>progId</code></dt><dd>空でないProgID文字列。例はScripting.Dictionary。</dd>
+</dl><h3>戻り値・結果</h3><p>セッションが所有するCOM参照。生成失敗は例外。</p><h3>対応範囲と注意</h3><ul>
+<li>Windowsで対象COMクラスが登録されている必要があります。</li>
+<li>プロパティ取得・代入、メソッド、引数の省略、採用したVAR・名前付き引数に対応します。 名前付きの参照引数は VAR 引数名=変数 の形で指定できます。COMメソッドが正常終了すると、返された値を指定した変数に書き戻します。</li>
+<li>同期COM処理が復帰しない場合の強制中断は未実装です。</li>
+<li>採用したCOM生成・取得・名前解決・呼出し・列挙のHRESULT失敗はTRY/EXCEPTで処理できます。メモリ不足・解放失敗・未知のadapter障害まで捕捉するものではありません。</li>
+<li>COMへ渡せない値、表現できない返値、不正な列挙応答の採用した検証エラーもTRY/EXCEPTで処理できます。内部障害を含む変換失敗を一律に捕捉する仕様ではありません。</li>
+<li>COMのnull BSTRは空文字列として扱い、NULLやNOTHINGとは区別します。未変更の値を直接COMへ戻す場合は元のnull表現を保ちます。文字列を変更・連結した後は通常の文字列として渡し、配列要素はWindowsのコピー結果に従います。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="createoleobj"><code>DIM obj = CREATEOLEOBJ(&quot;Scripting.Dictionary&quot;)
+obj.Add(&quot;name&quot;, &quot;UWSC#&quot;)
+PRINT obj.Item(&quot;name&quot;)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="getactiveoleobj">GETACTIVEOLEOBJ</h2>
+<p>既に起動・登録されているCOM objectを取得します。</p>
+<h3>書式</h3><pre><code>GETACTIVEOLEOBJ(progId)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>progId</code></dt><dd>空でないProgID文字列。</dd>
+</dl><h3>戻り値・結果</h3><p>取得したCOM参照。COM の取得に失敗した場合は EXCEPT で捕捉できます。COM_ERR_IGN が有効な場合は、型3の -999999 を返し、COM_ERR_FLG を TRUE にします。</p><h3>対応範囲と注意</h3><ul>
+<li>GETACTIVEOLEOBJ は、指定した ProgID が未登録の場合や、実行中のオブジェクトを取得できない場合にエラーになります。この呼び出しで COM オブジェクトを起動・登録することはありません。</li>
+<li>通常のactive取得だけが対象です。原版のタイトル・順番による取得は未対応です。 空文字列や0を指定した場合も引数エラーになり、COM_ERR_IGNでは抑止できません。両引数を省略してください。</li>
+<li>Office/IE固有の全取得条件や別bitnessでの動作は未受入です。</li>
+<li>採用したCOM生成・取得・名前解決・呼出し・列挙のHRESULT失敗はTRY/EXCEPTで処理できます。メモリ不足・解放失敗・未知のadapter障害まで捕捉するものではありません。</li>
+<li>COMへ渡せない値、表現できない返値、不正な列挙応答の採用した検証エラーもTRY/EXCEPTで処理できます。内部障害を含む変換失敗を一律に捕捉する仕様ではありません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="iegetdata">IEGETDATA</h2>
+<p>COMオブジェクトのdocumentから、フォームの値やタグの表示文字列を取得します。</p>
+<h3>書式</h3><pre><code>IEGETDATA(window, name [, value, number]) / IEGETDATA(window, tag [, selector, row, column])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>window</code></dt><dd>documentプロパティを持つWindowsのCOMオブジェクト。</dd>
+<dt><code>name, value, number</code></dt><dd>フォーム要素の名前。値と候補番号で絞り込めます。候補番号は1から数え、省略時は先頭です。</dd>
+<dt><code>tag, selector</code></dt><dd>TAG=Pなどのタグ指定と、1から始まる候補番号。番号の省略または0以下は先頭を選びます。ID=、innerHTML=、innerText=、ClassName=による完全一致も使えます。</dd>
+<dt><code>row, column</code></dt><dd>TAG=TABLEの行と列。表番号、行、列の順に指定し、行と列は1から数えます。行を省略するか0を指定すると、表全体の表示文字列を返します。行を指定し、列を省略するか0を指定すると、その行の表示文字列を返します。行または列に負数を指定するとEMPTYを返します。列番号はその行にあるセルを数えます。行や列にまたがる結合セルは、同じ行で複数のセルとして数えません。</dd>
+</dl><h3>戻り値・結果</h3><p>フォームの値またはタグの表示文字列を返します。タグで指定した INPUT と TEXTAREA は現在値を返します。IMG は空文字列を返します。選択欄では、名前で指定した場合も TAG=SELECT で指定した場合も、選択中の項目の表示名を返します。複数の項目を選択している場合は、選択肢の順にタブで区切ります。現在値を指定せず、項目が選択されていない場合は空文字列を返します。現在値で絞り込むときは、最初の選択項目のvalueを使います。対象が見つからない場合はEMPTYを返します。</p><h3>対応範囲と注意</h3><ul>
+<li>フォームを現在値で絞り込むときは、大文字と小文字を同じ文字として扱います。候補番号に0以下を指定すると先頭を選び、取得した値は元の表記で返します。タグをID、ClassName、innerText、innerHTMLで絞り込むときも、大文字と小文字を同じ文字として扱い、最初に一致した要素を選びます。フォーム名の検索は文書のCOM実装に従います。</li>
+<li>固定HTMLを使い、WindowsのCOM経由で読み取れることを確認しています。IEデスクトップアプリでの動作と、表や絞り込みを含む原版の全条件との一致は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="iesetdata">IESETDATA</h2>
+<p>COMオブジェクトのdocumentにあるフォームの値やタグの表示文字列を変更します。</p>
+<h3>書式</h3><pre><code>IESETDATA(window, newValue, name [, value, number]) / IESETDATA(window, value, tag [, selector, number])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>window</code></dt><dd>documentプロパティを持つWindowsのCOMオブジェクト。</dd>
+<dt><code>newValue, text</code></dt><dd>設定する値。文字列は入力欄の値やタグの表示文字列に使います。チェックボックスやラジオボタンはTRUEで選択し、FALSEで解除します。ボタンと画像はTRUEでクリックします。</dd>
+<dt><code>name, value, number</code></dt><dd>フォーム要素の名前。現在値で絞り込むときは、大文字と小文字を同じ文字として扱います。一致した候補だけを1から数え、番号を省略した場合や0以下を指定した場合は先頭を選びます。</dd>
+<dt><code>tag, selector</code></dt><dd>TAG=Pなどのタグ指定と候補番号。ID=、innerHTML=、innerText=、ClassName=でも絞り込めます。TAG=IMGでは画像パスの一部と、一致した画像の候補番号を指定できます。</dd>
+</dl><h3>戻り値・結果</h3><p>設定できた場合はTRUE。対象が見つからない場合や書き込むプロパティがない場合はFALSE。COMがアクセス拒否を返した場合は、スクリプトエラーになります。</p><h3>対応範囲と注意</h3><ul>
+<li>Name で選んだテキスト入力欄に disabled が設定されている場合、値を変更せず FALSE を返します。IEGETDATA では無効なテキスト入力欄の値も取得できます。 名前で指定した無効な単一選択欄と複数選択欄も、選択を保持してFALSEを返します。IEGETDATAでは選択中の表示名を取得できます。 名前で指定した無効なチェックボックス、ラジオボタン、ボタンにTRUEを渡した場合もFALSEを返します。 無効なボタンに文字列を渡した場合は、ラベルを保持してFALSEを返します。 同名のテキスト入力欄を現在値で絞り込むとき、無効な欄も候補番号に含まれます。</li>
+<li>選択欄には選択肢の表示名を指定します。複数選択欄では、表示名をタブで区切って一度に指定できます。大文字と小文字を区別せず、同じ表示名が複数あれば最初の項目だけを選びます。設定すると以前の選択を置き換えます。指定した表示名の一部だけが一致する場合も、一致した項目を選び、TRUE を返します。一致する項目が1つもなければ選択を解除してFALSEを返します。その後も表示名で選び直せます。複数項目を設定している途中でスクリプトを取り消した場合や、COM が書き込みを拒否した場合は、書き込み済みの選択が残ることがあります。タグには渡した文字列がそのまま表示されます。例えば&lt;b&gt;を渡すと、画面に&lt;b&gt;と表示されます。固定HTMLのTEXTAREAでは、名前とTAG=TEXTAREAのどちらで設定しても本文と現在値が更新され、IEGETDATAで更新後の値を取得できます。</li>
+<li>タグのID、ClassName、innerText、innerHTMLは、大文字と小文字を同じ文字として扱い、最初に一致した要素を選びます。画像パスの比較も大文字と小文字を区別しません。ボタンや画像にFALSEを指定した場合は、対象が見つかればTRUEを返し、クリックは発生しません。ローカルのGETフォームでは、送信ボタンにTRUEを指定すると、更新した入力値を含めて送信されます。この動作をホスト付きWebBrowserで原版と照合しました。IEデスクトップアプリでの動作は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="ielink">IELINK</h2>
+<p>COMオブジェクトのdocumentで、表示文字列が一致するリンクをクリックします。</p>
+<h3>書式</h3><pre><code>IELINK(window, text [, number, exact])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>window</code></dt><dd>documentプロパティを持つWindowsのCOMオブジェクト。</dd>
+<dt><code>text</code></dt><dd>A要素の表示文字列。大文字と小文字を区別しません。TITLE=またはCLASS=で始まる指定では、それぞれtitleまたはclassが空のリンクを候補にします。等号の後の文字列と完全一致フラグは、この2種類の指定には影響しません。ID=、NAME=、ALT=、HREF=で始まる指定はFALSEを返します。</dd>
+<dt><code>number</code></dt><dd>一致したリンクの候補番号。1から数え、省略または0以下は先頭を選びます。</dd>
+<dt><code>exact</code></dt><dd>省略またはFALSEで部分一致、TRUEで完全一致です。比較には文書が返す表示文字列を使うため、HTMLソースに書かれた空白や改行と異なる場合があります。検証したローカルHTMLでは、連続空白と改行しない空白は半角空白1個、BRはCRLFとして比較されました。</dd>
+</dl><h3>戻り値・結果</h3><p>クリックを呼び出せた場合はTRUE。対象がない場合はFALSE。</p><h3>対応範囲と注意</h3><ul>
+<li>クリック後に遷移先の内容を読むときは、ページの読み込み完了を待ってください。クリック後にスクリプトを取り消しても、ブラウザーはページの読み込みを続けることがあります。子フレーム内のリンクを選ぶには、IEGETFRAMEで取得した参照を渡します。リンクが別の名前付きフレームを指定していれば、そのフレームでページが開きます。ホスト付きWebBrowserでローカルページへの遷移を原版と照合しました。IEデスクトップでのページ遷移は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="iegetsrc">IEGETSRC</h2>
+<p>指定した要素のHTMLを、開始タグと終了タグを含めて取得します。</p>
+<h3>書式</h3><pre><code>IEGETSRC(window, tag [, number])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>window</code></dt><dd>documentプロパティを持つWindowsのCOMオブジェクト。</dd>
+<dt><code>tag</code></dt><dd>対象のタグ名。PとTAG=Pのどちらの書き方も使えます。 * を指定するとすべての要素が候補になります。</dd>
+<dt><code>number</code></dt><dd>候補番号。1から数え、省略または0以下は先頭を選びます。</dd>
+</dl><h3>戻り値・結果</h3><p>文書が返すHTML文字列。対象がない場合や取得できない場合はEMPTY。</p><h3>対応範囲と注意</h3><ul>
+<li>タグの大文字・小文字や空白などの表記は、文書のCOM実装が返す値に従います。空のタグも、対象にあればタグを含むHTMLを返します。タグが存在しない文書ではEMPTYを返します。文書やタグ候補を探す段階でCOMがアクセスを拒否すると、スクリプトエラーになります。IEデスクトップアプリでの動作は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="iesetsrc">IESETSRC</h2>
+<p>指定した要素を、開始タグと終了タグを含めてHTMLで置き換えます。</p>
+<h3>書式</h3><pre><code>IESETSRC(window, html, tag [, number])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>window</code></dt><dd>documentプロパティを持つWindowsのCOMオブジェクト。</dd>
+<dt><code>html</code></dt><dd>対象と置き換えるHTML文字列。</dd>
+<dt><code>tag</code></dt><dd>対象のタグ名。PとTAG=Pのどちらの書き方も使えます。 * を指定するとすべての要素が候補になります。</dd>
+<dt><code>number</code></dt><dd>候補番号。1から数え、省略または0以下は先頭を選びます。</dd>
+</dl><h3>戻り値・結果</h3><p>置換できた場合はTRUE。対象がない場合や要素を置換できない場合はFALSE。 COM が置換を反映した後にエラーを返すと、IESETSRC は FALSE を返し、反映済みの変更は文書に残ります。</p><h3>対応範囲と注意</h3><ul>
+<li>置換後は、IEGETDATAで新しい要素の内容を取得できます。置換で追加した名前付きフォーム要素は、IESETDATAで値を変更できます。置換が完了した直後に実行を取り消しても、文書の変更は元に戻りません。IEデスクトップアプリでの動作は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="iegetframe">IEGETFRAME</h2>
+<p>文書のフレームを名前または番号で選び、ウィンドウのCOM参照を取得します。</p>
+<h3>書式</h3><pre><code>IEGETFRAME(window, frame)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>window</code></dt><dd>documentプロパティを持つWindowsのCOMオブジェクト。</dd>
+<dt><code>frame</code></dt><dd>必須。フレーム名、または1から数える番号。先頭を選ぶには0または空文字列を指定し、数字の文字列も番号として扱います。名前は大文字と小文字を区別せず、同名の場合は先頭を選びます。</dd>
+</dl><h3>戻り値・結果</h3><p>フレームのCOM参照。対象が見つからない場合はEMPTY。番号-1または文字列「-1」を指定すると、配下にフレームがある場合は入れ子を含む総数に1を足した数、ない場合は数値0を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>返された参照は同じ実行内でIEGETDATAなどに渡せます。探索中にCOMが名前の取得を拒否したフレームは、名前指定の候補から外れます。子文書へのアクセスを拒否された場合は、その配下を探索しません。そのフレームを取得して文書へ直接アクセスすると、スクリプトエラーになります。</li>
+<li>入れ子のフレームも候補に含みます。各フレームの直後にその配下をたどってから、次の兄弟フレームに進みます。親フレームの参照を渡すと、その配下だけを探索します。探索中の祖先と同じ文書に戻った場合は、その枝の探索を打ち切り、残りの候補を調べます。</li>
+<li>ページを切り替えた後は、読み込みが完了してからフレームの参照を取り直してください。切替前に取得した参照でデータを読むと、COMのエラーになることがあります。</li>
+<li>WebBrowserコントロールでローカルのHTMLを開き、名前と番号による選択と、子フレーム内のデータ取得を確認しました。番号0・1・2、数字の文字列、空文字列、対象不在時の返値を原版と照合しました。IEデスクトップでの取得は未確認です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="getoleitem">GETOLEITEM</h2>
+<p>COMコレクションまたは配列を列挙して結果を公開します。</p>
+<h3>書式</h3><pre><code>GETOLEITEM(collection)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>collection</code></dt><dd>列挙できるCOM objectまたは配列。</dd>
+</dl><h3>戻り値・結果</h3><p>件数。ALL_OLE_ITEM[0]以降へ要素を設定します。COM_ERR_IGN中に識別済みCOM失敗を抑止した場合は-1を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>全件の収集後に結果を公開し、失敗・取消では前回の結果を保持します。</li>
+<li>FOR INによる直接列挙とLENGTHのCOM経路にも対応します。全provider・全VARIANT型の互換性は未確認です。</li>
+<li>採用したCOM生成・取得・名前解決・呼出し・列挙のHRESULT失敗はTRY/EXCEPTで処理できます。メモリ不足・解放失敗・未知のadapter障害まで捕捉するものではありません。</li>
+<li>COMへ渡せない値、表現できない返値、不正な列挙応答の採用した検証エラーもTRY/EXCEPTで処理できます。内部障害を含む変換失敗を一律に捕捉する仕様ではありません。</li>
+<li>COM列挙はDISPID -4/IEnumVARIANTで1件ずつ取得し、全件収集と列挙子解放が成功してからALL_OLE_ITEMを置き換えます。Countプロパティは必要ありません。</li>
+<li>native配列読取りとCOM値変換には、それぞれ入れ子を含む累積1,000,000スロットの上限があります。列挙では各項目も1スロットとして数え、999要素の配列1000個で上限ちょうどです。文字列のバイト数やプロセスメモリ全体の上限ではありません。</li>
+<li>上限超過はTRY/EXCEPTで捕捉でき、前回の結果を保持します。同期COM呼出しや配列変換の内部を強制中断するものではありません。取得済みobjectはsessionの終了まで保持する場合があります。</li>
+<li>配列を直接渡す場合は既存の値の内容をコピーし、多次元は行優先で全要素を並べます。ALL_OLE_ITEMはゼロ起点です。外部objectを複製せず、同じ参照を保持します。</li>
+<li>この辞書の例は2、2、日本語、secondの順に出力します。Windows 11 x64の実COMと原版で確認しました。Office・IEなど全serverの受入を意味しません。</li>
+<li>COM_ERR_IGN中の失敗はCOM_ERR_FLGをTRUEにし、-1を返して前回のALL_OLE_ITEMを保持します。非列挙COMで前回結果を空にする原版の観測結果とは異なります。COM_ERR_RET後は既存のTRY/EXCEPTによるエラー通知へ戻ります。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="getoleitem"><code>DIM o=CREATEOLEOBJ(&quot;Scripting.Dictionary&quot;)
+o.Add(&quot;日本語&quot;,7)
+o.Add(&quot;second&quot;,9)
+PRINT GETOLEITEM(o)
+PRINT LENGTH(ALL_OLE_ITEM)
+PRINT ALL_OLE_ITEM[0]
+PRINT ALL_OLE_ITEM[1]</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="oleevent">OLEEVENT</h2>
+<p>COMイベントをProcedureへ同期配送します。対象だけを指定すると、その対象の全イベント登録を解除します。</p>
+<h3>書式</h3><pre><code>OLEEVENT(object, interfaceName, eventName, procedure) / OLEEVENT(object)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>object</code></dt><dd>CREATEOLEOBJやGETACTIVEOLEOBJで取得したCOMオブジェクト。</dd>
+<dt><code>interfaceName</code></dt><dd>登録するディスパッチイベントのインタフェース名。</dd>
+<dt><code>eventName</code></dt><dd>登録するイベント名。</dd>
+<dt><code>procedure</code></dt><dd>引数なしで呼べるProcedureの名前。すべての引数に既定値があるProcedureも指定できます。</dd>
+</dl><h3>戻り値・結果</h3><p>登録・解除の正常時は空の文字列。1引数または4引数を指定し、途中の引数省略はできません。</p><h3>対応範囲と注意</h3><ul>
+<li>通常のコマンドライン版とUWSC# アプリのメイン・THREADから登録できます。通知は登録元の実行経路で処理し、COM側へ戻る前にProcedureを完了します。</li>
+<li>同じ対象・インタフェース・イベントへの再登録は後のProcedureへ置き換えます。名前の比較は大文字小文字を区別しません。登録先の名前解決や型情報の取得に失敗した場合は旧登録を維持します。</li>
+<li>Procedure内のEVENT_PRMはゼロ始まりの1次元配列です。参照引数を更新すると、Procedureの正常終了後にCOM側へ元の型で書き戻します。値渡し引数の変更はCOM側へ反映しません。次元・下限・要素数は変更できません。</li>
+<li>入れ子の通知から戻ると外側のEVENT_PRMを復元します。通知中のCOM再呼出しも可能です。EVENT_PRMは通知Procedure内で参照してください。</li>
+<li>参照引数はすべて変換してから書き戻します。書戻し開始後の解放失敗では、先に書き戻した引数の変更が残る場合があります。</li>
+<li>通知を処理する Procedure は、登録元の実行経路の COM エラー設定を使います。Procedure 内で COM_ERR_IGN または COM_ERR_RET を実行すると、Procedure から戻った後も登録元で変更後の設定を使います。</li>
+<li>Procedure内の非COMエラーや取消はCOM_ERR_IGNで抑止しません。登録・解除等の識別したCOM操作失敗はCOMエラー制御の対象です。 型情報の取得に失敗した場合もCOM_ERR_IGN/RETの設定に従います。</li>
+<li>登録元THREADの終了と実行終了時に、その所有する登録を解除します。通知Procedure内でも自身の登録を解除・置換でき、正常終了すれば参照引数を書き戻します。</li>
+<li>THREADの通知処理中にメインから登録を解除・置換できます。処理中の通知が正常終了すれば、参照引数を書き戻します。メインが置換した登録は、元のTHREADを停止しても残ります。</li>
+<li>ディスパッチ型の接続点と、イベントを識別できる型情報が必要です。クラス型情報がない場合は、既定IDispatch型情報の所属ライブラリから名前を解決し、対象の接続点を照合します。名前付きイベント引数、非dispatchの通知、型情報を取得できない対象は未対応です。同一プロセスにFramework CLRと.NETを混在させる別MTA通知には未解決の失敗があります。</li>
+<li>CALL復帰後の補助手続き参照、通知中の自己解除・置換と登録元THREADの終了は通常のコマンドライン版とUWSC# アプリで確認しました。一時停止中の保留・再開と取消はWindows実行先と所有する実COM対象で確認しました。UWSC# アプリの停止画面で、実行の一時停止中に開始した通知を再開後に処理し、参照引数を書き戻すことを確認しました。一時停止中に停止すると、この試験では Procedure の記録が残らず、通知元にエラーが返り、登録が解除されました。コマンドライン版の停止画面からの操作と、ほかのCOM対象での動作は未確認です。全provider・全Variant・全解除失敗も未受入です。同期COM呼出しや通知Procedureを強制的に中断する機能はありません。</li>
+<li>例のProgID・インタフェース名・イベント名は、事前に起動したCOM対象の仕様に合わせて変更してください。例は実際の対象の存在や利用可否を保証しません。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="oleevent"><code>DIM obj=GETACTIVEOLEOBJ(&quot;対象のProgID&quot;)
+OLEEVENT(obj,&quot;対象のイベントインタフェース&quot;,&quot;対象のイベント&quot;,&quot;OnEvent&quot;)
+SLEEP(10)
+OLEEVENT(obj)
+PROCEDURE OnEvent()
+    PRINT LENGTH(EVENT_PRM)
+FEND</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="vartype">VARTYPE</h2>
+<p>値の型番号を調べるか、指定した型へ変換した値を返します。</p>
+<h3>書式</h3><pre><code>VARTYPE(value [, targetType])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>照会・変換する値。必須です。HASHTBLと省略値には対応しません。</dd>
+<dt><code>targetType</code></dt><dd>省略すると型照会、指定すると変換です。末尾の省略も照会になります。型番号の小数部分は切り捨てます。</dd>
+</dl><h3>戻り値・結果</h3><p>型照会では型番号（返値自体の型はVAR_WORD）。変換では変換後の値。元の変数は変更しません。</p><h3>対応範囲と注意</h3><ul>
+<li>Windowsの通常のコマンドライン版とUWSC# アプリで利用できます。独立したCoreの式評価APIだけでは利用できません。1～2引数で、引数数と必須位置の省略は式の評価前に拒否します。</li>
+<li>型定数はVAR_EMPTY=0、VAR_NULL=1、VAR_SMALLINT=2、VAR_INTEGER=3、VAR_SINGLE=4、VAR_DOUBLE=5、VAR_CURRENCY=6、VAR_DATE=7、VAR_OLESTR=8、VAR_DISPATCH=9、VAR_ERROR=10、VAR_BOOLEAN=11、VAR_VARIANT=12、VAR_UNKNOWN=13、VAR_SBYTE=16、VAR_BYTE=17、VAR_WORD=18、VAR_DWORD=19、VAR_INT64=20、VAR_ASTR=256、VAR_USTR=258、VAR_ARRAY=8192です。</li>
+<li>通常の数値は5、TRUE/FALSE・比較・!とCHKNUM・ISUNICODE・HASHTBLのHASH_EXISTS/HASH_REMOVEの結果は11です。数値としてのTRUE=1/FALSE=0と既存の演算は維持します。AND/OR等の数値演算結果は5です。その他の組み込み関数の全返値について論理型の保持は未確認です。</li>
+<li>通常文字列とCOMから直接受け取るBSTRは258です。元バイト列を保持する文字列は256です。変換先8と258はUnicode文字列、256はCP932文字列を返します。CP932で表せない文字は代替文字になります。</li>
+<li>EMPTYは0、NULLは1、NOTHINGと通常COM参照は9、IUnknownとして保持する参照は13です。配列は8192と要素型のビットORで、通常配列は8204、BYTE要素の配列は8209です。配列をscalarへ変換する機能ではありません。元の照会型と同じ配列型への保持に対応し、異なる要素型の配列への変換はエラーです。</li>
+<li>通常の型変換先は0～13、16～21、256、258です。同じ照会型の値を保持する場合は、下記のBYREF・配列・Native型にも対応します。指定できる番号でも入力により変換できません。数値からVAR_ERROR/VAR_VARIANT、NULLから整数、範囲外の整数変換などはエラーです。通常の変換エラーはTRY/EXCEPTで処理できます。</li>
+<li>型変換は現在のWindows言語設定によるVariant変換を使います。整数の.5は偶数丸めで、2.5は2、3.5は4です。VAR_BOOLEANへの変換と文字列化もVariantの規則に従います。全localeと全COM providerの比較は未完です。</li>
+<li>変換した64bit整数の元値はPRINTとCOMへの送信で保持しますが、通常の数値演算は既存のdoubleです。DATEのPRINTは既存のISO形式で、原版の地域依存表示とは異なります。同期Native呼出しを強制中断せず、呼出し前後で取消を確認します。</li>
+<li>スクリプトのTRUEと述語の真は、整数・浮動小数点数への明示変換で1を保持します。同じ論理型へ変換しても保持します。一方、数値1や文字列TrueからVAR_BOOLEANへ明示変換した値はNative BOOLとなり、整数への再変換では-1です。両者の文字列化はTrue/Falseです。</li>
+<li>型14・22・23は、同じ照会型を持つ値に同型を指定する場合だけ保持できます。通常数値からこれらの型への変換はエラーです。COMから受け取った型の照会と元値の再送は維持します。型21（符号なし64bit整数）は数値21で指定できます。</li>
+<li>Native配列は要素型と上下限を保持し、I4/BSTR/VARIANT/UI1の配列型は8195/8200/8204/8209です。COMのBYREF返値では型フラグを保持します。VT_BYREF|VT_VARIANTは16396、型付きBYREFは16384と元の型番号のビットORを返し、BSTRのBYREFは16392です。VT_BYREF|VT_ARRAY|VT_VARIANTは8204へ正規化します。全provider・全配列型の比較は未完です。</li>
+<li>COM objectを型照会するときは既定メンバーを呼びません。明示的に数値などへ変換するときは、WindowsのVariant変換が既定の値を呼び出す場合があります。通常の変換失敗はTRY/EXCEPTで処理でき、元のobjectを保持します。</li>
+<li>BYREF返値も借用ポインターは保存せず、値をコピーして元の型番号だけを保持します。別名・手続き引数・配列要素の更新では保持し、異なる型への明示変換や数値演算が作る新しい値には変換後の型を使います。COMへの再送は、所有するコピーと既存の型保持規則に従います。</li>
+<li>VARTYPE(value,VARTYPE(value))は、BYREF・配列・Native型14/22/23を含め、同じ照会型の値を保持します。異なるBYREF型や配列型への変換はエラーです。CP932以外の符号化情報を持つ文字列を256へ変換する場合は、従来どおりCP932へ変換します。</li>
+<li>COMメソッドのVAR引数へ書き戻された値は、その実値の型を照会します。VAR引数領域の16396をそのまま返すものではありません。書戻し後も既存のNative型を再送時に保持し、原版で型16・17・18が3、型19が5へ変わる観測結果とは異なります。</li>
+<li>COMから受け取ったBYREF配列は、SETCLEAR・SHIFTARRAY・RESIZE・QSORTで内容を更新しても照会用の参照型を保持します。元のCOM領域への生きた参照を保存する機能ではなく、COMへの再送は所有するコピーを使います。原版の型付き配列へのRESIZEは未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="vartype"><code>source=&quot;2.5&quot;
+converted=VARTYPE(source,VAR_INTEGER)
+PRINT converted
+PRINT VARTYPE(converted)
+PRINT source
+PRINT VARTYPE(&quot;A&quot;)</code></pre>
+<p>期待出力：</p><pre><code>2
+3
+2.5
+258
+</code></pre>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-system.html">← システム・時間・待機</a> <a href="troubleshooting.html">次へ：制限と困ったとき</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#createoleobj">CREATEOLEOBJ</a></li><li><a href="#getactiveoleobj">GETACTIVEOLEOBJ</a></li><li><a href="#iegetdata">IEGETDATA</a></li><li><a href="#iesetdata">IESETDATA</a></li><li><a href="#ielink">IELINK</a></li><li><a href="#iegetsrc">IEGETSRC</a></li><li><a href="#iesetsrc">IESETSRC</a></li><li><a href="#iegetframe">IEGETFRAME</a></li><li><a href="#getoleitem">GETOLEITEM</a></li><li><a href="#oleevent">OLEEVENT</a></li><li><a href="#vartype">VARTYPE</a></li></ul></nav>
+</div></div></body></html>

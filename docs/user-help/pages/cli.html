@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>コマンドライン版の使い方と起動引数 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section" open><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a aria-current="page" href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / コマンドライン版の使い方と起動引数</p>
+<h1>コマンドライン版の使い方と起動引数</h1><h2 id="run">コマンドラインから実行する</h2>
+<p>コマンドライン版のプレビューのサポート範囲は、通常の<code>.uws</code>の実行、引数の受け渡し、標準出力・標準エラー、終了コード、ローカルのファイル処理、取消と再実行です。Windowsの画面・入力操作やCOMなどは、各機能の説明に記載した対応状況を確認してください。</p>
+<p>ソースから実行する場合は、リポジトリのルートで次の形式を使います。</p>
+<pre><code>dotnet run --project src/UWSCSharp.Cli -- examples/parameters.uws "日本語" "a b"</code></pre>
+<p>ランタイム依存のコマンドライン版配布物では.NET 10 Runtimeが必要です。展開先で次の形式を使います。</p>
+<pre><code>dotnet UWSCSharp.Cli.dll script.uws "日本語" "a b"</code></pre>
+<p>原版UWSCやUWSC#で作成した<code>UWS05</code>形式の.uwsファイルは、通常のスクリプトと同じ指定で実行でき、<code>CALL</code>の呼出し先にも使えます。ファイル形式が不正な場合や、検査値が本文と一致しない場合は、読込み時にエラーを表示します。</p>
+<h2 id="scramble">スクリプトをUWS05へ変換する</h2>
+<p><code>/A</code>を先頭に指定します。出力先を指定した場合は元ファイルを保ち、指定したファイルにUWS05を生成します。出力先を省略した場合は、変換前のバイト列を同じフォルダーの<code>.org</code>へ保存してから、元のパスをUWS05に置き換えます。</p>
+<pre><code>dotnet UWSCSharp.Cli.dll /A source.uws converted.uws
+dotnet UWSCSharp.Cli.dll /A source.uws</code></pre>
+<p>入力はUTF-8（BOMの有無を問わず）、CP932、BOM付きUTF-16LE、BOM付きUTF-16BEに対応します。空行・コメント・字下げを保持し、改行はCRLFにそろえます。出力先、または省略時の<code>.org</code>が既にある場合はエラーになり、入力と既存ファイルを保持します。原版UWSC 5.3.0.2は、この2条件で既存ファイルを上書きします。<code>.org</code>の保存後に元のパスの置換が失敗した場合は、<code>.org</code>を保持します。書込みと削除を禁止するロックを入力にかけた試験では、置換が失敗して入力と<code>.org</code>の両方に元の内容が残りました。</p>
+<p>読み取り専用の入力を出力先の指定なしで変換すると、入力と<code>.org</code>に元の内容が残り、終了コード1を返します。</p>
+<p>出力先や退避先に一時ファイルを作成できない場合や、作成したファイルを移動できない場合は、診断に保存先のパスが表示されます。</p>
+<p>BOM付きUTF-16LEまたはUTF-16BEの入力を読み取れない場合は、入力パスを含む診断を表示して終了コード1を返します。入力はそのまま残り、出力や<code>.org</code>は作成されません。</p>
+<p>置換に失敗して<code>.org</code>が残った場合は、まだ存在しない別の出力先を指定して変換をやり直せます。入力と<code>.org</code>はそのまま残ります。</p>
+<p>変換が途中で中断されると、<code>.uwsc-scramble-*.tmp</code> が残ることがあります。変換プロセスが終了したことと、入力や<code>.org</code>に必要な内容が残っていることを確認してから、一時ファイルを削除してください。</p>
+<p>変換後に本文を復元できることを確認してから保存します。置換記号との衝突を回避できない場合は、入力を保持してエラーを返します。</p>
+<h2 id="arguments">PARAM_STRの規則</h2>
+<p>コマンドライン版専用の先頭オプションを除いた最初の引数は、スクリプトのパスです。それ以降だけがPARAM_STRへ入り、スクリプト名や実行ファイル名は入りません。配列は0始まりです。順序、空文字、Unicode、空白、数値に見える文字列も文字列として保持します。シェルが事前に除去・変換した引用符などは復元しません。</p>
+<h2 id="input-cleanup">終了後の入力フック回収（Windowsのコマンドライン版）</h2>
+<p>選択的な入力禁止フックが終了時に残った場合に、同じコマンドライン版で回収を試すための指定です。LOCKHARDEXはコマンドライン版とUWSC# アプリで使用できます。公開経路の機能全体の受入は一部対応です。</p>
+<pre><code>dotnet UWSCSharp.Cli.dll --input-cleanup=manual script.uws "日本語"</code></pre>
+<p>このオプションはスクリプトのパスより前の先頭に指定します。パスより後の文字列は、同じ表記でもPARAM_STRへ渡します。先頭の<code>--input-cleanup=</code>はコマンドライン版設定として予約されるため、同じ名前のファイルには<code>./</code>または絶対パスを付けてください。</p>
+<p>標準入力と標準エラーを端末へ接続して使います。標準出力のリダイレクトは可能です。端末条件を満たさない場合、不明な値を指定した場合、Windows以外で指定した場合は、スクリプト実行前に終了コード2で拒否します。</p>
+<p>未回収所有者が残ったときだけ、終了前に操作を待ちます。未回収がなければ待ちません。指定しない通常起動でも操作待ちは追加せず、未回収の診断を出して終了します。</p>
+<ul><li><code>retry</code>とEnter：明示的に1回再回収し、診断と未回収所有者数を表示します。残る場合だけ再び操作を待ちます。</li><li><code>exit</code>とEnter：未回収が残ることを表示して終了します。既存の非ゼロ終了コードを維持し、元のコードが0なら1にします。</li><li>Ctrl+C：操作待機から退出して130を返します。回収要求中は退出要求を保持し、その要求の協調待機が終わってから退出します。</li></ul>
+<p>コマンドの大文字小文字と前後の空白は無視します。入力は64文字までで、超過した行や未知のコマンドでは再回収しません。受付前や前の回収中に届いた残留入力は、新たな要求として扱いません。</p>
+<p>再回収後も過去の診断が残る場合があります。未回収所有者数が0なら回収完了ですが、元の実行エラーや取消の終了コードを0へ変更しません。プロセス終了と明示解除の成功も区別してください。OSや所有スレッドの応答停止を強制回復する操作ではありません。</p>
+<p>手動回収とCtrl+C/Breakによる取消は、Windows 11 x64の検証用コンソールで確認しています。Windows Terminalなどの追加端末、物理キーボード操作、実OSのフック解除障害は未確認です。端末が異なる場合の入力配送や、OS障害からの回復を一般保証するものではありません。</p>
+<h2 id="restart-script">スクリプトを再実行する（Windowsのコマンドライン版）</h2>
+<p><code>POFF(P_UWSC_REEXEC, TRUE)</code> は、現在のスクリプトを終了し、同じファイルと引数で別のコマンドライン版プロセスを起動します。元の作業ディレクトリと <code>--input-cleanup=manual</code> の指定も引き継ぎます。</p>
+<p>再実行が必要な場合だけこの行へ進むように条件を付けてください。起動するたびにこの行を実行すると、再実行を繰り返します。</p>
+<p>元のコマンドライン版は、後片付けが成功して新しいプロセスを起動できた場合に終了コード0を返します。再実行したスクリプトの終了コードは、新しいプロセスが返します。後片付けに失敗した場合は新しいプロセスを起動しません。</p>
+<p>Windowsのコマンドライン版で再実行を指定する場合は、第2引数に <code>TRUE</code> を指定してください。UWSC# アプリの指定は<a href="editor.html#restart-application">スクリプトからUWSC# アプリを再起動する</a>を参照してください。</p>
+
+<h2 id="power-commands">Windowsの電源と画面を操作する</h2>
+<p>Windowsのコマンドライン版とUWSC# アプリでは、<code>POFF(コマンド)</code> でWindowsに電源や画面の操作を要求できます。UWSC# アプリの予約実行でも、同じプロセスと別プロセスの両方から要求できます。</p>
+<table><thead><tr><th>コマンド</th><th>要求する操作</th></tr></thead><tbody>
+<tr><td><code>P_POWEROFF</code></td><td>電源を切る</td></tr>
+<tr><td><code>P_LOGOFF</code></td><td>ログオフする</td></tr>
+<tr><td><code>P_REBOOT</code></td><td>Windowsを再起動する</td></tr>
+<tr><td><code>P_SUSPEND</code></td><td>休止する</td></tr>
+<tr><td><code>P_SUSPEND2</code></td><td>スタンバイに入る</td></tr>
+<tr><td><code>P_MONIPOWER</code></td><td>モニターを省電力状態にする</td></tr>
+<tr><td><code>P_MONIPOWER2</code></td><td>モニターの電源を切る</td></tr>
+<tr><td><code>P_MONIPOWER3</code></td><td>モニターの電源を入れる</td></tr>
+<tr><td><code>P_SCREENSAVE</code></td><td>スクリーンセーバーを起動する</td></tr>
+</tbody></table>
+<p><code>P_FORCE</code> は電源断、ログオフ、Windowsの再起動にだけ <code>OR</code> で追加できます。アプリを強制終了するため、未保存の内容が失われることがあります。第2引数は、UWSC#を再起動する <code>P_UWSC_REEXEC</code> 専用です。</p>
+<p>操作の呼び出しが成功すると <code>EMPTY</code> を返します。Windowsが要求を受理した後の状態は、電源設定、権限、機器やセッションによって決まります。APIがエラーを返した場合は <code>EXCEPT</code> で捕捉できます。予約実行で <code>P_UWSC_REEXEC</code> を指定すると、捕捉できるエラーになります。</p>
+
+<h2 id="exit">終了コードと停止</h2>
+<table><thead><tr><th>コード</th><th>意味</th></tr></thead><tbody><tr><td>0</td><td>正常終了</td></tr><tr><td>1</td><td>失敗</td></tr><tr><td>2</td><td>スクリプト引数なし、手動回収の起動設定エラー、/Aの引数の個数が不正</td></tr><tr><td>130</td><td>協調取消</td></tr></tbody></table>
+<p>スクリプトがEXITEXITに終了コードを指定すると、後処理が成功した場合はその値を返します。1・2・130も明示指定できるため、コードだけではコマンドライン版自身のエラーと区別できません。診断はstderrも確認してください。終了コードの省略、通常の最終行到達、メインのEXITは0です。</p>
+<p>stdoutとstderrはUTF-8です。Ctrl+Cの配送は端末に依存します。取消・実行エラー時も、保留中の出力は終了時に保存される場合があります。ロールバックは行いません。</p>
+
+<h2 id="logging">PRINTのログ保存</h2>
+<p>コマンドライン版はPRINTの内容を、主スクリプトと同じフォルダーの<code>UWSC.LOG</code>へ保存します。既定では分単位の日時を付け、直近2,000件を保持します。実行中は約1秒ごとに保存を試み、正常終了・エラー・取消の後にも最終保存します。保存先に書込み権限がない場合は診断を確認してください。</p>
+<p>保存不要の場合は<code>OPTION LOGFILE=1</code>を先頭に指定してください。保存形式や保存先の変更は<a href="control-flow.html#log-options">ログOPTION</a>を参照してください。周期保存が失敗するとstderrへ通知して再試行します。回復後に最終保存が成功した場合、周期保存の失敗だけで終了コードを変更しません。最終保存だけが失敗すると終了コード1となり、実行エラーや取消と重なった場合は元の診断に終了処理の失敗を付記します。</p>
+<nav class="pager" aria-label="前後のページ"><a href="scheduler.html">← スクリプトを予約実行する</a> <a href="authoring.html">次へ：.uws作成支援（MCPサーバー）</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#run">コマンドラインから実行する</a></li><li><a href="#scramble">スクリプトをUWS05へ変換する</a></li><li><a href="#arguments">PARAM_STRの規則</a></li><li><a href="#input-cleanup">終了後の入力フック回収（Windowsのコマンドライン版）</a></li><li><a href="#restart-script">スクリプトを再実行する（Windowsのコマンドライン版）</a></li><li><a href="#power-commands">Windowsの電源と画面を操作する</a></li><li><a href="#exit">終了コードと停止</a></li><li><a href="#logging">PRINTのログ保存</a></li></ul></nav>
+</div></div></body></html>

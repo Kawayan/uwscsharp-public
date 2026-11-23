@@ -1,0 +1,24 @@
+// テスト側が専用作業ディレクトリのfixture_dirとINI名のコンテキストを渡します。
+WRITEINI("Task", "Count", 42)
+IF READINI("Task", "Count") <> 42 THEN PRINT 1 / 0
+WRITEINI("Task", "Text", "日本語")
+IF READINI("Task", "Text") <> "日本語" THEN PRINT 1 / 0
+DELETEINI("Task", "Count")
+IF READINI("Task", "Count") <> "" THEN PRINT 1 / 0
+path = fixture_dir + "\data.txt"
+id = FOPEN(path, F_WRITE8)
+IF id < 1 THEN PRINT 1 / 0
+FPUT(id, "keep")
+FPUT(id, "remove")
+FDELLINE(id, 2)
+IF FGET(id, F_LINECOUNT) <> 1 THEN PRINT 1 / 0
+FCLOSE(id)
+IF GETDIR(fixture_dir, "*.txt") <> 1 THEN PRINT 1 / 0
+IF GETDIR_FILES[0] <> "data.txt" THEN PRINT 1 / 0
+FOR name IN GETDIR(fixture_dir, "*.txt")
+    IF DELETEFILE(fixture_dir + "\" + name) <> TRUE THEN PRINT 1 / 0
+NEXT
+IF GETDIR(fixture_dir, "*.txt") <> 0 THEN PRINT 1 / 0
+DELETEINI("Task")
+IF READINI("Task", "Text") <> "" THEN PRINT 1 / 0
+PRINT "ini-dir-ok"

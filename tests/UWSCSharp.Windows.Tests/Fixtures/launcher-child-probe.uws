@@ -1,0 +1,22 @@
+﻿// 起動先で受け取った値を保存し、解放指示を待ちます。
+DIM name=PARAM_STR[0]
+DIM f=FOPEN(name+".args",F_WRITE8)
+FPUT(f,GET_CUR_DIR,0)
+DIM i
+FOR i=1 TO LENGTH(PARAM_STR)-1
+    FPUT(f,PARAM_STR[i],0)
+NEXT
+FCLOSE(f)
+f=FOPEN(name+".pid",F_WRITE8)
+FPUT(f,STATUS(GETID(GET_THISUWSC_WIN),ST_PROCESS),0)
+FCLOSE(f)
+f=FOPEN(name+".ready",F_WRITE8)
+FCLOSE(f)
+DIM started=GETTIME()
+WHILE !FOPEN(name+".go",F_EXISTS)
+    IF GETTIME()-started>90 THEN EXITEXIT(3)
+    SLEEP(0.05)
+WEND
+f=FOPEN(name+".done",F_WRITE8)
+FCLOSE(f)
+EXITEXIT(0)

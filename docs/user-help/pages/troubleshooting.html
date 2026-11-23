@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>制限と困ったとき | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section" open><summary>困ったとき</summary><ul><li><a aria-current="page" href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 制限と困ったとき</p>
+<h1>制限と困ったとき</h1><h2 id="keys">ホットキーが動かない</h2>
+<p>画面の登録状態を確認してください。他のアプリと競合する場合は「ホットキー設定」でキーを変更するか、ボタンで操作します。</p>
+<h2 id="recording">記録と再生が一致しない</h2>
+<ul><li>IMEの確定文字を意味として記録する方式は未対応です。最初はIMEをオフにして確認してください。日本語スクリプトの読込みやPRINTとは別の制限です。</li>
+<li>待ち時間を省略すると対象アプリの処理が間に合わない場合があります。省略をオフにするかSLEEPを追加してください。</li>
+<li>相対記録ではアクティブ切替や通知順序の実操作受入が未確認です。同名・同クラスの対象は一つに絞ってください。</li>
+<li>保存する入力イベントの上限は50,000件です。警告が出た記録は内容を確認し、短い記録に分割してください。</li></ul>
+<h2 id="stop">停止・保存に時間がかかる</h2>
+<p>一時停止はキーやボタンのUPまで保留される場合があります。同期Windows/COM処理では処理の復帰後に停止します。強制終了時の後処理は保証しません。保存エラーが出た場合は、別の書込み可能な場所を指定してください。</p>
+<h2 id="limits">互換性と未確認事項</h2>
+<p>UWSC# アプリの初回確認対象はWindows 11 x64、1画面・150%、通常権限のメモ帳とEdgeです。これは確認対象の定義であり、全項目が受入済みという意味ではありません。部品の回帰テストや起動検査と、実操作の受入は区別しています。</p>
+<p>管理者対象、セキュアデスクトップ、複数画面、倍率混在、100/200%は初回確認対象外です。実OSのフック・物理入力を含む長時間運用は未受入です。記録中の一時停止、独立STOP画面、インストーラー、自動更新は、基本記録・再生プレビューの初回確認範囲外です。</p>
+<ul>
+<li><a href="editor.html#launcher">通知領域への格納・復帰とランチ</a>を利用できます。通知領域のアイコンを物理マウスで操作する検証は未実施です。</li>
+<li><a href="scheduler.html">予約実行</a>では、予約の登録、監視、実行履歴の確認ができます。予約に連動した実音と実機での休止・復帰は未確認です。</li>
+<li><a href="recording.html#high-level">高レベル記録</a>と<a href="recording.html#background-playback">背景再生用記録</a>は、Win32プッシュボタンと2状態のWin32自動チェックボックスに対応します。高レベル記録では、メニューバーから直接実行できるWin32メニュー項目にも対応します。</li>
+</ul>
+<p>原版との全関数・全引数・全生成行の一致は保証しません。このアプリはファイルやWindows操作を隔離するサンドボックスではありません。</p>
+<h2 id="report">問題を報告する</h2>
+<p>公開の不具合受付URLはまだ設定していません。配布担当者へ、版番号、Windows版、画面倍率、対象アプリ、再現手順、期待結果と実際の結果を伝えてください。スクリプトを添える場合は個人情報を除いてください。</p>
+
+<h2 id="input-cleanup">入力フックの未回収で再生・記録を開始できない</h2>
+<p>件数と実行結果の診断を確認し、<a href="editor.html#input-cleanup">「入力フックを再回収」の操作</a>を使ってください。過去の診断が残っていても、件数が0なら回収完了です。終了を解除成功と扱わず、必要な編集内容を保存してから閉じるか判断してください。</p>
+<nav class="pager" aria-label="前後のページ"><a href="functions-com.html">← COM連携</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#keys">ホットキーが動かない</a></li><li><a href="#recording">記録と再生が一致しない</a></li><li><a href="#stop">停止・保存に時間がかかる</a></li><li><a href="#limits">互換性と未確認事項</a></li><li><a href="#report">問題を報告する</a></li><li><a href="#input-cleanup">入力フックの未回収で再生・記録を開始できない</a></li></ul></nav>
+</div></div></body></html>

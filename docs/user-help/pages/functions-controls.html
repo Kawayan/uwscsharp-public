@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>コントロール・アクセシビリティ | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a aria-current="page" href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / コントロール・アクセシビリティ</p>
+<h1>コントロール・アクセシビリティ</h1><p class="lead">ボタンや一覧の操作、文字列・選択状態の取得を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="clkitem">CLKITEM</h2>
+<p>名前で指定したボタンやメニュー、一覧項目などを操作します。</p>
+<h3>書式</h3><pre><code>CLKITEM(id, name, [kind, on, number])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象ウィンドウID。</dd>
+<dt><code>name</code></dt><dd>項目の文字列。メニューやツリーの階層にはバックスラッシュを使います。複数選択LISTの名前はタブで連結します。</dd>
+<dt><code>kind</code></dt><dd>CLK_BTN、CLK_LIST、CLK_TAB、CLK_MENU、CLK_TREEVIEW、CLK_LISTVIEW、CLK_TOOLBAR、CLK_LINKなど。省略は自動探索。</dd>
+<dt><code>on</code></dt><dd>既定TRUE。対応するチェック項目のオン・オフなどを指定します。</dd>
+<dt><code>number</code></dt><dd>通常は1から指定します。LISTの省略・0は全コンテナを探索します。負数や同名番号の意味は経路と種別に依存します。</dd>
+</dl><h3>戻り値・結果</h3><p>操作できた場合は1、対象なしや処理できない条件では0。操作障害の一部は例外として通知します。</p><h3>対応範囲と注意</h3><ul>
+<li>通常はAPI→UIA→ACCの順に探索し、UIA優先ルートではUIA→API→ACCの順に探索します。操作を始めた候補を別経路で再操作しません。CLK_API・CLK_UIA・CLK_ACCは指定経路に限定します。UIA/ACCのマウス指定にも対応します。CLK_OFTHISはnativeを優先し、未検出ならUIAへ進みます。</li>
+<li>通常MSAA探索は指定種別に対応するrole・祖先コンテナ・取得できるHWNDクラスで候補を絞ります。UIAで必要なpatternが未提供なら、操作開始前に限って後続経路を試します。操作開始後の失敗やFALSEでは再操作しません。明示CLK_UIAはACCへ切り替えません。</li>
+<li>UIA Toggleの要求状態は0・1・2に限ります。範囲外は操作前にTRY/EXCEPTで通知する操作エラーとし、0や2へ丸めません。正の範囲外でもTRUEとなる原版の挙動とは異なります。UIAのLIST OFFは項目の照合とフォーカス準備だけを行い、明示的な選択変更は行いません。フォーカスに伴う副作用は対象アプリによります。</li>
+<li>UIAのLIST番号は、0・省略で全List/Comboを探索し、正・負で絶対値に対応するコンテナを指定します。CLK_OFTHISはコンテナを横断した一致項目の番号とし、0・省略は最初の一致、正・負は絶対値に対応する一致を選びます。番号を変えても同じ最終同名項目を選んだ原版のUWSC# アプリとは異なる設計です。</li>
+<li>CLK_SHORTは対応する項目の部分一致です。LINKにも使えます。種別省略・複合種別のオプションも対象の処理へ渡します。native LISTVIEWは従来の完全一致を使います。CLK_BACKは対応経路で前面化を抑止します。</li>
+<li>CLK_UIAはButton・CheckBox・RadioButton・List/Combo・Tab・Menu・Tree・DataGrid・Toolbar・Linkの型別操作へ接続しています。通常操作では必要なpatternが未提供なら操作できません。明示クリックでは項目位置から物理入力を送ります。選択項目は表示位置へスクロールを試み、表示外のままならFALSEを返します。CLK_OFTHISはLISTの一致項目番号に対応します。</li>
+<li>CLK_ACCはルートからMSAA候補を探索します。CLK_FROMLASTとCLK_ACC2もMSAA用の指定です。CLK_ACC・CLK_UIA・CLK_APIは同時に指定できません。</li>
+<li>通常経路は既知のWinForms別名を含むネイティブ探索を使い、既存のUIA優先ルートではUIAを使います。ネイティブ操作の拒否後に同じ候補をUIAで再操作しません。</li>
+<li>通常の別プロセスTABはUIAの選択patternで操作します。CLK_APIによる別プロセスTABは、WM_NOTIFYのプロセス間送信を行わず、操作前に拒否します。</li>
+<li>Windows 11 x64で採用仕様の実装・検証を完了しました。明示APIの制限、要求状態への到達、UIAのMENU/TOOLBAR拡張など、原版と異なる動作があります。アプリ固有の部品と全providerの互換を保証するものではありません。</li>
+<li>CLK_APIはUIA・MSAAを使わず、Windowsメッセージで操作します。状態をAPIから取得できない所有描画チェック項目はFALSEを返します。WinFormsの標準push buttonはAPIで識別して通知します。</li>
+<li>Windows標準コントロール中心の実装です。アプリ固有の部品や権限差では操作できない場合があります。</li>
+<li>採用したACC/UIA interfaceから戻る通常の操作失敗もTRY/EXCEPTへ通知します。従来の未検出・未対応patternの返値は維持します。通知callbackや参照解放、hostの規約違反・メモリ不足まで一律に捕捉する仕様ではありません。</li>
+<li>採用したACC/UIA経路では、操作失敗や取消に重なった解放失敗で元の原因を置き換えません。残りの解放を試みます。解放だけの失敗はホスト障害として通知し、EXCEPTでは一律に捕捉しません。</li>
+<li>発生箇所で識別した操作失敗だけを、実行したsessionと関数でTRY/EXCEPTへ通知します。未知のbackend障害・資源不足は、同じ例外型でも一律に捕捉しません。識別した操作失敗の本文にはFucCLKITEM:を付けます。</li>
+<li>操作失敗や取消に前面復元の失敗が重なった場合は、最初の原因を保持します。復元だけが失敗した場合は、その失敗を通知します。workerの期限超過後は、同期処理が戻ってから復元します。</li>
+<li>CLK_CONTINUEは種別またはCLK_ACCと組み合わせます。単独では種別を補わずFALSEを返します。MSAA探索では前回成功した照合位置を再利用し、その位置を含めて以降の一致番号を数えます。外すと先頭から検索します。位置は実行セッションごとで、別ウィンドウへの切替でリセットします。構成変更後に先頭から探す場合はCLK_CONTINUEを外してください。</li>
+<li>UIA/ACCのマウス移動だけの指定は、通常の項目操作も行います。明示クリックは項目位置で物理入力を送ります。UIA CheckBoxはOn/Offにかかわらずクリックし、ACCは要求状態と異なる場合にクリックします。物理クリックはCLK_BACK指定時も前面化を要求します。押下後の取消でも解放を試みます。</li>
+<li>UIA/ACCでは、複数のクリック指定を重ねるとLEFTCLK→RIGHTCLK→DBLCLKの順に1種類を選びます。ダブルクリックは単独のCLK_DBLCLKで指定します。UIA ToggleButtonはToggle patternによる状態合わせを優先します。</li>
+<li>タブ区切りの複数選択では、native LISTは一致件数で成功を判定し、不足時のFALSEでも途中の選択変更が残ります。UIAは複数選択可能なLISTに限り、一致した項目を選択します。一致があれば、欠けた名前を含んでいてもTRUEを返します。UIAのOFFは明示的な選択変更をしません。</li>
+<li>UIAの複数名と明示クリックの併用は、入力せずFALSEを返します。マウス移動だけの指定は選択patternと併用できます。複数選択不可のLISTやCOMBOを、先頭の名前だけの選択へ縮めません。</li>
+<li>型を確認できるSystem.Windows.Forms.Buttonの通常操作は、BM_CLICKで通知します。明示マウスとチェック項目の操作は各経路の規約に従います。</li>
+<li>native LISTBOXのマウス指定は、対象行を表示してから行内位置へ移動・クリックします。クリックは対象HWNDへのposted mouseを使います。COMBOの移動は従来の選択処理に従います。</li>
+<li>UIA/ACCの物理クリックは、最後のカーソル移動後に待機し、実位置とヒット先が対象ルートまたはその所有窓の範囲にあるかを照合します。一致しなければ入力せずFALSEを返します。</li>
+<li>型を確認できるWinFormsのCheckBoxとRadioButtonは、対象HWNDのUIA patternで通常操作します。チェックOFFでは、原版がONのままTRUEとなる条件でも、製品は要求したOFFへ合わせます。</li>
+<li>型を確認できるWinFormsボタンの明示マウス指定は、選択したHWNDのUIA矩形を使って物理入力を送ります。通常pushのBM_CLICK、明示APIの制限とは区別します。</li>
+<li>native LISTの明示クリックは対象行へのposted mouseです。TRUEは名前一致と送信成功を示し、右クリックによる選択変更は保証しません。原版が項目を選択しても、対象アプリでは選択を保持する場合があります。</li>
+<li>CLK_MENUはアプリケーションのメニューを対象とします。UIA探索のためにタイトルバーのシステムメニューを開きません。</li>
+<li>ネイティブSysLinkのONは、対象のデスクトップがユーザー入力を受け取っている場合に限ります。非入力デスクトップではFALSEを返します。BACKでもこの制限は同じです。OFFの照合や他のUIA providerへ一律に同じ制限を適用しません。</li>
+<li>単一選択のnative LIST/COMBOは選択確認が不一致なら最大3回試行し、各試行で隣接キーによる選択通知を送ります。成功しても通知列が1組限りとは限らず、再試行で同じ通知列が繰り返される場合があります。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="clkitem"><code>DIM id = GETID(&quot;検証用ウィンドウ&quot;, , 1)
+IFB id &gt; 0
+    PRINT CLKITEM(id, &quot;実行&quot;, CLK_BTN)
+ENDIF</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="getstr">GETSTR</h2>
+<p>編集欄、ラベル、ステータスバーなどの文字列を読み取ります。</p>
+<h3>書式</h3><pre><code>GETSTR(id, [number, kind, moveMouse])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象ID。0はクリップボードのUnicode文字列。</dd>
+<dt><code>number</code></dt><dd>既定0はフォーカス欄。正番号は有効候補、負番号は無効候補も数えます。STATIC/STATUSの0はタイトル/先頭部品。MSAA取得は従来どおり正負とも無効候補を数えます。</dd>
+<dt><code>kind</code></dt><dd>STR_EDIT（既定）、STR_STATIC、STR_STATUS、STR_ACC_EDIT、STR_ACC_STATIC、STR_ACC_CELL。</dd>
+<dt><code>moveMouse</code></dt><dd>0（既定）は移動なし、1は取得した要素の矩形内へマウスを移動。ID=0、STR_STATICの番号0、候補なしでは移動しません。</dd>
+</dl><h3>戻り値・結果</h3><p>取得した文字列。通常の対象なしではEMPTY。クリップボードに文字列がなければ空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>ネイティブ欄がなければ指定対象内のUIA編集欄・表示文字列・ステータス部品を探します。ネイティブの位置順とproviderの列挙順は異なります。</li>
+<li>存在する空の欄は空文字列、候補なしはEMPTYです。MSAA取得には既存のrole/state条件とsentinelの扱いがあります。</li>
+<li>移動は画面座標で行い、MOUSEORGの相対座標へ変換しません。値取得後の取消確認を通過してから、選んだ矩形の左上から最大4ピクセル内側へ移動します。</li>
+<li>STR_STATICの番号0で読むタイトルは300文字まで返します。タイトル以外は既存の取得上限を使います。原版のUIA移動位置・STATUS部品位置・読取り時の前面化には差が残ります。</li>
+<li>取得上限・座標・通常のWindows操作とproviderの失敗はTRY/EXCEPTへ通知します。ルートUIA要素の不在は候補なしとします。取消・メモリ不足・未知の障害まで一律に捕捉しません。</li>
+<li>外部COMの同期呼出し中は強制停止せず、復帰後に取消を確認します。主例外を保ってCOM参照を解放し、解放だけの失敗はホスト障害とします。</li>
+<li>画像資源のStaticは、番号0のcaptionを含め空文字列を返します。資源IDやhandleを文字列へ変換しません。選択Staticの移動指定は有効で、番号0は移動しません。WindowsForms10.RichEdit系も既知クラスとして扱います。</li>
+<li>入力禁止中のEDIT・STATICの取得と移動は、DPI144（150%）のSandboxでDPI非対応・PerMonitorV2の両条件を確認しました。DPI非対応での移動位置のずれを修正しました。</li>
+<li>入力禁止中のSTATUS・MSAA・UIAの取得と移動も、所有する検証用ウィンドウとDPI144で確認しました。UIAのDPI非対応時の座標取得を修正しました。任意provider・別倍率・複数モニターは今回未確認です。</li>
+<li>DPI144・単一画面で、入力禁止中の移動先が指定した物理座標と一致することを確認しました。96/192 DPI・混在倍率・複数画面は未検証です。</li>
+<li>DPI非対応の対象のEDIT・STATUSでは、指定した移動位置と一致しない検証例があり、原因を調査中です。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="chkbtn">CHKBTN</h2>
+<p>チェックボックスやラジオボタンなどの状態を取得します。</p>
+<h3>書式</h3><pre><code>CHKBTN(id, name, [number, acc])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象ID。</dd>
+<dt><code>name</code></dt><dd>対象の表示名。</dd>
+<dt><code>number</code></dt><dd>同名対象の番号。既定1。0以下も1へ補正します。通常API/UIAでは無効候補を除外し、UIAはButton→CheckBox→Radioの型順で数えます。</dd>
+<dt><code>acc</code></dt><dd>0（既定）は通常API/UIA、非0はMSAA。1・2等を受理し、製品は非0の指定で前面化しません。原版は2以外で前面化します。</dd>
+</dl><h3>戻り値・結果</h3><p>未チェック0、チェック1、不定状態2。見つからない場合などは-1。</p><h3>対応範囲と注意</h3><ul>
+<li>native Button・Tree・ListView、既知のWindowsForms10別名、UIAのButton/CheckBox/Radio、MSAAの採用条件を持つ候補に対応します。通常経路でToolbarやメニューの存在をONとして返すものではありません。</li>
+<li>Tree/ListViewの照会は選択・展開や通知を変える場合があります。チェックON/OFFを変えるSpace操作は行いません。ALL_ITEM_LISTは変更しません。</li>
+<li>採用したACC/UIA interfaceから戻る通常の操作失敗もTRY/EXCEPTへ通知します。従来の未検出・未対応patternの返値は維持します。通知callbackや参照解放、hostの規約違反・メモリ不足まで一律に捕捉する仕様ではありません。</li>
+<li>採用したACC/UIA経路では、操作失敗や取消に重なった解放失敗で元の原因を置き換えません。残りの解放を試みます。解放だけの失敗はホスト障害として通知し、EXCEPTでは一律に捕捉しません。</li>
+<li>発生箇所で識別した操作失敗だけを、実行したsessionと関数でTRY/EXCEPTへ通知します。未知のbackend障害・資源不足は、同じ例外型でも一律に捕捉しません。識別した操作失敗の本文にはFucCLKITEM:を付けます。</li>
+<li>操作失敗や取消に前面復元の失敗が重なった場合は、最初の原因を保持します。復元だけが失敗した場合は、その失敗を通知します。workerの期限超過後は、同期処理が戻ってから復元します。</li>
+<li>UIA優先ルートは直接UIAへ進み、それ以外はnative未一致かつ標準候補20件未満でUIAへ進みます。</li>
+<li>MSAA専用枝は無効状態だけで候補を落とさず、0/1/2を返す場合があります。.NET補助経路の状態も、生のBM_GETCHECKと異なる場合があります。</li>
+<li>任意アプリ・全provider・全DPI等の原版互換は未確認です。同期COM呼出し自体は強制中断しません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="getitem">GETITEM</h2>
+<p>指定種別の項目を収集し、件数とALL_ITEM_LISTを公開します。</p>
+<h3>書式</h3><pre><code>GETITEM(id, kind, [number, column, excludeDisabled, maxCount])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象ID。</dd>
+<dt><code>kind</code></dt><dd>ITM_BTN、ITM_LIST、ITM_TAB、ITM_MENU、ITM_TREEVIEW、ITM_LISTVIEW、ITM_TOOLBAR、ITM_EDIT、ITM_STATIC、ITM_STATUSBAR、ITM_LINK、ITM_ACCCLK、ITM_ACCTXT、ITM_ACCEDITなど。</dd>
+<dt><code>number</code></dt><dd>既定1、0は1へ補正、通常種別の負数は全取得。native List/Tree/Viewは99候補まで。ACCを含む場合は正数または-1。番号を使わない種別は全候補を取得します。</dd>
+<dt><code>column</code></dt><dd>native ListViewとUIA DataGridの列。既定0と1は先頭列、負数は列見出し。範囲外の正列は空結果。</dd>
+<dt><code>excludeDisabled</code></dt><dd>0または1。既定0。1では無効な要素を除外します。UIAは要素自身のIsEnabledを使うため、nativeの結果と異なる場合があります。</dd>
+<dt><code>maxCount</code></dt><dd>ACC各種での取得上限。既定0。</dd>
+</dl><h3>戻り値・結果</h3><p>件数を返し、ALL_ITEM_LIST[0]以降へ文字列を設定します。</p><h3>対応範囲と注意</h3><ul>
+<li>列指定はLISTVIEW、上限・ITM_FROMLAST・ITM_BACKはACC各種に対応しています。</li>
+<li>取得開始後の失敗・取消では、その呼出しで収集した項目までを公開します。入口前の取消や引数検査失敗は以前の配列を保持します。返却配列と過去に保存した配列は独立しています。</li>
+<li>標準クラスとWindowsForms10・RichEditの既知別名、保存文字列を持つowner drawに対応します。画像Staticは空文字列として数えます。仮想owner data等は明示的に拒否します。</li>
+<li>発生箇所で分類した取得上限・対象状態・データ形式・ファイル等のWindows操作エラーはTRY/EXCEPTで処理できます。取消・メモリ不足・未知のbackend障害や、外部providerの全例外まで捕捉する仕様ではありません。</li>
+<li>採用したACC/UIA interfaceから戻る通常の操作失敗もTRY/EXCEPTへ通知します。従来の未検出・未対応patternの返値は維持します。通知callbackや参照解放、hostの規約違反・メモリ不足まで一律に捕捉する仕様ではありません。</li>
+<li>採用したACC/UIA経路では、操作失敗や取消に重なった解放失敗で元の原因を置き換えません。残りの解放を試みます。解放だけの失敗はホスト障害として通知し、EXCEPTでは一律に捕捉しません。</li>
+<li>操作失敗にsnapshot公開の失敗が重なった場合は、元の原因を保持します。新しい配列を構築できない場合は以前のALL_ITEM_LISTを維持します。</li>
+<li>通常種別はButton→List→Tab→Menu→TreeView→ListView→Edit→Static→StatusBar→Toolbar→Linkの順に連結し、その後にACCを追加します。</li>
+<li>UIAはproviderの型と順に従います。EditやTextは生文字列、Tree/Menuは先頭の区切りを含む葉パス、Toolbarは容器のNameを返します。列見出しに行見出しは混ぜません。</li>
+<li>UIAの標準Comboは表示状態を変えずに取得します。一時的な展開は元へ戻しますが、復元できない部分展開は拒否します。同期COM呼出しの強制中断や任意アプリ・全providerへの対応は保証しません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="getslctlst">GETSLCTLST</h2>
+<p>一覧やツリーで選択されている項目の文字列を取得します。</p>
+<h3>書式</h3><pre><code>GETSLCTLST(id, [number, column])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象ID。</dd>
+<dt><code>number</code></dt><dd>対象コントロールの番号。既定1。0以下は1へ補正。nativeは有効な候補を画面位置順、UIAはList→Combo→Tree→DataGridの型順で数えます。UIAは無効候補も番号を消費します。</dd>
+<dt><code>column</code></dt><dd>native ListViewとUIA DataGridの列。既定0は先頭。負値も先頭へ補正し、int.MinValueの減算overflowはエラー。他の型では使いません。</dd>
+</dl><h3>戻り値・結果</h3><p>選択された文字列。複数選択はタブで連結します。対象なしは空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>複数の選択項目はTABで連結します。候補なし・無選択は空文字列を返し、ALL_ITEM_LISTを変更しません。先頭の空項目ではTABを増やしません。</li>
+<li>native List/Comboの選択文字列は最大2048 UTF-16単位です。native ListViewの列文字列はtrimします。UIAはproviderの生の文字列を使います。</li>
+<li>Treeは親からのパスを返します。nativeは先頭区切りなし、UIAは先頭の区切りを含みます。</li>
+<li>UIAの標準Comboはネイティブ選択取得、独自ComboはSelectionPatternを優先し、表示状態を変えません。patternがなければ展開して読み、終了時に閉じる経路が残ります。</li>
+<li>HASSTRINGS付きowner drawと保存文字列のListViewに対応します。非終端item dataやLVS_OWNERDATAは明示的に拒否し、未初期化データを文字列として読みません。</li>
+<li>UIAとMozillaは対象固有の準備を行います。任意のWebページ・アプリ・全仮想化への対応を保証しません。</li>
+<li>通常の操作失敗はTRY/EXCEPTへ通知し、取消・メモリ不足・未知の障害を一律に空文字列へ変換しません。外部COMの同期呼出しは強制停止せず、復帰後に取消を確認します。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="getslider">GETSLIDER</h2>
+<p>トラックバーやスクロールバーの位置・範囲・座標などを取得します。</p>
+<h3>書式</h3><pre><code>GETSLIDER(id, [number, item])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>GETID/HNDTOIDのID。0は呼出し時点の前面ウィンドウ。必須IDにEMPTYは指定できません。</dd>
+<dt><code>number</code></dt><dd>1始まりの番号。省略・EMPTY・0は1。負数は絶対値を使います。標準経路の負番号は無効なコントロールも含めます。</dd>
+<dt><code>item</code></dt><dd>SLD_POS（既定）、SLD_MIN、SLD_MAX、SLD_PAGE、SLD_BAR、SLD_X、SLD_Y、SLD_X2、SLD_Y2。</dd>
+</dl><h3>戻り値・結果</h3><p>指定項目の数値。対象なしはERR_VALUE（-999999）。</p><h3>対応範囲と注意</h3><ul>
+<li>標準trackbar・独立ScrollBar・ウィンドウ付属の横/縦バーと、対応する互換クラス名を扱います。標準経路は画面位置順で数えます。</li>
+<li>UIAではSliderを先に、その後にPaneのスクロール可能な縦軸・横軸を数えます。無効なUIA要素も番号を消費します。標準経路で指定候補がなければUIAも検索します。</li>
+<li>原版の全クラス・provider・通知順・権限・競合の互換は未確認です。</li>
+<li>項目番号は0～8です。UIAの小数値は0方向へ切り捨てます。SLD_X/Y/X2/Y2は物理矩形を対象rootのクライアント座標へ変換します。</li>
+<li>UIAのPaneではMIN=0・MAX=100、PAGEは表示領域の割合です。付属バーの座標は所有ウィンドウ全体の外周で、不可視のリサイズ枠も含めます。バー自体の矩形ではありません。</li>
+<li>不正な項目番号、UIAの非有限値・int範囲外は実行エラーです。無効IDはERR_VALUEを返します。UIA基盤がproviderの失敗を0へ置き換えた場合、その0と正常値0を区別できません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="setslider">SETSLIDER</h2>
+<p>対応するトラックバーやスクロールバーの位置を変更します。</p>
+<h3>書式</h3><pre><code>SETSLIDER(id, position, [number])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>GETID/HNDTOIDのID。0は呼出し時点の前面ウィンドウ。必須IDにEMPTYは指定できません。</dd>
+<dt><code>position</code></dt><dd>設定するsigned32数値。対象の範囲へ補正します。-10000000は設定せず現在位置を取得する予約値です。</dd>
+<dt><code>number</code></dt><dd>1始まりの番号。省略・EMPTY・0は1。負数は絶対値を使います。標準経路の負番号は無効なコントロールも含めます。</dd>
+</dl><h3>戻り値・結果</h3><p>設定後の値が補正後の要求値に達すれば1、対象なし・反映なし・読取専用などは0。OS・provider操作の失敗は実行エラーになる場合があります。</p><h3>対応範囲と注意</h3><ul>
+<li>標準trackbar・独立ScrollBar・ウィンドウ付属の横/縦バーと、対応する互換クラス名を扱います。標準経路は画面位置順で数えます。</li>
+<li>UIAではSliderを先に、その後にPaneのスクロール可能な縦軸・横軸を数えます。無効なUIA要素も番号を消費します。標準経路で指定候補がなければUIAも検索します。</li>
+<li>原版の全クラス・provider・通知順・権限・競合の互換は未確認です。</li>
+<li>変更可能な対象で同じ値なら、通知せず成功します。標準経路は変更時にTHUMBPOSITIONを1回通知し、UIAはRangeValueまたはScrollPatternで設定して実値を確認します。UIAのスクロール軸は0～100%で、反対の軸を保持します。</li>
+<li>親やproviderが値を戻した場合、上書きを繰り返さず0を返します。無効・読取専用のUIA対象には設定しません。取消は例外となり、適用済みの変更は巻き戻しません。</li>
+<li>-10000000は標準・UIAとも読み取り専用です。有効なIDで対象がなければ-999999、IDが無効なら0です。この数値自体への設定はできません。取得にはGETSLIDERを勧めます。</li>
+<li>原版UIAでは範囲外値や設定拒否でも成功を返す場合がありました。現実装は範囲補正と反映確認を統一し、読取専用は0、providerの操作失敗は実行エラーとする方式を継続する提案です。前面化・キー通知・再試行は追加しません。</li>
+<li>標準通知の位置フィールドは16bitです。大きい範囲では受信側が現在位置を問い合わせる必要があります。標準メッセージは1000msでタイムアウトします。同期UIA呼出しの途中を強制中断する保証はありません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="posacc">POSACC</h2>
+<p>指定した座標からアクセシビリティ情報を読み取ります。</p>
+<h3>書式</h3><pre><code>POSACC(id, x, y, [mode])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>正のウィンドウID。画面全体は0。</dd>
+<dt><code>x, y</code></dt><dd>正のIDでは対象のクライアント座標。ID 0では物理スクリーン座標。</dd>
+<dt><code>mode</code></dt><dd>ACC_ACCAPI/ACC_ACCはName優先・空ならValue。ACC_NAME、ACC_VALUE、ACC_ROLE、ACC_STATE、ACC_DESCRIPTION、ACC_LOCATION。ACC_BACKを付加可能。</dd>
+</dl><h3>戻り値・結果</h3><p>情報を文字列として返します。対象なし・範囲外は空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>ACC_LOCATIONはx,y,幅,高さをカンマで連結します。正のIDではクライアント座標、ID 0では物理スクリーン座標です。</li>
+<li>ACC_ROLEとACC_STATEの数値はWindowsの表示言語の文字列へ変換します。状態ビットが複数ある場合は半角空白で連結します。</li>
+<li>ACC_APIと描画APIへの自動フォールバック、トラップやコールバックは未対応です。既定モードもMSAAのName優先・空ならValueという取得経路です。</li>
+<li>今回の経路はACC_BACKの有無にかかわらず前面化やフォーカス変更を行いません。停止したプロバイダーの強制中断はできません。</li>
+<li>採用したACC/UIA interfaceから戻る通常の操作失敗もTRY/EXCEPTへ通知します。従来の未検出・未対応patternの返値は維持します。通知callbackや参照解放、hostの規約違反・メモリ不足まで一律に捕捉する仕様ではありません。</li>
+<li>採用したACC/UIA経路では、操作失敗や取消に重なった解放失敗で元の原因を置き換えません。残りの解放を試みます。解放だけの失敗はホスト障害として通知し、EXCEPTでは一律に捕捉しません。</li>
+</ul>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-input.html">← マウス・キーボード入力</a> <a href="functions-images.html">次へ：画面・画像</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#clkitem">CLKITEM</a></li><li><a href="#getstr">GETSTR</a></li><li><a href="#chkbtn">CHKBTN</a></li><li><a href="#getitem">GETITEM</a></li><li><a href="#getslctlst">GETSLCTLST</a></li><li><a href="#getslider">GETSLIDER</a></li><li><a href="#setslider">SETSLIDER</a></li><li><a href="#posacc">POSACC</a></li></ul></nav>
+</div></div></body></html>

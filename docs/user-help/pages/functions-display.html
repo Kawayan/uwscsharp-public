@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>ダイアログ・表示関連 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a aria-current="page" href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / ダイアログ・表示関連</p>
+<h1>ダイアログ・表示関連</h1><p class="lead">INPUT・MSGBOX・SLCTBOX・POPUPMENU・FUKIDASI/BALLOONとPRINT、UWSC# アプリのログ表示制御を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<p>PRINTは制御文です。以下の関数・文は、それぞれ掲載した採用範囲で利用できます。</p>
+<section class="reference-entry"><h2 id="print">PRINT</h2>
+<p>コマンドライン版の標準出力、またはUWSC# アプリの実行結果へ値を表示します。</p>
+<h3>書式</h3><pre><code>PRINT [expression]</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>expression</code></dt><dd>表示する式。省略時は空行。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値を持たない文です。</p><h3>対応範囲と注意</h3><ul>
+<li>数値・文字列・EMPTY・NULL・NOTHING・ERRORと、非nullの外部参照を表示できます。外部参照は実行内の同じ参照を同じOBJECT(番号)で示し、番号は実行ごとに初期化します。原版のポインター数値とは異なります。配列・HASHTBL自体の直接表示はエラーです。</li>
+<li>通常のコマンドライン版とUWSC# アプリは、主スクリプトと同じフォルダーのUWSC.LOGへ自動保存します。LOGPATH/LOGLINES/LOGFILEで設定できます。UWSC# アプリでは専用ログウィンドウにも表示します。表示はLOGPRINT、履歴件数はLOGLINESで変更できます。原版の全表示条件の互換性は未確認です。</li>
+<li>PRINTは関数呼出しではなく、PRINT valueの形式で記述します。</li>
+<li>通常数値はInvariantCultureのG形式、通常TRUE/FALSEは1/0です。未変更のCOM値は元の型を使い、DATEはタイムゾーンなしのISO形式、BOOLはTrue/False、整数は元の桁、Currency/DECIMALはG29で表示します。代入や配列コピーでは型を保持しますが、演算で新しい数値を作るとdoubleの表示になります。</li>
+<li>COMのnull BSTRは空文字列として空行を表示し、NULLやNOTHINGとは区別します。文字列中のNULで表示内容を切り詰めません。</li>
+<li>通常のコマンドライン版とUWSC# アプリは、実行開始時にOSのRoaming AppData内のUWSC/UWSC.INIの[SET] LogLinesを読み、保存とUWSC# アプリの表示履歴の件数に使います。欠落・不正値・0以下は2000件、100000を超える32ビット整数は100000件です。OPTION LOGLINESはその実行だけで優先されます。読取りに失敗した場合は実行前にエラーを通知します。UWSC# アプリの「ログ設定」でLogLinesとLogFontを保存でき、次の実行から反映します。スクリプト内のOPTIONはINIへ書き戻しません。</li>
+<li>UWSC# アプリのログ画面は、同じINIの[SET] LogFont=フォント名,ポイント数を実行開始時に読みます。既定はＭＳ ゴシック・10ptです。不正な形式は既定値に戻し、未知のフォント名は既定フォント、UWSC# アプリで使えないサイズは10ptに戻します。ローカルに導入済みのフォントを使い、URLやフォントファイルの指定は扱いません。実行結果欄・標準出力・保存本文の書式は変えません。</li>
+<li>保存済みファイルの内容が変わらない限り、同じ実行内では改行を含むPRINTも保存時に1件として保持します。周期保存の有無で件数を変えません。新しい実行の既存ファイル、外部変更・別パスの読込みでは、元のPRINTの区切りを復元せず物理行として数えます。</li>
+<li>起動時LogLinesの32ビット整数範囲外は2000件へ戻して実行を続けます。LogFontの正の小数サイズは維持し、不正サイズではフォント名も既定値へ戻します。原版 5.3.0.2 Free は、Arial の9.5を9pt相当で表示し、Consolas のサイズが0または不正な文字列の場合は名前を保って10pt相当に戻しました。同じ原版の DPI 144 の検証では、未知のフォント名は LOGFONTW に残り、ログ画面のデバイスコンテキストにそのフォントを選択すると GetTextFaceW は Arial を返しました。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="print"><code>PRINT &quot;処理を開始します&quot;
+PRINT
+PRINT 1 + 2</code></pre>
+<p>期待出力：</p><pre><code>処理を開始します
+
+3
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="stopform">STOPFORM</h2>
+<p>コマンドライン版またはUWSC# アプリで実行全体が共有する停止画面を表示・非表示にし、位置を変更します。</p>
+<h3>書式</h3><pre><code>STOPFORM(visible[, x, y])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>visible</code></dt><dd>有限数値へ変換して小数部分を0方向へ切り捨て、0なら非表示、それ以外なら表示。TRUE/FALSEを指定できます。</dd>
+<dt><code>x, y</code></dt><dd>外枠左上の物理スクリーン座標。32ビット整数へ切り捨てます。省略した軸は現在位置を維持し、対象画面の作業領域内へ位置を調整します。</dd>
+</dl><h3>戻り値・結果</h3><p>成功時は空文字列を返し、画面への適用後に次の文へ進みます。</p><h3>対応範囲と注意</h3><ul>
+<li>通常のコマンドライン版は明示したSTOPFORM(TRUE)で表示し、UWSC# アプリは実行開始時の自動表示も維持します。コマンドライン版のCtrl+Cは画面を隠しても利用できます。</li>
+<li>TRUEでは最小化を解除し、停止画面を前面にして入力先を切り替えます。Windowsの前面化制限で拒否された場合や、画面全体を作業領域へ収められない場合はエラーになります。</li>
+<li>FALSEは表示だけを隠し、実行を停止しません。非表示の呼出しに指定した座標は適用しませんが、値の検証は行います。</li>
+<li>GETID(GET_STOPFORM_WIN)で同じ実行の停止画面を取得できます。コマンドライン版では必要に応じて非表示の画面を作成します。表示・非表示で同じIDとHWNDを保持します。</li>
+<li>CALLと子THREADも同じ停止画面を操作し、子THREADの終了だけでは破棄しません。コマンドライン版は実行終了時に画面とUIスレッドを解放し、UWSC# アプリは実行終了時に隠してアプリ終了時に解放します。</li>
+<li>OPTION DLGTITLE は停止画面のタイトルに適用されません。停止ボタンと閉じる操作は実行全体へ停止を要求します。後片付けを待つため、直ちにプロセスを強制終了する操作ではありません。</li>
+<li>原版の省略時の(0,0)への移動とは異なり、利用者が採用した現在位置の維持・指定軸の更新と、画面内への配置を使います。</li>
+<li>OPTION TOPSTOPFORMは停止画面を最前面へ固定します。OPTION NOSTOPHOTKEYはUWSC# アプリの停止ホットキーだけを無効にし、停止ボタン・閉じる操作・Ctrl+Cには影響しません。どちらも値を付けずに指定します。変更した設定は実行終了時に復元します。コマンドライン版にはグローバル停止ホットキーを追加しません。全異常引数・全書体・全DPI・複数画面・配布環境の受入は未完です。</li>
+<li>埋込み先が停止画面のホスト機能を提供しない場合は、引数の評価前にエラーになります。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="stopform"><code>STOPFORM(TRUE, 100, 120)
+SLEEP(1)
+STOPFORM(FALSE)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="logprint">LOGPRINT</h2>
+<p>UWSC# アプリのPRINT専用ログウィンドウを表示・非表示にし、位置と寸法を変更します。</p>
+<h3>書式</h3><pre><code>LOGPRINT(visible[, x, y, width, height])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>visible</code></dt><dd>有限数値への共通変換後、0なら非表示、0以外なら表示。</dd>
+<dt><code>x, y</code></dt><dd>省略時は現在位置を維持。小数部は0方向へ切り捨て、32ビット整数の範囲。</dd>
+<dt><code>width, height</code></dt><dd>省略時は現在の寸法を維持。切捨て後に1以上の32ビット整数。</dd>
+</dl><h3>戻り値・結果</h3><p>EMPTYを返します。</p><h3>対応範囲と注意</h3><ul>
+<li>UWSC# アプリでのみ利用できます。通常のコマンドライン版では引数の評価前にエラーになります。</li>
+<li>指定する座標と寸法は外枠を基準とします。同じWin32 APIで測った5条件では原版と一致しました。原版との複数モニター・混在DPIの完全互換は未確認です。</li>
+<li>履歴は実行ごとに初期化し、起動時のLogLines（省略時2000出力）と合計100000 UTF-16単位で制限します。複数行を含むPRINTも1出力です。LOGLINES 0は履歴を消去して追加を止めます。</li>
+<li>ウィンドウを閉じると非表示になり、次のPRINTで再表示しません。LOGPRINT(TRUE)で再表示できます。表示・非表示はファイル保存やstdoutを止めません。</li>
+<li>GETID(GET_LOGPRINT_WIN)で、非表示のログウィンドウも取得できます。現実装では途中の引数を省略すると、その位置や寸法を維持します。原版のLOGPRINT(TRUE,,,,260)は「定義が間違っています」と通知しました。途中省略を扱う現方式の継続を提案しています。</li>
+<li>位置は負の座標や画面外の指定も保持します。原版は今回の1画面の比較で画面端へ補正しましたが、現実装では仮想画面の指定座標を扱う方式の継続を提案しています。</li>
+<li>幅と高さは切り捨て後に1以上が必要です。0・負数は変更前にエラーとなります。正の小さな寸法はWindowsの最小外枠へ補正されるため、実際の寸法が指定値より大きくなる場合があります。</li>
+<li>TRUEは、非表示からの再表示も含めて最小化を解除します。FALSEで最小化中の位置・寸法を指定した場合は、非表示・最小化を保ち、通常状態へ戻した際の外枠へ反映します。省略した項目は通常状態の値を保ちます。FALSEを続けて呼んで位置・寸法を変える場合も、非表示を維持します。</li>
+<li>非表示の最大化ウィンドウは、TRUEで前面ウィンドウを変えずに最大化状態で再表示します。最大化から最小化していた場合は、TRUEで元の最大化状態へ戻ります。非表示中に変更した通常時の位置・寸法は、最大化を解除した際に使います。</li>
+<li>最小化中も、画面外を含む指定座標を保持して通常状態へ戻る際に反映します。続けてxだけを変えた場合、yや寸法は前の指定を保ちます。原版の画面内への補正とは異なる採用案です。</li>
+<li>表示フォントは実行開始時のUWSC.INI/SET/LogFontから設定します。省略時はＭＳ ゴシック・10ptです。同じログ画面を再利用する場合も次の実行の設定へ切り替えます。</li>
+<li>最大化中の位置・寸法指定は、表示中の最大化外枠を保ったまま通常状態の復元先へ反映します。最小化中の保留指定がある場合も新しい指定で更新し、省略項目はその復元先の値を保持します。原版の最大化中の指定と異なる採用方式です。</li>
+<li>LOGPRINTは画面への適用が完了してから次の文へ進みます。実行待ちの要求が取り消された場合は適用せず、既に適用した画面の変更は実行取消でも巻き戻しません。</li>
+<li>位置・寸法の指定は物理ピクセルです。拡大率が異なる画面へLOGPRINTで移動する場合も、指定した寸法を反映します。画面の制約やWindowsの最小外枠による補正は受けます。位置・寸法を指定しない通常移動では、UWSC# アプリのDPI自動調整が働きます。</li>
+<li>100%/150%の2画面では、境界をまたぐ配置も含めて明示した物理寸法を保持することを確認しています。境界上のウィンドウDPIは移動元によって異なる場合があり、モニター番号から一意には決められません。</li>
+<li>原版 5.3.0.2 Free でも、非表示にした最大化ウィンドウは LOGPRINT(TRUE) で最大化したまま再表示されました。今回の比較では原版の再表示前後で前面ウィンドウが変わり、位置と寸法を指定した場合の通常表示の外枠は指定値と一致しませんでした。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="logprint"><code>LOGPRINT(TRUE, 100, 120, 400, 220)
+PRINT &quot;ログの表示&quot;
+LOGPRINT(FALSE)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="msgbox">MSGBOX</h2>
+<p>メッセージと指定したボタンを表示し、押されたボタンの値を返します。</p>
+<h3>書式</h3><pre><code>MSGBOX(message, [buttons, x, y, focus, links])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>message</code></dt><dd>共通の文字列表現へ変換できる値。必須です。</dd>
+<dt><code>buttons</code></dt><dd>BTN_OK=1、BTN_CANCEL=2、BTN_YES=4、BTN_NO=8、BTN_ABORT=16、BTN_RETRY=32、BTN_IGNORE=64の和。省略・0はOKです。</dd>
+<dt><code>x, y</code></dt><dd>物理ピクセルの左上座標。省略した軸は作業領域の中央、両方-1は前回の位置、両方-999999は中央です。</dd>
+<dt><code>focus</code></dt><dd>初期フォーカスのボタン値。省略・0・表示しないボタンは、表示順の最初を使います。</dd>
+<dt><code>links</code></dt><dd>0以外でリンク通知を有効にします。省略は無効です。</dd>
+</dl><h3>戻り値・結果</h3><p>押されたBTN定数の値を、VARTYPEが3の32ビット整数で返します。閉じる操作とEscapeは、Cancelボタンがなくても2を返します。スクリプトの実行取消は取消例外です。</p><h3>対応範囲と注意</h3><ul>
+<li>通常のコマンドライン版とUWSC# アプリで使えます。表示中は呼出したスクリプトを待機し、取消・セッション終了で所有する画面を閉じます。THREADからも同じ実行のUI処理と表示設定を共有します。UWSC# アプリ本体の操作を全面的に禁止する方式ではありません。</li>
+<li>表示順はYes、No、OK、Cancel、Abort、Retry、Ignoreです。ボタン・focusの未知bit、負数、focusの複数bitはエラーです。座標・ボタン・focusは共通の数値変換で有限値を0方向へ切り捨て、int32の範囲を検査します。linksは有限数の0以外で有効です。原版の全省略・不正値の挙動とは一致を保証しません。</li>
+<li>OPTION DLGTITLE=&quot;確認&quot;で次の画面のタイトル、OPTION DEFAULTFONT=&quot;Arial,18&quot;で本文とボタンのフォントを変更できます。既定はUWSC#と主スクリプト名、Tahoma 9ptです。サイズを省略したフォント名は前のサイズを保ちます。 DLGTITLE は同じ実行の親と THREAD で共有し、次に開くダイアログに適用します。別の実行では既定のタイトルから始まります。未知のフォント名はWindowsの代替表示に従います。</li>
+<li>長文は作業領域に合わせて折り返し、スクロールできる本文で表示します。画面外へ横に広がる原版や、DEFAULTFONTがボタンへ反映されない原版とは異なる表示方針を採用しています。文字列中のNULは表示用の␀へ置き換えます。設定したフォントでボタンを配置できない場合はエラーです。</li>
+<li>OPTION POSITION=x,y の配置対象は、コマンドライン版では停止画面、UWSC# アプリでは停止画面とログ画面です。MSGBOX の省略座標には適用されません。原版の観測でも MSGBOX には反映されませんでした。MSGBOX に座標を明示すると、画面外でも指定した位置を使います。</li>
+<li>リンクの起動対象はhttp、https、mailtoに限定します。通知経路・許可判定とゲスト内マウス操作によるリンク検出は検証済みです。Windows Sandbox では、HTTP リンクから既定のブラウザーを起動し、ゲスト内のループバックに要求が届くことを確認しました。HTTPS リンクからの実際の起動と、mailto でのメールアプリの起動は未確認です。表示方針と残る条件はMSGBOX-IMPLEMENTATION.mdを参照してください。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="msgbox"><code>OPTION DLGTITLE=&quot;確認&quot;, DEFAULTFONT=&quot;Arial,18&quot;
+PRINT MSGBOX(&quot;処理を続けますか&quot;, BTN_YES+BTN_NO, , , BTN_NO)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="input">INPUT</h2>
+<p>文字列の入力画面を表示し、OKで確定した内容を返します。</p>
+<h3>書式</h3><pre><code>INPUT(message, [defaultText, password, x, y])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>message</code></dt><dd>表示するメッセージ。共通の文字列変換を使います。</dd>
+<dt><code>defaultText</code></dt><dd>最初に入力欄へ設定する値。省略は空文字列です。NULを含む文字列はエラーです。</dd>
+<dt><code>password</code></dt><dd>有限数の0以外でWindowsの標準マスク表示を使います。省略は無効です。</dd>
+<dt><code>x, y</code></dt><dd>物理ピクセルの左上座標。片側だけなら中央、両方-1は前回のINPUT位置、両方-999999は中央です。</dd>
+</dl><h3>戻り値・結果</h3><p>OKは入力内容の文字列。空文字のOKも文字列です。Cancel・Escape・閉じるはEMPTY、実行取消は取消例外です。</p><h3>対応範囲と注意</h3><ul>
+<li>数値に見える001.50や1e3も表記を保ち、数値へ変換しません。Unicode文字列を返す方針で、原版の文字列型256/258の使い分けは再現しません。</li>
+<li>入力欄は初期状態で全選択され、EnterでOK、Escapeで取消になります。パスワードは画面上のマスク表示であり、戻り値を暗号化する機能ではありません。</li>
+<li>最初のファイルドロップでは現在の入力の末尾にパスを追加し、2回目以降は途中で入力を編集しても新しいパスで置き換えます。1回のドロップに複数のパスがある場合はタブで結合します。</li>
+<li>UWSC#は画面本体と入力欄でファイルを受信します。原版UWSC Free 5.3.0.2では画面本体の受信を確認しました。Explorerからのドラッグや異なる権限での受信は未確認です。</li>
+<li>OPTION DLGTITLEとDEFAULTFONTは次のINPUTにも適用します。 DLGTITLE は同じ実行の親と THREAD で共有し、次に開くダイアログに適用します。別の実行では既定のタイトルから始まります。本文・入力欄・ボタンへ同じフォントを使い、長文の本文は作業領域内で折り返します。MSGBOXと同じ採用表示方針で、原版の寸法・全フォントは再現しません。</li>
+<li>座標は有限値を0方向へ切り捨ててint32へ変換します。明示した画面外座標は補正しません。前回位置はMSGBOXと別に保持し、OPTION POSITIONはINPUTへ適用しません。</li>
+<li>通常のコマンドライン版とUWSC# アプリで利用できます。表示・取消・資源の所有はMSGBOXと共有します。実キー入力と静的CALL経由を確認しましたが、スクリプトTHREAD専用のINPUT受入、全DPI・複数画面・配布受入は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="input"><code>OPTION DLGTITLE=&quot;名前の入力&quot;
+DIM name=INPUT(&quot;名前を入力してください&quot;, &quot;太郎&quot;)
+PRINT name</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="slctbox">SLCTBOX</h2>
+<p>ボタン・チェック・ラジオ・コンボ・リスト方式の選択画面を表示します。</p>
+<h3>書式</h3><pre><code>SLCTBOX(kind, timeout, message, [item, ...])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>kind</code></dt><dd>SLCT_BTN=1、SLCT_CHK=2、SLCT_RDO=4、SLCT_CMB=8、SLCT_LST=16の1方式。0はBTN。返値はSLCT_STR=64またはSLCT_NUM=128を加算できます。</dd>
+<dt><code>timeout</code></dt><dd>有限数の秒数。正の小数秒も保持し、0以下は期限なしです。</dd>
+<dt><code>x, y</code></dt><dd>種別と秒数に続く数値型2値は物理ピクセル座標。数値文字列は座標と解釈しません。両方-1は前回位置、両方-999999は中央です。</dd>
+<dt><code>message, item</code></dt><dd>先頭の文字列はメッセージで、省略位置は空文字です。以後は項目。配列は行順に展開します。</dd>
+</dl><h3>戻り値・結果</h3><p>既定は選択ビットの合計。STRは選択名をタブで結ぶ文字列。NUMは1項目なら0始まりの数値、0項目・複数項目なら位置をタブで結ぶ文字列。閉じるボタンまたは Escape でダイアログを閉じると、戻り値の形式にかかわらず数値 -1 を返します。コンボボックスの候補一覧を開いた状態では、1回目の Escape で一覧を閉じます。</p><h3>対応範囲と注意</h3><ul>
+<li>座標を指定する形式はSLCTBOX(kind, timeout, x, y, message, [item, ...])です。最低3引数を要求し、メッセージだけを空にする場合は省略位置を残してください。</li>
+<li>期限終了は既定形式の数値0、STR/NUMの空文字列です。実行取消は取消例外で伝えます。UI停止中には閉じられませんが、通知再開後は経過時間から期限を判定します。</li>
+<li>ビット形式は先頭31項目を使い、SLCT_1～SLCT_31で結果を判定できます。配列展開は深さ16までです。BTN/CHK/RDOは最大12行を再使用してスクロールします。STR/NUMで指定できる項目数は最大100万です。ボタン、チェックボックス、ラジオボタンは100万項目の末尾を選択できることを確認しました。リストボックスは100万項目を表示し、末尾を選ぶと位置999,999を返すことを確認しました。コンボボックスも100万項目を表示し、キー操作で末尾を確定できることを確認しました。10万項目以上のコンボボックスでは、候補一覧を開くとダイアログが縦に広がります。画面下端に近いときは上へ移動し、一覧を閉じると元の位置に戻ります。</li>
+<li>RDO/CMBは先頭が初期選択、CHK/LSTは未選択です。選択結果は項目順に並びます。</li>
+<li>リストボックスで離れた項目を選ぶには、最初の項目をクリックし、追加の項目をCtrlキーを押しながらクリックします。</li>
+<li>選択ビット、1項目を選んだときのNUMの位置、既定形式で期限が切れたときの0、画面を閉じたときの-1は、VARTYPEが3の32ビット整数です。</li>
+<li>原版の整数秒への切捨てと異なり小数秒を保持します。STRとNUMの同時指定・複数方式・未知ビットは拒否します。TRUE/FALSEは既存の数値1/0であり、座標の位置へ2つ続けると座標として解釈します。</li>
+<li>OPTION DLGTITLEとDEFAULTFONTを作成時に適用します。 DLGTITLE は同じ実行の親と THREAD で共有し、次に開くダイアログに適用します。別の実行では既定のタイトルから始まります。POSITIONは適用しません。共通フォントと折返し・スクロールは採用表示方針で、原版の寸法を再現しません。表示用NULは␀へ置き換え、STRの戻り値には元の項目名を使います。</li>
+<li>ボタンは Tab で移動し、チェックボックスは Tab で移動して Space で選択を切り替えます。ラジオボタンは上下の矢印キーで選択します。ボタン、チェックボックス、ラジオボタンの項目にフォーカスがあるときは、PageUp と PageDown で表示を1ページずつ移動できます。ページ移動では、それまでの選択を保持します。コンボボックスとリストボックスでは End で末尾へ移動できます。リストボックスは Space で選択を切り替えます。Enter で確定します。</li>
+<li>コンボボックスは F4 で候補一覧を開けます。一覧を開いた状態では、1回目の Enter で候補を確定して一覧を閉じ、2回目の Enter でダイアログを確定します。</li>
+<li>長い選択肢がある場合は、指定書体で測った文字の幅に合わせて選択画面を広げます。幅の上限は対象モニターの作業領域に応じて決まります。座標を指定すると、選択画面の左上が指定位置になり、画面の一部が作業領域の外に出ることがあります。 コマンドライン版とUWSC# アプリで CALL 先からの呼び出しも確認しました。THREAD からも SLCTBOX を呼び出せます。全5方式で1項目の選択と時間切れを確認しました。チェックボックスとリストボックスでは複数選択も確認しました。</li>
+<li>コマンドライン版とUWSC# アプリでは、停止ボタンで実行を取り消すと、表示中の SLCTBOX が閉じます。UWSC# アプリのエディターでは停止後に再生し直せます。</li>
+<li>Windows Sandbox では、全5方式で1,000項目の末尾までスクロールバーをドラッグし、マウスで選択できました。コンボボックスの候補一覧は F4 で開きました。UWSC# アプリの停止ボタンへのマウス入力、全キーボード操作、異なる DPI・複数画面・OS での動作、配布版での動作は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="slctbox"><code>DIM selected=SLCTBOX(SLCT_BTN+SLCT_STR, 10, &quot;選んでください&quot;, &quot;A&quot;, &quot;B&quot;)
+PRINT selected</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="popupmenu">POPUPMENU</h2>
+<p>配列の項目を階層メニューとして表示し、選択した項目の元配列位置を返します。</p>
+<h3>書式</h3><pre><code>POPUPMENU(items, [x, y])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>items</code></dt><dd>4096要素までの1次元配列。先頭の{で直前項目のサブメニューを開始し、末尾の}で閉じます。深さは16までです。</dd>
+<dt><code>x, y</code></dt><dd>物理スクリーン座標。小数は切り捨てます。片方でも省略すると両方とも現在のマウス位置を使います。</dd>
+</dl><h3>戻り値・結果</h3><p>選択した項目の番号。配列の先頭から0始まりで数え、空文字は飛ばします。Escapeなどで選択せずに閉じると-1を返します。選択番号と-1はVARTYPEが3の32ビット整数です。スクリプトの実行取消は取消例外です。</p><h3>対応範囲と注意</h3><ul>
+<li>空文字は表示せず、単独の-は区切りとなります。---や文字列内部の波括弧は通常の表示名です。&amp;とタブはWindows標準メニューの書式として扱います。</li>
+<li>単独の波括弧、不整合な階層、NUL、配列を要素に含む入力、上限を超える入力は表示前にエラーにします。原版の全境界互換は未確認です。</li>
+<li>表示にはWindowsの標準メニューを使います。DEFAULTFONT・DLGTITLE・POSITIONはメニューの書体と配置に適用しません。</li>
+<li>原版では単独波括弧の条件で8秒以内の復帰を確認できませんでした。明示的な拒否を維持する案を開発資料に記録しています。</li>
+<li>区切りとサブメニューの親も番号に数えます。A、空文字、区切り、Bの順に並べた0始まりの配列でBを選ぶと2が返ります。</li>
+<li>SAFEARRAYの下限が0以外でも、選択番号は0から始まります。</li>
+<li>コマンドライン版とUWSC# アプリでは、CALL 先や THREAD から開いたメニューでも、選択した項目の番号が返り、Escape で閉じると -1 が返ります。</li>
+<li>スクリプトの実行を取り消すと、表示中のメニューが閉じます。UWSC# アプリのエディターでは、停止後に同じスクリプトを再生し直せます。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="popupmenu"><code>DIM items[4]=&quot;操作&quot;,&quot;{開く&quot;,&quot;保存}&quot;,&quot;-&quot;,&quot;終了&quot;
+DIM selected=POPUPMENU(items)
+PRINT selected</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="fukidasi">FUKIDASI</h2>
+<p>実行中のTHREADごとに1枚の吹出しを表示・更新します。FUKIDASIとBALLOONは同じ画面を操作します。</p>
+<h3>書式</h3><pre><code>FUKIDASI([message, x, y, direction, fontSize, fontName, textColor, backgroundColor, transparency])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>message</code></dt><dd>本文。引数なし・空文字では非表示にし、次の表示で同じ画面を再利用します。空文字と一緒に無効な引数を渡すと、エラーになり、表示中の吹出しはそのまま残ります。</dd>
+<dt><code>x, y</code></dt><dd>物理スクリーン座標。個別に省略でき、前回の指定を使います。初回は0,0です。作業領域内へ位置を調整します。 原版から移行する場合は、位置を固定したい呼び出しで X と Y を明示してください。原版の観測では省略した軸が 0 になり、UWSC# では前回の指定を引き継ぎます。</dd>
+<dt><code>direction</code></dt><dd>0は嘴なし、1は上、2は下、3は左、4は右。省略は0です。UWSC# では範囲外の値はエラーになります。原版で範囲外の値を使って嘴なしにしていた場合は、0を指定してください。</dd>
+<dt><code>fontSize, fontName</code></dt><dd>有限数のサイズとフォント名。サイズ0と空のフォント名は、省略時と同じく現在のDEFAULTFONTを使います。</dd>
+<dt><code>textColor, backgroundColor</code></dt><dd>24bitのBGR。文字色の省略はOSの情報文字色、背景の省略・0はOSの情報背景色、1は黒に近い色です。</dd>
+<dt><code>transparency</code></dt><dd>0～255。0は不透明、255は完全透明。-1は背景を透過し、枠には指定した背景色を使います。背景色を省略するか0を指定すると枠は黒になります。-2は背景と枠を透過します。透明化を省略すると0になります。 透明化に -2～255 の範囲外の値を指定すると、UWSC# ではエラーになります。原版で255を指定したときはアルファ値8が観測されました。UWSC# で同じアルファ値にするには247を指定してください。</dd>
+</dl><h3>戻り値・結果</h3><p>表示・消去とも空文字列。表示後すぐに復帰します。</p><h3>対応範囲と注意</h3><ul>
+<li>表示と更新で入力先を切り替えません。GETID(GET_BALLOON_WIN)とGETID(GET_FUKIDASI_WIN)は、そのTHREADの同じ吹出しIDを返します。未作成なら-1、消去後も作成済みのIDを保持します。</li>
+<li>THREAD終了・セッション終了・実行全体の停止では画面を破棄し、登録済みIDを失効させます。別のTHREADの吹出しは別の画面です。</li>
+<li>長文は作業領域内で折り返し、右側の▲/▼の領域をクリックするかホイールでスクロールします。空白のない長い単語も改行します。タブは8個の空白で表示します。</li>
+<li>本文のNUL、不正なフォント名、非有限数・範囲外の数値を拒否します。フォントが作業領域に比べて大きすぎる場合もエラーにします。原版の全入力境界は未確認です。</li>
+<li>フォントサイズの小数部を切り捨てます。結果が0なら既定のフォントサイズを使い、0以外で6pt未満なら6ptとして表示します。空白だけのフォント名と制御文字を含む名前はエラーです。</li>
+<li>X・Y・向き・色・透明化は共通の整数変換で小数部分を切り捨てます。本文だけを省略して後続の値を渡す呼出しと、10引数以上の呼出しはエラーです。</li>
+<li>向き・フォント・色・透明化は毎回、省略時の既定値へ戻ります。DLGTITLEとPOSITIONは適用しません。OPTION FIXBALLOONは、次の表示・更新から仮想デスクトップ切替後も表示する方式へ変更します。設定は実行内で共有し、終了後へ持ち越しません。 原版から移行する場合、初回から固定するには、最初の吹出しを表示する前に OPTION FIXBALLOON を実行してください。原版では、実行されない分岐や固定名の CALL 先にだけ指定を書いても、初回表示から有効になる例を確認しています。</li>
+<li>原版の観測との差として、入力先の維持、THREAD終了時の解放とID失効、透明化255の完全透明化、不足文字の代替書体での表示を利用者の判断で採用しました。描画の完全一致、全DPI・複数画面・仮想デスクトップは未確認です。</li>
+<li>指定書体にない文字はOSの代替書体で表示します。代替される書体や行高によって吹出しの寸法が変わる場合があります。すべての文字・書体・DPIでの字形は未確認です。</li>
+<li>省略したフォント名とサイズは、それぞれ現在のDEFAULTFONTを使います。起動時はINIの[SET] DefaultFont、以後は実行内OPTION DEFAULTFONTを使います。明示した名前・サイズはその項目だけ優先し、次の呼出しで省略すれば現在の既定値へ戻ります。設定変更だけでは表示済みの吹出しを変えず、次の表示・更新から適用します。CALL/THREADは設定を共有し、吹出し自体はTHREADごとに所有します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="fukidasi"><code>FUKIDASI(&quot;処理中&quot;,80,90)
+SLEEP(2)
+BALLOON()</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="balloon">BALLOON</h2>
+<p>実行中のTHREADごとに1枚の吹出しを表示・更新します。FUKIDASIとBALLOONは同じ画面を操作します。</p>
+<h3>書式</h3><pre><code>BALLOON([message, x, y, direction, fontSize, fontName, textColor, backgroundColor, transparency])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>message</code></dt><dd>本文。引数なし・空文字では非表示にし、次の表示で同じ画面を再利用します。空文字と一緒に無効な引数を渡すと、エラーになり、表示中の吹出しはそのまま残ります。</dd>
+<dt><code>x, y</code></dt><dd>物理スクリーン座標。個別に省略でき、前回の指定を使います。初回は0,0です。作業領域内へ位置を調整します。 原版から移行する場合は、位置を固定したい呼び出しで X と Y を明示してください。原版の観測では省略した軸が 0 になり、UWSC# では前回の指定を引き継ぎます。</dd>
+<dt><code>direction</code></dt><dd>0は嘴なし、1は上、2は下、3は左、4は右。省略は0です。UWSC# では範囲外の値はエラーになります。原版で範囲外の値を使って嘴なしにしていた場合は、0を指定してください。</dd>
+<dt><code>fontSize, fontName</code></dt><dd>有限数のサイズとフォント名。サイズ0と空のフォント名は、省略時と同じく現在のDEFAULTFONTを使います。</dd>
+<dt><code>textColor, backgroundColor</code></dt><dd>24bitのBGR。文字色の省略はOSの情報文字色、背景の省略・0はOSの情報背景色、1は黒に近い色です。</dd>
+<dt><code>transparency</code></dt><dd>0～255。0は不透明、255は完全透明。-1は背景を透過し、枠には指定した背景色を使います。背景色を省略するか0を指定すると枠は黒になります。-2は背景と枠を透過します。透明化を省略すると0になります。 透明化に -2～255 の範囲外の値を指定すると、UWSC# ではエラーになります。原版で255を指定したときはアルファ値8が観測されました。UWSC# で同じアルファ値にするには247を指定してください。</dd>
+</dl><h3>戻り値・結果</h3><p>表示・消去とも空文字列。表示後すぐに復帰します。</p><h3>対応範囲と注意</h3><ul>
+<li>表示と更新で入力先を切り替えません。GETID(GET_BALLOON_WIN)とGETID(GET_FUKIDASI_WIN)は、そのTHREADの同じ吹出しIDを返します。未作成なら-1、消去後も作成済みのIDを保持します。</li>
+<li>THREAD終了・セッション終了・実行全体の停止では画面を破棄し、登録済みIDを失効させます。別のTHREADの吹出しは別の画面です。</li>
+<li>長文は作業領域内で折り返し、右側の▲/▼の領域をクリックするかホイールでスクロールします。空白のない長い単語も改行します。タブは8個の空白で表示します。</li>
+<li>本文のNUL、不正なフォント名、非有限数・範囲外の数値を拒否します。フォントが作業領域に比べて大きすぎる場合もエラーにします。原版の全入力境界は未確認です。</li>
+<li>フォントサイズの小数部を切り捨てます。結果が0なら既定のフォントサイズを使い、0以外で6pt未満なら6ptとして表示します。空白だけのフォント名と制御文字を含む名前はエラーです。</li>
+<li>X・Y・向き・色・透明化は共通の整数変換で小数部分を切り捨てます。本文だけを省略して後続の値を渡す呼出しと、10引数以上の呼出しはエラーです。</li>
+<li>向き・フォント・色・透明化は毎回、省略時の既定値へ戻ります。DLGTITLEとPOSITIONは適用しません。OPTION FIXBALLOONは、次の表示・更新から仮想デスクトップ切替後も表示する方式へ変更します。設定は実行内で共有し、終了後へ持ち越しません。 原版から移行する場合、初回から固定するには、最初の吹出しを表示する前に OPTION FIXBALLOON を実行してください。原版では、実行されない分岐や固定名の CALL 先にだけ指定を書いても、初回表示から有効になる例を確認しています。</li>
+<li>原版の観測との差として、入力先の維持、THREAD終了時の解放とID失効、透明化255の完全透明化、不足文字の代替書体での表示を利用者の判断で採用しました。描画の完全一致、全DPI・複数画面・仮想デスクトップは未確認です。</li>
+<li>指定書体にない文字はOSの代替書体で表示します。代替される書体や行高によって吹出しの寸法が変わる場合があります。すべての文字・書体・DPIでの字形は未確認です。</li>
+<li>省略したフォント名とサイズは、それぞれ現在のDEFAULTFONTを使います。起動時はINIの[SET] DefaultFont、以後は実行内OPTION DEFAULTFONTを使います。明示した名前・サイズはその項目だけ優先し、次の呼出しで省略すれば現在の既定値へ戻ります。設定変更だけでは表示済みの吹出しを変えず、次の表示・更新から適用します。CALL/THREADは設定を共有し、吹出し自体はTHREADごとに所有します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="balloon"><code>FUKIDASI(&quot;処理中&quot;,80,90)
+SLEEP(2)
+BALLOON()</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-images.html">← 画面・画像</a> <a href="functions-strings.html">次へ：文字列</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#print">PRINT</a></li><li><a href="#stopform">STOPFORM</a></li><li><a href="#logprint">LOGPRINT</a></li><li><a href="#msgbox">MSGBOX</a></li><li><a href="#input">INPUT</a></li><li><a href="#slctbox">SLCTBOX</a></li><li><a href="#popupmenu">POPUPMENU</a></li><li><a href="#fukidasi">FUKIDASI</a></li><li><a href="#balloon">BALLOON</a></li></ul></nav>
+</div></div></body></html>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <ProjectReference Include="../UWSCSharp.Core/UWSCSharp.Core.csproj" />
+    <EmbeddedResource Include="../../docs/user-help/reference.json" LogicalName="reference.json" />
+    <EmbeddedResource Include="../../docs/user-help/capabilities.json" LogicalName="features.json" />
+    <EmbeddedResource Include="../../docs/user-help/content/authoring.html" LogicalName="authoring" />
+    <EmbeddedResource Include="../../docs/user-help/content/language.html" LogicalName="language" />
+    <EmbeddedResource Include="../../docs/user-help/content/control-flow.html" LogicalName="control-flow" />
+    <EmbeddedResource Include="../../docs/user-help/content/routines.html" LogicalName="routines" />
+    <EmbeddedResource Include="../../docs/user-help/content/data-types.html" LogicalName="data-types" />
+  </ItemGroup>
+</Project>

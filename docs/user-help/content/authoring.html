@@ -1,0 +1,68 @@
+<h1>.uws作成支援（ローカルMCPサーバー）</h1>
+<p>AIクライアントからUWSC#の関数仕様・対応状況を検索し、作成したソースを実行せずに構文検査できます。Windows 11 x64、.NET 10 SDKと、ローカルSTDIOのMCPサーバーに対応するクライアントを用意してください。この試作にはHTTP公開やスクリプト実行ツールはありません。</p>
+<h2 id="build">ビルド</h2>
+<p>リポジトリのルートで次を実行します。初回はNuGetへの接続が必要です。既にDebug出力のDLLを直接起動している場合は、先にクライアント側でそのMCPサーバーを停止してください。接続中のDLLをビルドが上書きしようとすると、ファイルのロックで失敗します。</p>
+<pre><code>dotnet build src/UWSCSharp.Mcp/UWSCSharp.Mcp.csproj -c Debug
+if ($LASTEXITCODE -ne 0) { throw "ビルドに失敗しました" }
+$serverRoot = Join-Path (Resolve-Path .).Path "artifacts/authoring-server"
+New-Item -ItemType Directory -Force -Path $serverRoot | Out-Null
+$serverCopy = Join-Path $serverRoot ([guid]::NewGuid().ToString("N"))
+Copy-Item -LiteralPath "artifacts/bin/UWSCSharp.Mcp/debug" -Destination $serverCopy -Recurse
+Join-Path $serverCopy "UWSCSharp.Mcp.dll"</code></pre>
+<p>最後に表示された実行用コピーのDLLを接続先にします。コピー先は開発ビルドとは別の新しいフォルダーで、依存DLLも含まれます。接続中のコピーは上書きせず、更新時も新しいフォルダーを作ってください。</p>
+<p>ヘルプと機能台帳はビルド時に埋め込まれます。資料を更新した場合は再ビルドして新しいコピーを作り、接続設定を更新してクライアント側からMCPを再起動してください。サーバープロセスを停止するだけでは、既存チャットの接続が戻らない場合があります。起動フォルダーを変えても資料を取得できます。</p>
+<p>接続後に<code>get_capabilities</code>で<code>APP-CLI</code>などの機能IDを調べると、応答の<code>version</code>で資料の日付とハッシュを確認できます。接続先を更新した後も古い資料が返る場合は、設定したDLLのパスと、クライアントを再接続したかを確認してください。</p>
+<h2 id="connect">接続</h2>
+<p>クライアントのMCP設定で、名前を<code>uwsc-authoring</code>、起動コマンドを<code>dotnet</code>、引数をビルド済みDLLの絶対パスにします。パスは手元の配置先に置き換えてください。</p>
+<pre><code>command: dotnet
+args: ["C:/path/to/UWSCSharp.Mcp.dll"]</code></pre>
+<p>サーバーの標準入力・標準出力はMCP通信専用です。ログは標準エラーへ出します。通信中のサーバーを端末から手入力で操作しないでください。ビルド出力が通信に混ざるのを避けるため、接続時はビルド済みDLLを起動します。クライアント固有の設定形式は、そのクライアントの説明に従ってください。</p>
+<h2 id="skill">作成支援スキル</h2>
+<p>対象ホストはコマンドライン版とUWSC# アプリです。機能を限定したコマンドライン版は提供を終了しています。コマンドライン版とUWSC# アプリでは画面や入力などの実行条件が異なるため、作成を依頼するときは利用するホストを伝えてください。</p>
+<p><code>skills/uws-authoring</code>をクライアントのスキル配置先にコピーします。MCP設定は別途必要です。スキルとMCPを有効にしたら、「UWSC# アプリ向けに、タイトルからウィンドウを探して状態を表示する.uwsを作成し、構文検査してください」のように依頼できます。</p>
+<h3 id="input-conditions">入力と失敗時の条件を伝える</h3>
+<p>ファイルを集計する場合は、正常な入力の形式だけでなく、空行・非数値・範囲外の値・文字コードの不正をどう扱うかも依頼に含めてください。たとえば「3行のうち整数でない行があれば合計を出さず、理由を表示し、コマンドライン版で非ゼロの終了コードを返す。ファイルはエラー時にも閉じる」のように、拒否条件と後処理を指定できます。実行前に、作成されたソースがそれらを満たすか確認してください。</p>
+<p><a href="functions-files.html#fget">FGET</a>の返値は常に数値とは限りません。数値に変換できない行は文字列になり、<a href="language.html#string-operations">文字列を含む<code>+</code></a>は連結になります。また、BOMのない入力はUTF-8で読めないとCP932を試すため、すべての不正なUTF-8を拒否するわけではありません。文字コードや整数の厳密な検証が必要な場合は、利用可能な機能とその限界を仕様で確認してください。</p>
+<p>エラーを表示して通常終了するソースでは、終了コードが0になることがあります。スクリプトで非ゼロを返す場合は<a href="control-flow.html#exit">EXITEXIT</a>の仕様を確認してください。構文検査と呼出し診断は、入力値の妥当性、終了コードやエラー時の後処理を実行して確認するものではありません。</p>
+<h3 id="codex-project">Codexでリポジトリ専用の設定を使う</h3>
+<p>Codexでは、リポジトリの<code>.codex/config.toml</code>に次の接続設定を置けます。DLLの絶対パスは配置先に合わせてください。既存の設定がある場合は内容を保持し、同名のサーバー設定を重複させないでください。</p>
+<pre><code>[mcp_servers.uwsc-authoring]
+command = "dotnet"
+args = ["C:/path/to/UWSCSharp.Mcp.dll"]
+startup_timeout_sec = 20
+tool_timeout_sec = 15</code></pre>
+<p>このリポジトリのWindows環境では、<code>.agents/skills/uws-authoring</code>から<code>skills/uws-authoring</code>へのディレクトリジャンクションを作り、スキルを重複させず参照できます。参照先を移動した場合は作り直してください。別の配置先で使う場合は、クライアントのスキル配置先へコピーする方法も使えます。</p>
+<p><code>codex mcp get uwsc-authoring --json</code>で接続設定を確認できます。スキルの発見、MCPの5ツールの認識、実際の仕様取得・作成・診断・修正、自動選択の成否はそれぞれ確認してください。設定の表示やツール一覧の取得だけでは、作成支援の一連の操作が成功したことにはなりません。スキルを明示する場合は<code>$uws-authoring</code>を依頼に含めます。</p>
+<p>OpenAI公式資料のURLは、MCPが<code>https://learn.chatgpt.com/docs/extend/mcp</code>、スキルが<code>https://learn.chatgpt.com/docs/build-skills</code>です。このヘルプ内の操作に外部ページの読込みは必要ありません。</p>
+<h2 id="tools">利用できるツール</h2>
+<ul>
+<li><code>search_reference</code>：関数・機能・構文資料の候補を検索します。queryは1〜200文字、limitは1〜20件です。</li>
+<li><code>get_reference</code>：関数名・機能IDから仕様と根拠を取得します。authoringはこの作成支援ガイド、languageは基本構文、control-flowは制御文とCALL、routinesは関数・手続き、data-typesは変数・定数・配列・HASHTBL・OPTIONの資料を返します。</li>
+<li><code>get_capabilities</code>：機能IDの調査・実装・検証状態を取得します。</li>
+<li><code>validate_script</code>：sourceに指定したソースを構文解析し、エラー時は行番号と診断を返します。</li>
+<li><code>analyze_script</code>：sourceに指定したソースを構文解析し、直接呼出しの名前と引数形式を警告します。式やホストを実行しません。</li>
+</ul>
+<h2 id="static-call-analysis">呼出しの静的診断</h2>
+<p><code>validate_script</code>の成功は構文だけの確認です。続いて同じソースを<code>analyze_script</code>へ渡すと、未知の関数名や引数不足などを実行せずに確認できます。組込み関数、同じソースの関数・手続き、モジュール内の直接呼出しを調べます。大文字小文字を区別せず、前方定義、再帰、既定引数、必須位置の省略とTHREADのユーザー関数指定も扱います。</p>
+<table>
+<thead><tr><th>応答</th><th>読み方</th></tr></thead>
+<tbody>
+<tr><td>syntaxValid</td><td>構文を解析できたかを示します。</td></tr>
+<tr><td>callsAnalyzed</td><td>呼出しの解析を実施できたかを示します。構文エラーや外部CALLの拒否ではfalseとなり、lineとmessageを返します。</td></tr>
+<tr><td>diagnostics</td><td>line、code、function、message、severityを持つ警告です。lineは呼出しを含む文・宣言の開始行で、複数行式の位置や列番号までは示しません。</td></tr>
+<tr><td>truncated</td><td>診断100件を超えて残りを省略した場合にtrueとなります。省略分を検査済みと扱わないでください。</td></tr>
+<tr><td>uncheckedScopes</td><td>解決していないmemberAccesses、内容・指定先を検査していないdynamicCalls、未対応のsyntaxNodesの件数です。呼出し解析を実施できなかった場合はnullです。</td></tr>
+<tr><td>scope</td><td>診断範囲と未検査の内容です。診断の有無と合わせて確認してください。</td></tr>
+</tbody>
+</table>
+<p><code>unknown-function</code>は、組込みまたは同じソースの定義から名前を解決できない警告です。動的な定義が実行時にも存在しないとは断定しません。<code>argument-shape</code>は、引数の数・必須位置の省略・自作関数の引数形式が一致しない警告です。仕様と利用者の意図を確認して修正し、再検査してください。</p>
+<p><code>DEF_DLL</code>の未対応の型には<code>native-dll-unavailable</code>が出ます。対応する型の呼出しでは引数の数と形式を調べます。<code>モジュール名.関数名()</code>のようなメンバー呼出しは静的診断の対象外です。</p>
+<pre><code>GETID()</code></pre>
+<p>この例は構文検査を通りますが、呼出しの診断では必須のtitle不足を警告します。タイトルを指定する意図なら、次のように修正して再検査します。どちらの検査もウィンドウを検索・操作しません。</p>
+<pre><code>GETID("対象タイトル", , 0)</code></pre>
+<p>メンバー名の解決、EVALの文字列、文字列で指定するコールバック先は検査しません。メンバー呼出しの引数に含まれる直接呼出しは調べます。到達可能性を解析しないため、実行されない分岐や呼ばれていない関数内の警告も返します。引数の型・値・範囲、変数・参照先の妥当性、ホスト公開範囲、実行成功、原版互換も未検査です。警告0件を実行成功と説明しないでください。</p>
+<p>analyze_scriptがない旧サーバーでは構文検査と仕様照合までを行い、呼出しの静的診断は未実施としてください。サーバー更新時は新しい実行用コピーへ切り替え、クライアント側でMCPを再起動します。</p>
+<h2 id="limits">検査の範囲</h2>
+<p>ソースは64000文字までです。解析には2秒の協調取消を設定しています。強制終了の保証ではないため、クライアント側でも待機期限を設けてください。外部CALLは、未実行の分岐に書かれている場合も読取り前に拒否します。</p>
+<p>validate_scriptの構文成功だけでは、未知関数・引数数・型・ホストの公開範囲・実行成功・原版互換は確認されません。analyze_scriptの警告も全静的検査の合否ではありません。関数仕様と対応範囲を別に取得してください。台帳の「実装済み」だけで各ホストでの公開を保証しません。実行前には対象ウィンドウ、権限、ファイルの保存先なども確認してください。</p>
+<p>ファイルパスの読取り・書込み、画面操作、実行はツールに含めていません。GUIの実行検証には既存のSandbox方針を使います。スキルの説明だけで実行環境の権限を制限できるわけではありません。</p>

@@ -1,0 +1,11 @@
+<Window x:Class="UWSCSharp.Wpf.LogWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="UWSC# ログ" Width="640" Height="320"
+    ShowActivated="False" ShowInTaskbar="False"
+    WindowStartupLocation="Manual">
+    <TextBox x:Name="History" IsReadOnly="True" IsUndoEnabled="False"
+        Margin="6"
+        VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+        AutomationProperties.Name="ログ表示履歴" />
+</Window>

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>制御文 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section" open><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a aria-current="page" href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 制御文</p>
+<h1>制御文</h1><p class="lead">条件分岐・繰返し・中断と例外処理の、現在使える書式を説明します。条件は数値の0を偽、0以外を真として扱います。</p>
+<h2 id="if">IF・THEN：1行の条件分岐</h2>
+<pre data-example="verified" data-name="if" data-expected="対象あり&#10;"><code>DIM count = 1
+IF count > 0 THEN PRINT "対象あり" ELSE PRINT "対象なし"</code></pre>
+<p>THENの後に真の場合の文、任意のELSEの後に偽の場合の文を書きます。後続のセミコロン区切り文を分岐へ暗黙に含める書式は採用していません。</p>
+<pre data-example="verified" data-name="if-independent-statement" data-expected="10&#10;"><code>DIM count = 0
+IF FALSE THEN count = 1; count = count + 10
+PRINT count</code></pre>
+<p>上の例はTHEN直後の代入だけを分岐し、セミコロンの後の加算は実行するため10になります。条件は1回だけ評価し、選ばれなかった分岐の式は実行時に評価しません。ただし、構文の誤りは未選択の分岐も実行前に検出します。IFをTHENやELSEの中へ直接入れ子にする書式は採用していません。複雑な分岐にはブロックIF/IFBを使ってください。</p>
+<p>条件の数値化は<a href="#while">WHILE</a>と同じです。0を偽、0以外を真とし、NULL・数値でない文字列・非有限値は実行エラーにします。AND・OR・XORは両辺を評価する整数ビット演算です。条件と選択した文のエラーはその文の行、呼出し先の内部エラーは元の発生行を示します。</p>
+<p>引用文字列や括弧内のTHEN/ELSE、o.Thenやo.Elseのようなメンバー名は分岐の区切りにしません。1.のように小数点で終わる数値と、メンバー参照のドットも区別します。単行IFのBREAK・CONTINUE・EXITは、外側のループ・関数とFINALLYの通常規則に従います。</p>
+<h2 id="ifb">IFB・ELSEIF・ELSE・ENDIF</h2>
+<pre data-example="verified" data-name="ifb" data-expected="少数&#10;"><code>DIM count = 2
+IFB count = 0
+    PRINT "なし"
+ELSEIF count < 3
+    PRINT "少数"
+ELSE
+    PRINT "多数"
+ENDIF</code></pre>
+<p>上から順に判定し、最初に真になった分岐だけを実行します。複数行のIFからENDIFまでの形式にも対応します。</p>
+<pre data-example="verified" data-name="ifb-empty-first-match" data-expected="完了&#10;"><code>IFB TRUE
+ELSEIF INT(NULL)
+    PRINT "後続"
+ENDIF
+PRINT "完了"</code></pre>
+<p>最初に一致した本文が空でも、後続のELSEIFを評価しません。すべて偽でELSEがなければ何も実行しません。IFBとELSEIFには行末のTHENを付けられますが、その直後へ本文は書けません。ELSEは最後に1回だけ書き、ELSEの後のELSEIFや、ELSE/ENDIFへの引数は実行前に拒否します。</p>
+<p>条件の変換は単行IFと同じです。条件のエラーはIFB/ELSEIFの行、本文や呼出し先のエラーは発生した文の行を示します。未選択の本文も構文検査します。CONSTの宣言初期化は分岐の選択前に行うため、未選択の本文にあっても評価します。分岐内でだけ値を作る場合は通常の変数代入を使ってください。</p>
+<h2 id="for-to">FOR・TO・STEP・NEXT</h2>
+<pre data-example="verified" data-name="for-to" data-expected="3&#10;2&#10;1&#10;"><code>FOR i = 3 TO 1 STEP -1
+    PRINT i
+NEXT</code></pre>
+<p>STEPの既定値は1です。終了値も範囲に含み、負のSTEPで降順にできます。STEPが0、有限数でない値、精度不足でカウンターが進まない条件は拒否します。NEXTの後に変数名は書きません。OPTION EXPLICITを使う場合はカウンターも宣言してください。</p>
+<p>初期値を評価して反復変数へ代入し、その後で終了値、STEPの順に1回ずつ評価します。終了値とSTEPは本文で元の変数を変更しても変わりません。終了値やSTEPの式が反復変数を変更した場合は、その値から最初の範囲判定を行います。最初の判定で範囲外なら本文を実行しません。途中でエラーになっても、それ以前の代入や式の副作用は巻き戻しません。</p>
+<pre data-example="verified" data-name="for-counter-mutation" data-expected="1&#10;4&#10;"><code>FOR i = 1 TO 3
+    PRINT i
+    i = 3
+NEXT
+PRINT i</code></pre>
+<p>本文の終了時に反復変数を読み直し、STEPを加算して次の範囲判定へ進みます。上の例は本文でiを3に変えるため、次の値が4になり終了します。原版では本文の変更が反復回数に反映されない条件を確認しましたが、本実装は現在の変数値による更新を採用しています。同じ反復変数名を入れ子で使うと互いの値を変えるため、別の名前を使ってください。</p>
+<p>CONTINUEでも通過するFINALLYの後に反復変数を更新します。BREAK・EXIT・EXITEXITでは更新しません。通常終了後は範囲を越えた値が残ります。初期値・終了値・STEPと本文後の反復変数は有限数か、既存の規則で数値にできる文字列に限定し、EMPTYは0として扱います。直接変換、STEPが0、加算の精度停滞・オーバーフローはFORの行で診断します。数値文字列の書式と文字数制限は<a href="#while">WHILE</a>の説明を参照してください。</p>
+<h2 id="for-in">FOR・IN・NEXT</h2>
+<pre data-example="verified" data-name="for-in" data-expected="a&#10;b&#10;"><code>DIM values = SPLIT("a,b", ",")
+FOR value IN values
+    PRINT value
+NEXT</code></pre>
+<p>配列、文字列、HASHTBLのキー、対応するCOMコレクションを列挙できます。GETDIR、GETITEM、GETOLEITEMの直接呼出しでは、その取得結果を列挙します。未実装のGETALLWINには対応していません。</p>
+<p>繰返し本文へ入る前に対象を1回収集するため、本文で配列や取得結果を変更しても列挙対象は途中で変わりません。通常の列挙完了では反復変数へEMPTYを設定します。</p>
+<pre data-example="verified" data-name="for-in-snapshot" data-expected="1&#10;2&#10;3&#10;9&#10;"><code>DIM values[] = 1, 2, 3
+FOR value IN values
+    PRINT value
+    SETCLEAR(values, 9)
+NEXT
+PRINT values[0]</code></pre>
+<p>上の例は元の配列を9で埋めても、収集済みの1・2・3を列挙します。配列は多次元の全要素を行優先で扱い、部分配列も指定できます。文字列はUnicodeスカラー単位で、サロゲートペアを1要素として扱います。結合文字は別の要素、不正なUTF-16は置換文字になります。HASHTBLは既定の登録順、HASH_SORT指定時は採用済みのソート順でキーを列挙します。</p>
+<p>対象の式は1回だけ評価します。GETDIR・GETITEM・GETOLEITEMの直接呼出しでは件数ではなく取得配列を使い、本文内で再取得しても今回の列挙対象は変わりません。COMコレクションも本文の前に収集します。要素に含まれるCOMオブジェクトは参照を共有するため、プロパティの値まで固定するものではありません。COMの収集は100万要素を上限とします。</p>
+<p>空の対象を含め、通常終了では反復変数をEMPTYへ変えます。BREAK・EXIT・EXITEXITや処理外へ伝わる例外ではこの終端代入を行わず、最後に代入された値を保持します。FINALLYで値を変更した場合はその変更が残ります。CONTINUEは次の要素へ進み、末尾ならEMPTYになります。OPTION EXPLICITでは反復変数の宣言が必要です。CONSTへの代入は、対象が空でも拒否します。</p>
+<p>収集が失敗・取消になった場合は本文へ入りません。収集用の列挙子は本文開始前に解放します。コピー中は要素ごとに取消を確認し、確認後は次の読取りへ進みません。同期COM自体の強制中断は行いません。反復変数には通常の代入制限があるため、本文でHASHTBLへ変えると終端のEMPTY代入が失敗します。その場合も本文の副作用は巻き戻しません。数値・EMPTY・NULL・NOTHINGなど、対応するコレクション以外を列挙元に指定するとエラーになります。</p>
+<h2 id="while">WHILE・WEND</h2>
+<pre data-example="verified" data-name="while" data-expected="0&#10;1&#10;"><code>DIM count = 0
+WHILE count < 2
+    PRINT count
+    count = count + 1
+WEND</code></pre>
+<p>本文へ入る前に条件を1回評価し、0なら終了、0以外なら本文を実行します。最初から偽なら本文を1度も実行しません。WENDに到達すると同じ条件式を評価し直します。本文が空でも条件の副作用と取消確認は省略しません。反復変数の自動更新はありません。</p>
+<p>条件には有限の数値、TRUE/FALSE、EMPTY、数値に変換できる文字列を使えます。EMPTYは0です。数値文字列は小数・E/e指数・$付き32bitの16進数に対応し、小数点を含まない形式は32文字以内、小数点を含む形式は小数点より前が32文字未満かつ全体が64文字以内という既存の変換制限があります。前後の空白は変換前に除きます。NULL・NOTHING・配列・連想配列・ERROR・object参照、文字列のTRUE/FALSE、非数・非有限値は実行エラーです。</p>
+<p>CONTINUEは通過するFINALLYを実行してから条件を再評価します。BREAKとEXITは次の条件を評価しません。条件の直接変換で起きたエラーはWHILEの行、本文のエラーはその文の行を示します。条件で呼び出した関数の内部エラーは、関数内の発生行を保持します。AND・OR・XORは既存の整数ビット演算であり、両側の式を評価します。短絡評価を前提にしないでください。</p>
+<h2 id="repeat">REPEAT・UNTIL</h2>
+<pre data-example="verified" data-name="repeat" data-expected="1&#10;3&#10;"><code>DIM count = 0
+REPEAT
+    count = count + 1
+    IF count MOD 2 = 0 THEN CONTINUE
+    PRINT count
+UNTIL count >= 4</code></pre>
+<p>本文の後で条件を1回判定し、真なら終了、偽なら次の反復へ進みます。最初の判定より前に本文を実行します。上の例はcountが4になったときもCONTINUEからUNTILへ進むため、1と3だけを表示して終了します。</p>
+<p>CONTINUEは通過するFINALLYを実行した後でUNTILを評価します。多段継続で外側のREPEATを指定した場合、途中の内側のUNTILは評価しません。BREAK・EXIT・EXITEXITと、本文から外へ伝わる例外でもUNTILは評価しません。本文が空でも条件を評価し、取消を確認します。</p>
+<p>原版では、REPEATのCONTINUEがUNTILを評価せず次の本文へ進む条件を確認しました。本実装はCONTINUEでも終了判定を通す規則を採用しています。原版のその動作には合わせていません。</p>
+<p>条件の数値化と文字数制限は<a href="#while">WHILE</a>と同じです。0は偽、0以外は真とし、NULL・非数・非有限値は実行エラーです。条件の直接変換エラーはUNTILの行を示します。本文のエラーと、条件で呼び出した関数の内部エラーは元の発生行を保持します。REPEATの後ろに引数は書けず、UNTILの条件は省略できません。</p>
+<h2 id="select">SELECT・CASE・DEFAULT・SELEND</h2>
+<pre data-example="verified" data-name="select" data-expected="該当&#10;"><code>DIM mode = 2
+SELECT mode
+    CASE 1
+        PRINT "一つ目"
+    CASE 2, 3
+        PRINT "該当"
+    DEFAULT
+        PRINT "その他"
+SELEND</code></pre>
+<p>SELECTの式は1回評価し、最初に一致したCASEだけを実行します。CASEはカンマで候補を列挙できます。一致がなければDEFAULTを実行します。文字列の比較はOPTION SAMESTRの影響を受けます。</p>
+<p>候補は左から右へ評価し、一致後は同じCASEの残りの式も、後続CASEも評価しません。本文が空でも次のCASEへ進みません。DEFAULTは最後に1回だけ置きます。SELECTと最初のCASEの間に実行文は書けません。未選択の本文も構文検査し、CONSTは分岐に関係なく事前初期化します。</p>
+<p>EMPTYはEMPTYとのみ一致します。文字列同士は通常、大文字小文字を区別せず、OPTION SAMESTRで区別します。全角/半角やひらがな/カタカナは別の文字です。数値と文字列の混在は数値変換を使うため、2と"02"は一致しますが、文字列同士の"2"と"02"は不一致です。変換できない文字列やNULLは数値との比較でエラーとなり、DEFAULTへは進みません。</p>
+<pre data-example="verified" data-name="select-text-input" data-expected="その他&#10;"><code>DIM answer = "xyz"
+SELECT answer
+    CASE "AAA", "BBB", "3"
+        PRINT "該当"
+    DEFAULT
+        PRINT "その他"
+SELEND</code></pre>
+<p>入力文字列を分類する場合は、上の例のように候補も文字列にそろえると、不明な入力や空文字列をDEFAULTで扱えます。原版の数値CASEと文字列を混在させた例とは、変換失敗時の動作が異なります。候補の評価・比較エラーはCASEの行、本文や呼出し先のエラーは発生した文の行を示します。BREAK/CONTINUEはSELECTをループ段数に数えず、外側のループへ作用します。</p>
+<h2 id="break">BREAK・CONTINUE</h2>
+<pre data-example="verified" data-name="break" data-expected="1&#10;3&#10;"><code>FOR i = 1 TO 5
+    IF i = 2 THEN CONTINUE
+    IF i = 4 THEN BREAK
+    PRINT i
+NEXT</code></pre>
+<p>BREAKはループを抜け、CONTINUEは対象ループの次の反復へ進みます。省略時は1段です。BREAK 2やCONTINUE 2で外側も含めた段数を指定できます。</p>
+<pre data-example="verified" data-name="break-two-levels" data-expected="1&#10;2&#10;"><code>FOR i = 1 TO 3
+    FOR j = 1 TO 3
+        IF j = 2 THEN BREAK 2
+    NEXT
+NEXT
+PRINT i
+PRINT j</code></pre>
+<p>BREAKで終了するFOR TOの反復変数は更新せず、FOR INの変数も現在の要素を保持します。WHILEの次の条件やREPEATのUNTILも評価しません。上の例は2段のループを終了し、iは1、jは2のままです。</p>
+<p>段数はコンパイル時の正の整数リテラルで、実際のループの深さ以内にします。十進、$・x・0xの16進表記を採用し、変数名や計算式では指定できません。</p>
+<p>CONTINUEはFOR TOの反復変数を更新し、FOR INの次の要素、WHILEの条件判定、REPEATのUNTIL判定へ進みます。多段継続で抜ける内側のUNTILは評価しません。IF・SELECT・TRYは段数に数えません。</p>
+<p>BREAK・CONTINUEで通過するFINALLYは内側から外側へ実行します。原版では外側のFINALLYが結果に含まれない配置を確認しましたが、後処理を一貫させる現設計を採用しています。FINALLY内のエラーは元の脱出・継続を中止し、既存の例外処理へ進みます。</p>
+<p>段数の不正は未実行の分岐でも実行前に拒否します。負数・0・深さ超過・Int32上限超過は使えません。CONSTの名前も段数としては使えず、関数・手続き・CALLの呼出し元ループを指定できません。</p>
+<h2 id="exit">EXIT・EXITEXIT</h2>
+<p>EXITは現在の手続き・関数・CALL先から戻ります。メイン領域ではメイン処理を終了します。引数は指定できません。関数のRESULTとVAR引数はFINALLYの実行後に呼出し元へ返します。</p>
+<p>EXITEXIT [終了コードの式]は実行全体を終了します。省略時は0です。式を一度だけ評価し、有限の数値・数値文字列・TRUE/FALSE・EMPTYを数値化して小数部を0方向へ切り捨てます。結果は-2147483648～2147483647に限定します。NULL・数値にできない文字列・範囲外の値は実行エラーです。コマンドライン版では指定したコードをプロセス終了コードとして返します。Windowsでは負数が符号なし32bit値として表示される場合があります。</p>
+<p>EXITとEXITEXITで通過するFINALLYは内側から外側へ実行します。EXITEXITはEXCEPTで捕捉せず、VAR引数の書戻しも行いません。FINALLY内のEXITは保留中のEXITEXITを取り消しません。FINALLY内で別のEXITEXITを実行すると新しいコードを使い、エラーや解放失敗が起きれば終了コードより失敗を優先します。取消は既存のOPTFINALLY規則に従います。ホストアプリ自体の強制終了は行いません。</p>
+<pre data-example="verified" data-name="exit" data-expected="開始&#10;"><code>PRINT "開始"
+EXITEXIT 0
+PRINT "ここは実行されません"</code></pre>
+<h2 id="try">TRY・EXCEPT・FINALLY・ENDTRY</h2>
+<pre data-example="verified" data-name="try" data-expected="エラーを処理&#10;後処理&#10;"><code>TRY
+    TRY
+        PRINT 1 / 0
+    EXCEPT
+        PRINT "エラーを処理"
+    ENDTRY
+FINALLY
+    PRINT "後処理"
+ENDTRY</code></pre>
+<p>一つのTRYにはEXCEPTかFINALLYのどちらかを指定します。両方が必要な場合は上の例のように入れ子にしてください。EXCEPTは捕捉可能なスクリプト実行エラーを処理します。TRY_ERRMSGにメッセージ、TRY_ERRLINEに行番号が入ります。FINALLYは通常終了・エラー・EXITなどの後処理に使います。</p>
+<p>TRY_ERRMSGとTRY_ERRLINEの自動情報は実行scopeの開始時と各TRYの開始時に空になります。同じEXCEPT内で新しいTRYへ入る場合も先の情報を消します。別の関数・手続きのTRY情報は独立しています。エラーでFINALLYへ入る場合は、そのエラーの情報を参照できます。エラー時のTRY_ERRLINEは数値、初期値は空文字列です。</p>
+<p>同名の仮引数・宣言・代入・VAR書戻しがある場合は、その通常の束縛を参照します。TRYの初期化やエラー発生で、その値を上書きしません。自動エラー情報を参照するscopeでは、同名の束縛を作らないでください。CALL先の自動情報も独立しています。</p>
+<p>通常のEXIT/EXITEXITでもFINALLYを実行します。FINALLYの新しい実行エラーは保留中の終了要求より優先し、外側EXCEPTで処理すれば後続へ進みます。新しいEXITEXITは終了コードを置き換えます。原版で観測した一部の停止優先順位とは異なる採用仕様です。</p>
+<p>協調取消では、既定でスクリプトのFINALLYを省略して実行セッションを解放します。先頭のOPTION OPTFINALLYを有効にすると、取消後の保留中FINALLYを共有5秒・10,000回確認という協調上限で実行します。強制終了や復帰しない同期Windows/COM処理の後処理を保証するものではありません。</p>
+<p>OPTFINALLY用の副tokenの生成・解放が失敗した場合も、元の取消を保持してホスト向けの診断情報へ付加します。後処理を開始できなかった場合の完走を保証するものではありません。</p>
+<p>CHKIMGの空・逆転探索範囲、SAVEIMGの無効なウィンドウID・取得範囲外の指定はEXCEPTで処理できます。画像ファイルやクリップボード、画面取得などの障害には未分類の経路が残っています。</p>
+<p>採用したCOM生成・取得・名前解決・呼出し・列挙のHRESULT失敗もEXCEPTで処理できます。TRY_ERRLINEは数値の行番号です。原版で観測した「行番号＋ソース行」の文字列とは異なります。メモリ不足や解放失敗、未知のadapter障害を一律に捕捉するものではありません。</p>
+<p>COMへ渡せない値、表現できない返値、不正な列挙応答の採用した検証エラーもEXCEPTで処理できます。列挙できないCOM objectのLENGTHもエラーです。既に公開したALL_OLE_ITEMは、後の取得が失敗しても保持します。</p>
+<p>Windows側で分類した取得上限・対象状態・データ形式・画像ファイル等の操作エラーもEXCEPTで処理できます。未対応のcontrol形式は、通常の未検出や空の結果とは別のエラーになる場合があります。外部providerのすべての失敗を捕捉できるわけではありません。</p>
+<p>採用したACC/UIA interfaceの通常の操作失敗と、必要な参照が返らない不正応答もEXCEPTへ通知します。従来から未検出・未対応patternとして扱う返値は維持します。providerの独自本文がCOM境界で標準本文になる場合があります。</p>
+<p>採用したACC/UIA経路では、操作失敗や取消に重なった解放失敗で元の原因を置き換えません。残りの解放を試みます。解放だけの失敗はホスト障害として通知し、EXCEPTでは一律に捕捉しません。</p>
+<p>CLKITEM/CHKBTNも発生箇所で識別した操作失敗だけを捕捉します。未知のbackend障害や資源不足を、例外型が同じという理由だけでEXCEPTへ渡しません。識別した操作失敗の本文には、両関数ともFucCLKITEM:を付けます。</p>
+<p>CLKITEM/CHKBTNの前面復元が操作失敗や取消に重なって失敗した場合も、最初の原因を保ちます。復元だけが失敗した場合は、その失敗を通知します。期限超過後に同期処理が戻る場合の復元は、その処理終了後になります。</p>
+<p>GETITEMが失敗した後のsnapshot公開も失敗した場合は、元の操作失敗や取消を保ちます。新しい配列を構築できない場合のALL_ITEM_LISTは以前の値のままです。snapshotだけの失敗はホスト障害として通知します。</p>
+<p>ホスト由来の障害など、すべての例外をEXCEPTで捕捉できるわけではありません。既に行ったファイル更新や入力操作を自動で巻き戻す機能でもありません。</p>
+<h2 id="com-errors">COM_ERR_IGN・COM_ERR_RET：COMエラー制御</h2>
+<p>通常のコマンドライン版とUWSC# アプリで使えます。COM_ERR_IGNはCOM操作のエラーを抑止し、COM_ERR_FLGをFALSEへ戻します。COM_ERR_RETは抑止を解除します。どちらも引数や括弧を付けない文です。入れ子の回数は数えず、RETを1回実行すると抑止を解除します。</p>
+<pre data-example="manual" data-name="com-error-control"><code>DIM dictionary=CREATEOLEOBJ("Scripting.Dictionary")
+COM_ERR_IGN
+DIM value=dictionary.NoSuchMember()
+IF COM_ERR_FLG THEN PRINT "COM操作に失敗しました"
+COM_ERR_RET</code></pre>
+<p>識別したCOM操作が失敗すると、抑止の有無にかかわらずCOM_ERR_FLGはTRUEになります。成功した操作やCOM_ERR_RETではリセットしません。COM_ERR_FLGは読み取り専用の論理型で、数値としては1/0、VARTYPEでは11です。初期値はFALSEです。</p>
+<p>抑止中に失敗したCOMの式は数値-999999を返し、後続の式や文を続けます。GETOLEITEMだけは-1を返します。どちらの返値もVARTYPEは3です。TRYのEXCEPTには移りません。抑止を解除した後のCOMエラーは、既存のTRYによる捕捉対象になります。</p>
+<p>設定とフラグはスクリプトのスレッドごとに持ちます。同じスレッドの関数・手続き・CALL先では共有し、戻るときに自動復元しません。THREADは抑止なし・フラグFALSEで始まります。別の実行にも引き継ぎません。</p>
+<p>対象はCOMセッションが識別した生成・取得・メンバー操作・列挙等の失敗です。COM以外の式のエラー、Windows操作の失敗、未知のホスト障害、取消、解放だけの失敗を一律には抑止しません。呼出し前のローカルな引数検査も対象外です。同期COMを強制中断する機能ではありません。</p>
+<p>既に行われたCOM側の副作用は巻き戻しません。失敗したVAR呼出しの書戻しは公開せず、参照先を再評価しません。成功した呼出しの書戻し途中で失敗した場合も、それまでに完了した変更は残ります。COM列挙の失敗を抑止したFOR INは反復せず、LENGTHの失敗は-999999を返します。GETOLEITEMの失敗では前回のALL_OLE_ITEMを保持します。これは非列挙COMで結果配列を空にする原版と異なり、LENGTHの列挙方式も原版のobjectに対する8とは異なります。全VAR/OUT・全列挙条件とイベントの組合せは原版比較・受入が残っています。</p>
+<h2 id="call">CALL：別のスクリプトを取り込む</h2>
+<pre><code>// parent.uws
+CALL child.uws("太郎")
+
+// child.uwsの内容
+PRINT PARAM_STR[0]</code></pre>
+<p>上の例は2ファイルに分けて保存します。ファイル名は固定で記述し、拡張子.uwsは省略できます。空白を含む名前は二重引用符で囲みます。変数をファイル名として評価する形式は未対応です。</p>
+<p>呼出し元スクリプトのフォルダーから相対パスを解決し、実行前にコンパイル対象へ取り込みます。PUBLIC・CONST・関数定義を共有しますが、各呼出しのローカル領域とPARAM_STRは独立し、復帰時に親の引数を戻します。</p>
+<p>取込みファイル数とCALLの呼出し深度は各128が上限です。コマンドライン版とUWSC# アプリの相対ファイル操作は主スクリプトのフォルダーが基準です。CALL先のフォルダーや起動時の作業ディレクトリへ切り替えません。</p>
+
+<p>CALL先の関数・PUBLIC/CONST初期化・構文・重複定義のエラーには、失敗位置のファイル名と行番号を表示します。親に定義した関数を子から呼んだ場合も、関数を定義した親のファイル名になります。呼出し時の実引数の評価エラーは呼出し元を示します。</p>
+
+<p>PUBLIC・CONSTは主ファイルを先に初期化し、直接のCALL先、その子という幅優先の順に初期化します。同じファイル内は宣言順、同じ深さのファイルは最初に参照した順です。未実行のCALL先も対象で、循環・共有先は一度だけ初期化します。まだ初期化していない宣言を遅延評価する機能はありません。</p>
+
+<p>引用したファイル名は空にできません。引用符が閉じていない指定や、引用形式と非引用形式を混ぜた指定は読込み前に構文エラーになります。括弧やセミコロンを含む名前は二重引用符で囲んでください。</p>
+<p>CALLの引数は左から右に評価し、文字列・数値・EMPTYをPARAM_STRへ渡します。TRUEは共通の数値表現1、EMPTYは空文字列になります。NULL・NOTHING・配列・HASHTBL・object・error値は文字列化できないためCALL行のエラーとなり、TRYで捕捉できます。失敗後の引数と子の本文は実行せず、親のPARAM_STRを保ちます。先に評価済みの引数の副作用は巻き戻しません。</p>
+<p>取込みファイル数128には主ファイルを含みます。同じ正規化パスの再参照は増加しません。呼出し深度128はユーザー関数とCALLで共有する上限です。</p>
+
+<p>明示した拡張子は変更しません。例：<code>CALL child.txt</code>はchild.txtを読みます。原版のchild.txt.uwsへの補完とは異なります。<code>CALL "child file.uws(7)"</code>は括弧も含むファイル名です。引数7を渡す場合は<code>CALL "child file.uws"(7)</code>と書いてください。</p>
+<p>ファイル名にNULやASCII制御文字を含めることはできません。CALL行のエラーとして、実行前に拒否します。</p>
+
+<h2 id="log-options">ログOPTION</h2>
+<p>コマンドライン版とUWSC# アプリで使用できます。先頭のOPTIONに加え、処理中や関数・CALL先でも変更できます。設定はその実行内で共有され、CALLから戻っても自動では復元しません。子の実行エラーを親が捕捉した場合や、子がEXITで戻った場合も、既に適用した設定は維持します。子で指定する相対LOGPATHも主スクリプトのフォルダーが基準です。次の実行は既定値から開始します。</p>
+<pre><code>OPTION LOGPATH="run.log", LOGFILE=6, LOGLINES=2000
+PRINT "処理を開始します"</code></pre>
+<table><thead><tr><th>設定</th><th>意味</th></tr></thead><tbody>
+<tr><td>LOGPATH</td><td>保存先の文字列式。相対パスは主スクリプトのフォルダーが基準です。空文字は既定のUWSC.LOGへ戻します。既存フォルダーまたは区切り文字で終わる指定にはUWSC.LOGを補います。</td></tr>
+<tr><td>LOGLINES</td><td>0～100,000の整数。永続ログの保持件数で、0は以後の保存を無効化します。画面の表示量の設定とは別です。</td></tr>
+<tr><td>LOGFILE</td><td>0は日時を分まで付加、1は保存しない、2は本文だけ、3は日時を秒まで付加します。4を加えると、次の成功した保存で既存内容を置き換えます。例：6は本文だけで置換保存します。</td></tr>
+</tbody></table>
+<p>設定は左から右へ評価します。変更前の未保存出力は旧設定で保存してから切り替えます。これは、未保存出力を新しいLOGPATHへ移す原版の観測結果とは異なります。変更が失敗した場合は、未保存データと旧設定を保持します。先に成功した別の設定変更や式の副作用は巻き戻しません。</p>
+<p>保存形式はBOMなしUTF-8で、出力ごとにCRLFを加えます。日時の書式は固定です。単独サロゲートは保存時に置換文字へ変換します。実行中は約1秒ごとに保存を試みます。遅い入出力では周期どおりの保存を保証せず、保存を重ねて並列実行しません。原版の全周期・全停止経路との互換は未確認です。</p>
+
+<h2 id="shortcircuit">条件の短絡評価 OPTION SHORTCIRCUIT</h2>
+<pre><code>OPTION SHORTCIRCUIT
+IF TRUE OR 1/0 THEN PRINT "右辺を評価しません"</code></pre>
+<p>IF・IFB・WHILE・UNTILの条件で、ANDの左辺が0なら右辺を、ORの左辺が非0なら右辺を評価しません。整数論理演算と小数の0方向への切捨ては維持します。指定がなければ従来どおり両辺を評価します。</p>
+<p>括弧の内側では短絡評価しません。たとえばIF (FALSE AND f())ではfを評価します。関数引数・代入・PRINT・EVALの通常式にも適用しません。静的CALLのOPTIONは既存方針で集約し、動的CALLのOPTIONは導入後に有効となります。</p>
+<nav class="pager" aria-label="前後のページ"><a href="routines.html">← 関数の定義</a> <a href="functions.html">次へ：スクリプト関数一覧</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#if">IF・THEN：1行の条件分岐</a></li><li><a href="#ifb">IFB・ELSEIF・ELSE・ENDIF</a></li><li><a href="#for-to">FOR・TO・STEP・NEXT</a></li><li><a href="#for-in">FOR・IN・NEXT</a></li><li><a href="#while">WHILE・WEND</a></li><li><a href="#repeat">REPEAT・UNTIL</a></li><li><a href="#select">SELECT・CASE・DEFAULT・SELEND</a></li><li><a href="#break">BREAK・CONTINUE</a></li><li><a href="#exit">EXIT・EXITEXIT</a></li><li><a href="#try">TRY・EXCEPT・FINALLY・ENDTRY</a></li><li><a href="#com-errors">COM_ERR_IGN・COM_ERR_RET：COMエラー制御</a></li><li><a href="#call">CALL：別のスクリプトを取り込む</a></li><li><a href="#log-options">ログOPTION</a></li><li><a href="#shortcircuit">条件の短絡評価 OPTION SHORTCIRCUIT</a></li></ul></nav>
+</div></div></body></html>

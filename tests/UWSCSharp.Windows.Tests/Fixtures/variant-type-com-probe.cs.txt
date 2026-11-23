@@ -1,0 +1,342 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+
+[ComImport]
+[Guid("00020400-0000-0000-C000-000000000046")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IRawVariantDispatch
+{
+    [PreserveSig]
+    int GetTypeInfoCount(out uint count);
+
+    [PreserveSig]
+    int GetTypeInfo(uint index, uint locale, out IntPtr info);
+
+    [PreserveSig]
+    int GetIDsOfNames(ref Guid iid, IntPtr names, uint count,
+        uint locale, IntPtr ids);
+
+    [PreserveSig]
+    int Invoke(int id, ref Guid iid, uint locale, ushort flags,
+        IntPtr parameters, IntPtr result, IntPtr exception, IntPtr argumentError);
+}
+
+// Sandbox内で同じbitnessのクライアントへ渡す値とBYREF領域を所有します。
+[ComVisible(true)]
+[Guid("CLASS_ID")]
+[ProgId("PROG_ID")]
+[ClassInterface(ClassInterfaceType.None)]
+public sealed class VariantProbe : IRawVariantDispatch, ICustomQueryInterface
+{
+    private readonly List<IntPtr> values = new List<IntPtr>();
+    private int defaultCalls;
+    private bool failDefault;
+    private int mutationCalls;
+    private int lastInputType;
+
+    public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr pointer)
+    {
+        pointer = IntPtr.Zero;
+        if (iid != typeof(IRawVariantDispatch).GUID)
+        {
+            return CustomQueryInterfaceResult.NotHandled;
+        }
+
+        pointer = Marshal.GetComInterfaceForObject(this,
+            typeof(IRawVariantDispatch), CustomQueryInterfaceMode.Ignore);
+        return CustomQueryInterfaceResult.Handled;
+    }
+
+    public int GetTypeInfoCount(out uint count)
+    {
+        count = 0;
+        return 0;
+    }
+
+    public int GetTypeInfo(uint index, uint locale, out IntPtr info)
+    {
+        info = IntPtr.Zero;
+        return unchecked((int)0x80004001);
+    }
+
+    public int GetIDsOfNames(ref Guid iid, IntPtr names, uint count,
+        uint locale, IntPtr ids)
+    {
+        string[] members = { "DefaultCalls", "Value", "Fill", "InputType",
+            "FailDefault", "ReleaseValues", "IsNullBstr", "ChangeThenFail",
+            "MutationCalls", "LastInputType" };
+        for (int i = 0; i < count; i++)
+        {
+            string name = Marshal.PtrToStringUni(Marshal.ReadIntPtr(names, i * IntPtr.Size));
+            int id = Array.FindIndex(members, member => string.Equals(member,
+                name, StringComparison.OrdinalIgnoreCase)) + 1;
+            if (id == 0)
+            {
+                return unchecked((int)0x80020006);
+            }
+
+            Marshal.WriteInt32(ids, i * 4, id);
+        }
+
+        return 0;
+    }
+
+    public int Invoke(int id, ref Guid iid, uint locale, ushort flags,
+        IntPtr parameters, IntPtr result, IntPtr exception, IntPtr argumentError)
+    {
+        try
+        {
+            if (result == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("返値領域が必要です。");
+            }
+
+            int count = Marshal.ReadInt32(parameters, IntPtr.Size * 2);
+            if (id == 0 && count == 0)
+            {
+                defaultCalls++;
+                if (failDefault)
+                {
+                    return unchecked((int)0x80020009);
+                }
+
+                WriteValue(3, result);
+            }
+            else if (id == 1 && count == 0)
+            {
+                Marshal.GetNativeVariantForObject(defaultCalls, result);
+            }
+            else if (id == 2 && count == 2)
+            {
+                int type = Convert.ToInt32(Marshal.GetObjectForNativeVariant(Argument(parameters, 0, count)));
+                int route = Convert.ToInt32(Marshal.GetObjectForNativeVariant(Argument(parameters, 1, count)));
+                if (route == 0)
+                {
+                    WriteValue(type, result);
+                }
+                else
+                {
+                    int size = IntPtr.Size == 8 ? 24 : 16;
+                    IntPtr value = Marshal.AllocCoTaskMem(size);
+                    values.Add(value);
+                    Marshal.Copy(new byte[size], 0, value, size);
+                    WriteValue(type, value);
+                    ushort actualType = unchecked((ushort)Marshal.ReadInt16(value));
+                    Marshal.WriteInt16(result, route == 1 ? (short)0x400c
+                        : unchecked((short)(actualType | 0x4000)));
+                    Marshal.WriteIntPtr(result, 8, route == 1 || actualType == 14
+                        ? value : IntPtr.Add(value, 8));
+                }
+            }
+            else if (id == 3 && count == 2)
+            {
+                IntPtr value = Argument(parameters, 0, count);
+                ushort type = unchecked((ushort)Marshal.ReadInt16(value));
+                if (type == 0x400c)
+                {
+                    value = Marshal.ReadIntPtr(value, 8);
+                    Marshal.ThrowExceptionForHR(VariantClear(value));
+                    WriteValue(Convert.ToInt32(Marshal.GetObjectForNativeVariant(
+                        Argument(parameters, 1, count))), value);
+                }
+
+                Marshal.GetNativeVariantForObject((int)type, result);
+            }
+            else if (id == 4 && count == 1)
+            {
+                Marshal.GetNativeVariantForObject(
+                    (int)unchecked((ushort)Marshal.ReadInt16(Argument(parameters, 0, count))), result);
+            }
+            else if (id == 5 && count == 1)
+            {
+                failDefault = Convert.ToBoolean(Marshal.GetObjectForNativeVariant(
+                    Argument(parameters, 0, count)));
+            }
+            else if (id == 6 && count == 0)
+            {
+                int freed = 0;
+                foreach (IntPtr value in values)
+                {
+                    Marshal.ThrowExceptionForHR(VariantClear(value));
+                    Marshal.FreeCoTaskMem(value);
+                    freed++;
+                }
+
+                values.Clear();
+                Marshal.GetNativeVariantForObject(freed, result);
+            }
+            else if (id == 7 && count == 1)
+            {
+                IntPtr value = Argument(parameters, 0, count);
+                ushort type = unchecked((ushort)Marshal.ReadInt16(value));
+                while (type == 0x400c)
+                {
+                    value = Marshal.ReadIntPtr(value, 8);
+                    type = unchecked((ushort)Marshal.ReadInt16(value));
+                }
+
+                if ((type & ~0x4000) != 8)
+                {
+                    throw new InvalidOperationException("BSTRの引数が必要です。");
+                }
+
+                IntPtr pointer = Marshal.ReadIntPtr(value, 8);
+                if ((type & 0x4000) != 0)
+                {
+                    pointer = Marshal.ReadIntPtr(pointer);
+                }
+
+                Marshal.GetNativeVariantForObject(pointer == IntPtr.Zero, result);
+            }
+            else if (id == 8 && count == 2)
+            {
+                mutationCalls++;
+                IntPtr value = Argument(parameters, 0, count);
+                lastInputType = unchecked((ushort)Marshal.ReadInt16(value));
+                if (lastInputType == 0x400c)
+                {
+                    value = Marshal.ReadIntPtr(value, 8);
+                    Marshal.ThrowExceptionForHR(VariantClear(value));
+                    WriteValue(3, value);
+                }
+
+                Marshal.GetNativeVariantForObject(777, result);
+                bool fail = Convert.ToBoolean(Marshal.GetObjectForNativeVariant(
+                    Argument(parameters, 1, count)));
+                if (fail)
+                {
+                    return unchecked((int)0x80020009);
+                }
+            }
+            else if (id == 9 && count == 0)
+            {
+                Marshal.GetNativeVariantForObject(mutationCalls, result);
+            }
+            else if (id == 10 && count == 0)
+            {
+                Marshal.GetNativeVariantForObject(lastInputType, result);
+            }
+            else
+            {
+                return unchecked((int)0x8002000e);
+            }
+
+            return 0;
+        }
+        catch (Exception error)
+        {
+            File.AppendAllText(Path.Combine(Path.GetDirectoryName(
+                typeof(VariantProbe).Assembly.Location), "native.log"), error + "\n");
+            return Marshal.GetHRForException(error);
+        }
+    }
+
+    private static IntPtr Argument(IntPtr parameters, int index, int count)
+    {
+        int stride = IntPtr.Size == 8 ? 24 : 16;
+        return IntPtr.Add(Marshal.ReadIntPtr(parameters), (count - index - 1) * stride);
+    }
+
+    private void WriteValue(int type, IntPtr destination)
+    {
+        object value;
+        switch (type)
+        {
+            case 0:
+                value = null;
+                break;
+            case 1:
+                value = DBNull.Value;
+                break;
+            case 2:
+                value = (short)-123;
+                break;
+            case 3:
+                value = 123;
+                break;
+            case 4:
+                value = 1.25f;
+                break;
+            case 5:
+                value = 1.25d;
+                break;
+            case 6:
+                value = new CurrencyWrapper(1.2345m);
+                break;
+            case 7:
+                value = new DateTime(2026, 11, 3);
+                break;
+            case 8:
+                value = "A\0日本語😀";
+                break;
+            case 8008:
+                value = new BStrWrapper(null);
+                break;
+            case 9:
+                value = new DispatchWrapper(this);
+                break;
+            case 10:
+                value = new ErrorWrapper(7);
+                break;
+            case 11:
+                value = true;
+                break;
+            case 13:
+                value = new UnknownWrapper(this);
+                break;
+            case 14:
+                value = 1.234567890123456789m;
+                break;
+            case 16:
+                value = (sbyte)-123;
+                break;
+            case 17:
+                value = (byte)123;
+                break;
+            case 18:
+                value = ushort.MaxValue;
+                break;
+            case 19:
+                value = uint.MaxValue;
+                break;
+            case 20:
+                value = 9007199254740993L;
+                break;
+            case 21:
+                value = ulong.MaxValue;
+                break;
+            case 22:
+                value = -123;
+                break;
+            case 23:
+                value = uint.MaxValue;
+                break;
+            case 8195:
+                Array integers = Array.CreateInstance(typeof(int), new[] { 2 }, new[] { -2 });
+                integers.SetValue(123, -2);
+                value = integers;
+                break;
+            case 8200:
+                value = new[] { "日本語", "second" };
+                break;
+            case 8204:
+                value = new object[] { 123, "日本語" };
+                break;
+            case 8209:
+                value = new byte[] { 123, 255 };
+                break;
+            default: throw new ArgumentOutOfRangeException("type");
+        }
+
+        Marshal.GetNativeVariantForObject(value, destination);
+        if (type == 22 || type == 23)
+        {
+            Marshal.WriteInt16(destination, unchecked((short)type));
+        }
+    }
+
+    [DllImport("oleaut32.dll")]
+    private static extern int VariantClear(IntPtr value);
+}

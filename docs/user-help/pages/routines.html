@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>関数の定義 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section" open><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a aria-current="page" href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section"><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 関数の定義</p>
+<h1>関数の定義</h1><p class="lead">PROCEDURE・FUNCTIONで処理をまとめ、MODULE・CLASSで変数と関数をまとめられます。THREADを使うと、別の処理を並行して実行できます。</p>
+<div class="notice">コマンドライン版とUWSC# アプリの採用範囲です。</div>
+<h2 id="procedure">PROCEDURE：戻り値のない手続き</h2>
+<pre data-example="verified" data-name="procedure" data-expected="こんにちは、太郎&#10;"><code>Greet("太郎")
+
+PROCEDURE Greet(name)
+    PRINT "こんにちは、" + name
+FEND</code></pre>
+<p>呼出しは関数名と丸括弧で行います。PROCEDUREの呼出し結果はEMPTYです。処理結果を値として返す場合はFUNCTIONを使用してください。</p>
+<h2 id="function">FUNCTION・RESULT：値を返す関数</h2>
+<pre data-example="verified" data-name="function" data-expected="6&#10;"><code>PRINT Twice(3)
+
+FUNCTION Twice(value)
+    RESULT = value * 2
+FEND</code></pre>
+<p>戻り値はRESULTへ代入します。RESULT未設定での初期値はEMPTYです。EXITは現在の手続き・関数を抜けます。EXITに戻り値の式を続ける書式は採用していません。</p>
+<pre data-example="verified" data-name="function-result-replacement" data-expected="7&#10;"><code>PRINT MakeValue()
+
+FUNCTION MakeValue()
+    HASHTBL values
+    RESULT = values
+    RESULT = 7
+FEND</code></pre>
+<p>手続き・関数内のRESULTへ再代入すると、前の値の種類にかかわらず指定した値へ置き換えます。RESULT=HASH_REMOVEALLも消去命令にはせず、数値の-109を設定します。連想配列を消去して返したい場合は、通常のHASHTBL変数へHASH_REMOVEALLを代入してからRESULTへ渡してください。通常のHASHTBL変数の消去・型制限は変わりません。</p>
+<p>PROCEDURE内のRESULT代入を受け付け、呼出し結果をEMPTYとするのはUWSC#の採用仕様です。原版Free 5.3.0.2では、単純なRESULT代入を含む手続きが実行前の診断となる条件を確認しています。</p>
+<p>返値は通過するFINALLYの後で確定し、VARの書戻しが成功してから呼出し元へ返します。FINALLYや書戻しで失敗した場合、代入先へ返値を渡しません。配列・HASHTBLの返値は独立した内容を保持し、外部objectは同じ参照を渡します。</p>
+<p>メイン処理は最初の関数定義より前に書いてください。関数定義の後にメインの実行文を置く形式は拒否します。名前の重複や予約名も拒否します。</p>
+<h2 id="defaults">既定引数</h2>
+<pre data-example="verified" data-name="defaults" data-expected="10&#10;15&#10;"><code>PRINT Multiply(5)
+PRINT Multiply(5, 3)
+
+FUNCTION Multiply(value, factor = 2)
+    RESULT = value * factor
+FEND</code></pre>
+<p>値・VAR・配列パラメーターに既定値を指定できます。リテラル、名前、添字、単項・二項演算の式を使い、関数やCOMメンバーの呼出しは許可しません。既定値のある引数の後に必須引数は置けません。呼出し時の引数の不足・過剰はエラーになります。</p>
+<pre data-example="verified" data-name="procedure-optional-hole" data-expected="6&#10;"><code>ShowTotal(, 4)
+
+PROCEDURE ShowTotal(first = 2, second = 3)
+    PRINT first + second
+FEND</code></pre>
+<p>カンマで引数を明示的に省略した場合も、既定値を使います。引数の個数と必須位置の省略は、どの実引数も評価する前に検査します。呼出しに失敗すると分かっている段階で、先行引数の関数や外部操作を実行しません。正常な実引数は左から右へ1回ずつ評価します。</p>
+<h3 id="default-scope">既定値の評価先</h3>
+<pre data-example="verified" data-name="routine-default-scope" data-expected="4&#10;8&#10;10&#10;"><code>PUBLIC baseValue = 3
+ShowNext()
+baseValue = 7
+ShowNext()
+ShowNext(9)
+
+PROCEDURE ShowNext(value = baseValue, nextValue = value + 1)
+    PRINT nextValue
+FEND</code></pre>
+<p>既定値は省略した位置だけで、左から右へ評価します。評価先は呼出し先のスコープで、現在のPUBLIC・CONST、先に設定した仮引数を参照できます。呼出し元のローカル変数は見えません。使われなかった既定値は評価せず、未定義名や型の不一致は、その値が必要になった時点でエラーになります。</p>
+<p>VAR引数を省略した場合は独立したローカル値を作り、既定値に指定した変数へ書き戻しません。明示したVARには、従来どおり書込み可能な変数・配列要素を指定します。配列の既定値には、呼出し先に見えるPUBLIC配列や先行する配列引数を使えます。型と次元数は指定した[]に一致する必要があり、x[]=EMPTYを省略すると配列の型エラーになります。原版とはVAR省略時や配列の既定値の動作が異なる条件があります。</p>
+<h2 id="scope">変数のスコープ</h2>
+<p>DIMと仮引数はその実行領域のローカル変数です。通常のPUBLICはメインの直下で宣言し、複数の名前や配列を指定できます。<a href="data-types.html#variables">PUBLICの再宣言とOPTPUBLIC</a>も参照してください。MODULE・CLASSの外のCONSTは、関数内で宣言してもメイン実行前に一度初期化して共有します。関数内のDIMで共有名と同名を宣言した場合は、そのローカル変数を参照します。</p>
+<pre data-example="verified" data-name="scope" data-expected="2&#10;1&#10;"><code>PUBLIC shared = 1
+ShowLocal()
+PRINT shared
+
+PROCEDURE ShowLocal()
+    DIM shared = 2
+    PRINT shared
+FEND</code></pre>
+<h2 id="reference">VAR引数：呼出し元へ値を書き戻す</h2>
+<pre data-example="verified" data-name="var" data-expected="2&#10;"><code>DIM count = 1
+Increment(count)
+PRINT count
+
+PROCEDURE Increment(VAR value)
+    value = value + 1
+FEND</code></pre>
+<p>VARの実引数には書き戻せる変数や配列要素を指定します。通常の同期呼出しでは独立した値として処理し、正常終了時に仮引数の順で書き戻します。本文の失敗・取消時は通常の書戻しを行いません。THREADで起動した処理では、VARでも書き戻しません。</p>
+<p>この方式は呼出し中に変数の実体を共有する参照とは異なります。同じ変数を複数回渡した場合も、途中の変更を仮引数同士で共有しません。書戻しの途中で後続が失敗した場合、先に完了した更新は巻き戻しません。書戻し先の添字や型変換でスクリプトエラーになった引数は飛ばし、残るVAR引数も処理してから先のエラーを通知します。エラー時に呼出し元の代入先へ返値を渡しません。取消やホストの障害では継続しません。</p>
+<p>複数のVAR書戻しでスクリプトエラーが起きたときは、仮引数の順で最初に起きたエラーだけを通知します。DLL書戻し中の添字関数を使った比較では、原版が2件目の範囲外エラーを外側のEXCEPTにも通知する場合や、添字の数値変換に失敗した後のVARが更新されない場合がありました。</p>
+<h2 id="array-parameters">配列パラメーター</h2>
+<pre data-example="verified" data-name="array-parameters" data-expected="9,2&#10;"><code>DIM values[1] = 1, 2
+Change(values)
+PRINT JOIN(values, ",")
+
+PROCEDURE Change(VAR items[])
+    items[0] = 9
+FEND</code></pre>
+<p>配列の次元数に合わせて仮引数に[]を付けます。上の例は1次元です。VARなしの通常配列引数はコピーとして扱い、VAR付きは正常終了時に書き戻します。多次元配列・部分配列には形状や書戻し先の検査があります。</p>
+<p>1次元配列形式のパラメーターにはHASHTBLも渡せます。VARのない引数は独立した内容で処理し、呼出し元へ書き戻しません。明示したVAR引数だけを正常終了時に書き戻します。同じ連想配列を複数のVAR引数へ渡すと、仮引数ごとの変更は独立し、後の書戻しが優先します。外部オブジェクトは同じ参照を保持します。</p>
+<h2 id="modules">MODULE・CLASS：変数と関数をまとめる</h2>
+<p>MODULEからENDMODULEまでに変数や関数をまとめ、<code>名前.変数</code>や<code>名前.関数()</code>で使います。CLASSからENDCLASSも同じ動作です。実行ごとに一つの共有状態を持ち、呼出しのたびに別の実体を作る構文ではありません。次の実行では新しい状態から始めます。</p>
+<pre><code>PRINT Counter.total
+Counter.Add(2)
+PRINT Counter.total
+
+MODULE Counter
+    PUBLIC total = 0
+    DIM initial = 10
+    PROCEDURE Counter()
+        total = initial
+    FEND
+    PROCEDURE Add(value)
+        THIS.total = THIS.total + value
+    FEND
+ENDMODULE
+// 出力: 10、12</code></pre>
+<p>直下のPUBLICは外から読み書きできる変数、DIMは内部だけで使う非公開の変数、CONSTは読み取り専用の定数です。非公開変数を外から参照したり、定数へ代入したりすることはできません。MODULE・CLASS直下のHASHTBL宣言、定義の入れ子、継承、複数の実体を生成する形式は対象外です。</p>
+<p>メイン処理の前に変数を初期化します。まとまりの名前と同じ引数なしのPROCEDUREまたはFUNCTIONがあれば、初期化処理として一度呼び出します。上の例では<code>Counter()</code>が初期値を10にします。この初期化処理へ引数を渡す形式は使えません。</p>
+<p>内部では<code>THIS.total</code>のように現在のまとまりを明示できます。同名のローカル変数や仮引数がある場合も、THISでそのまとまりの変数を指定できます。<code>GLOBAL.関数名(...)</code>は外側のユーザー関数や組み込み関数の呼出しです。GLOBALで外側の変数を読み書きする形式は対象外です。</p>
+<h2 id="thread">THREAD：別の処理を並行して実行する</h2>
+<p><code>THREAD 関数名(引数...)</code>でユーザー関数・手続きを起動します。呼出し元は完了を待たず、次の文へ進みます。通常の関数呼出しと違い、戻り値を受け取りません。<code>EVAL("THREAD Worker()")</code>でも起動できますが、返値は空文字列であり、処理のIDではありません。</p>
+<pre><code>PUBLIC done = FALSE
+THREAD Worker()
+FOR attempt = 1 TO 100
+    IF done THEN BREAK
+    SLEEP(0.01)
+NEXT
+PRINT done
+
+PROCEDURE Worker()
+    SLEEP(0.02)
+    done = TRUE
+FEND</code></pre>
+<p>引数は開始時の値をコピーし、VAR引数でも呼出し元へ書き戻しません。ローカル変数は処理ごとに分かれます。PUBLICやMODULE・CLASSの変数は同じ実行の処理間で共有します。複数の処理が同じ値を更新する順序は、スクリプト側で調整してください。</p>
+<h3 id="thread-control">CTRLTRD：停止・再開・終了を要求する</h3>
+<p><code>CTRLTRD(id, mode)</code>で制御します。IDは同時に使える64枠の番号0～63で、最初の処理は0から空き枠を使います。終了した枠は再利用されるため、古いIDが後の別処理を指す場合があります。WindowsのThread IDとは異なります。</p>
+<p>modeにTRD_SUSPENDを指定すると実行の区切りで停止し、TRD_RESUMEで再開、TRD_QUITで終了を要求します。優先度はTRD_IDLE・TRD_LOWEST・TRD_LOWER・TRD_NORMAL・TRD_HIGHER・TRD_HIGHESTの6段階です。引数は2個とも必須で、返値は空文字列です。詳しくは<a href="functions-system.html">CTRLTRDの関数リファレンス</a>を参照してください。</p>
+<p>メイン処理の終了・取消・EXITEXITでは、起動した処理にも終了を要求し、後処理と終了を待ちます。取消後にFINALLYを実行するには<a href="data-types.html#optfinally">OPTION OPTFINALLY</a>を指定してください。起動した処理の未捕捉エラーとEXITEXITは実行全体へ伝わり、解放失敗も通知します。</p>
+<p>停止は処理が区切りへ戻ったときに行います。取消を無視するWindows・COM等の外部処理を強制終了する機能ではありません。物理キーやマウスの状態はWindows全体で共通なので、複数の処理から同時に操作する順序もスクリプト側で調整してください。</p>
+<h2 id="recursion">再帰と制限</h2>
+<p>ユーザー関数の再帰呼出しに対応しています。既定の呼出し深度上限は128です。COMのVAR・名前付き引数はユーザー関数の引数と別の経路で処理します。</p>
+<p><code>DEF_DLL</code>は宣言の構文検査と登録に対応しています。モジュール内で宣言した名前はそのモジュールに属するため、外部からは<code>モジュール名.関数名()</code>で参照してください。</p>
+<p>Windows x64のコマンドライン版とUWSC# アプリでは、値渡しの<code>INT</code>、<code>LONG</code>、<code>BOOL</code>、<code>UINT</code>、<code>DWORD</code>、<code>BYTE</code>、<code>BOOLEAN</code>、<code>WORD</code>、<code>LONGLONG</code>、<code>FLOAT</code>、<code>DOUBLE</code>を引数と戻り型に指定できます。戻り型を省くか<code>VOID</code>にすると、スクリプトには0を返します。32ビットDLLの中継では、<code>EXTENDED</code>の戻り値をx87から倍精度に変換し、<code>VARTYPE</code>が5の数値として返します。値渡しの<code>EXTENDED</code>引数は、倍精度の入力を80ビットへ変換して渡します。元の整数を保持している<code>LONGLONG</code>の戻り値は、<code>SET8087CW</code>で指定した方向へ丸めます。COMから受け取った符号なし64ビット整数（<code>VT_UI8</code>）を<code>EXTENDED</code>へ渡す場合も、元の整数が保持されていれば<code>SET8087CW</code>で指定した方向へ丸めます。この丸め方向は、値渡し、単体の<code>VAR EXTENDED</code>、<code>EXTENDED[]</code>、構造体の<code>VAR EXTENDED</code>・<code>EXTENDED[]</code>フィールドで反映されます。最近接では、9007199254740993は9007199254740992になります。最大値9223372036854775807は最近接と上方向で9223372036854775808に、下方向とゼロ方向で9223372036854774784になります。最小値-9223372036854775808は倍精度で表せるため、そのまま渡ります。この丸め方向は、値渡しと単体の<code>VAR EXTENDED</code>、<code>EXTENDED[]</code>、構造体の<code>VAR EXTENDED</code>・<code>EXTENDED[]</code>フィールドに適用します。外側の引数領域では1引数につき12バイトです。64ビットDLLで<code>EXTENDED</code>を使う場合は、呼出し時にエラーになります。</p>
+<p>32ビットDLLの中継では、構造体の<code>EXTENDED</code>フィールドを通常配置では8バイト境界に揃え、<code>PACK</code>では直前のフィールドの直後に配置します。フィールド自体は10バイトです。<code>VAR EXTENDED</code>フィールドには10バイトの領域を指すポインターを置きます。どちらもDLLが変更した値を倍精度に変換して書き戻します。構造体の<code>EXTENDED[]</code>フィールドには配列の先頭を指すポインターを置きます。数値変数の扱い、書戻し、<code>NULL</code>の扱いは、構造体の外で<code>EXTENDED[]</code>を指定した場合と同じです。</p>
+<p>32ビットDLLの中継では、<code>EXTENDED[]</code>の要素を10バイト間隔で並べ、先頭へのポインターを渡します。数値を格納した変数は1要素として扱います。<code>VAR</code>の有無にかかわらず、DLLが変更した値を倍精度に変換して書き戻します。<code>NULL</code>を直接指定するとヌルポインターを渡します。<code>NULL</code>を格納した変数を指定すると、DLLを呼び出す前にエラーになります。</p>
+<p>32ビットDLLの中継で単体引数を<code>VAR EXTENDED</code>と宣言すると、DLLに10バイトの領域へのポインターを渡します。書き戻す値は倍精度に変換し、<code>VARTYPE</code>が5の数値として変数や配列要素に代入します。単体・配列・構造体フィールドの<code>EXTENDED</code>の書戻しにはDLLが戻った時点の丸め方向を使います。DLLが丸め方向を変更すると、その呼出しの書戻しに反映されます。UWSC#は中継の浮動小数点状態を復元するため、丸め方向や例外マスクの変更は次のDLL呼出しに持ち越されません。DLL内のゼロ除算が浮動小数点例外になった場合、その呼出しではEXTENDEDの値を書き戻さず、実行時エラーを通知します。構造体の<code>VAR EXTENDED</code>、<code>EXTENDED[]</code>、<code>VAR INT</code>を同時に変更した場合も、例外が起きると3つのフィールドへの書戻しを行いません。変換結果が無限大またはNaN（非数）になると、UWSC#ではDLLから戻った後に書戻しエラーになります。原版では、単体の<code>VAR EXTENDED</code>にDLLが書き込んだNaNや正負の無限大が数値として書き戻されます。UWSC#では、<code>EXTENDED[]</code>の要素にNaNがあると、その配列の値を保ちます。先に書き戻した別の引数や構造体フィールドの値は残り、後続の書戻しは中断します。たとえば文字列<code>"1.5"</code>は1.5、<code>TRUE</code>は1、<code>FALSE</code>と<code>EMPTY</code>は0として渡します。COMから受け取った真偽値（<code>VT_BOOL</code>）は、真を-1、偽を0として渡します。この変換は、<code>EXTENDED[]</code>の要素や、構造体の<code>VAR EXTENDED</code>・<code>EXTENDED[]</code>フィールドにも適用します。COMの通貨型（<code>VT_CY</code>）や十進数型（<code>VT_DECIMAL</code>）を単体の<code>VAR EXTENDED</code>に渡すと、DLLが書いた値は数値型5として書き戻されます。通貨型の入力は、<code>SET8087CW</code>で指定した方向へ丸めてから80ビットへ拡張します。たとえば通貨型の最大値922337203685477.5807は、最近接と上方向で922337203685477.625、下方向とゼロ方向で922337203685477.5になります。十進数型の<code>0.1</code>と<code>-0.1</code>は、丸め方向の指定にかかわらず同じ倍精度値を80ビットへ拡張します。通貨型・十進数型の入力変換は、値渡し、単体の<code>VAR EXTENDED</code>、<code>EXTENDED[]</code>、構造体の<code>VAR EXTENDED</code>・<code>EXTENDED[]</code>フィールドに適用します。COMの単精度型（<code>VT_R4</code>）の<code>0.1</code>と<code>-0.1</code>は、4つの丸め方向すべてで、元の単精度値をそのまま80ビットへ拡張して渡します。単精度型の最大有限値と、最小の正の非正規値（<code>2^-149</code>）も、元の値を保ったまま渡ります。COMの単精度型または倍精度型がNaNまたは正負の無限大を返した場合、UWSC#はCOMの戻り値を受け取る時点で実行時エラーを通知します。原版はこれらの値を<code>EXTENDED</code>の値渡し、単体の<code>VAR EXTENDED</code>、<code>EXTENDED[]</code>、構造体の<code>VAR EXTENDED</code>・<code>EXTENDED[]</code>フィールドに渡しました。書戻しのある経路では、DLLが書き込んだ有限値を数値型5として受け取りました。原版では、配列や構造体の先頭・末尾・両方にこれらの値を指定しても、DLLからの書戻しが反映されました。3要素に単精度のNaN、倍精度の正の無限大、単精度の負の無限大を配置した比較では、全6通りで原版が宣言順に値を渡し、すべての要素に書き戻しました。十進数型の<code>9007199254740993</code>は、丸め方向の指定にかかわらず<code>9007199254740992</code>として渡ります。十進数型の最大値・最小値も、4つの丸め方向すべてで正負の<code>2^96</code>として渡ります。十進数型の最小の非ゼロ値である正負の<code>10^-28</code>は、4つの丸め方向すべてで、数学的に最も近い倍精度値より絶対値が1 ULP大きい値として渡ります。この変換と数値型5への書戻しは、<code>EXTENDED[]</code>の要素と、構造体の<code>VAR EXTENDED</code>・<code>EXTENDED[]</code>フィールドにも適用します。空文字や数値に変換できない文字列は、DLLを呼び出す前にエラーになります。<code>NULL</code>の直接指定はヌルポインターを渡します。<code>NULL</code>を格納した変数でもDLLは呼び出され、書き戻し時にエラーになります。</p>
+<pre><code>DEF_DLL MulDiv(int,int,int):long:kernel32.dll
+PRINT MulDiv(3.5,1,1)</code></pre>
+<p>整数引数の変換には<code>SET8087CW</code>の丸め設定を使います。<code>SET8087CW</code>で設定したx87制御語は、32ビット中継ではDLLの関数を呼んでいる間だけ適用します。64ビットDLLを直接呼び出す場合、DLL内のx87やSSEの制御値には<code>SET8087CW</code>の指定を適用しません。同一プロセスのCOMメソッドを呼ぶときや、プロパティを取得・代入するときは、呼出し中だけこの指定をx87制御語に適用します。SSEの制御値は呼出し元の設定を使います。別プロセスのCOMサーバーでは、サーバー自身の制御語を使います。イベント処理からそのサーバーを呼び直したときも同じです。同期COMイベントの処理で別の制御語を指定して同じCOMオブジェクトを呼び直すと、内側の呼出しが終わったときに外側のx87制御語が復元されます。イベント処理で<code>SET8087CW(0)</code>を指定して同じCOMオブジェクトを呼び直すと、内側の呼出しは最外の呼出し前のx87制御語を使います。内側の呼出しが終わると、外側のx87制御語に戻ります。同一プロセスのCOMメソッドでは、x87のゼロ除算のマスクを解除すると、メソッド内のゼロ除算を<code>EXCEPT</code>で捕捉できます。戻り値の代入先には呼出し前の値が残り、その後もCOMメソッドを呼び出せます。同期COMイベントの通知処理で捕捉しなかった例外をサーバーが発火元へ返した場合は、イベントを発火した呼出しを囲む<code>EXCEPT</code>で捕捉できます。<code>SET8087CW(0)</code>で設定を解除すると、中継先の既定値で呼び出します。<code>THREAD</code>から32ビットDLLを並行して呼ぶ場合は、各スレッドの設定をその呼出しに適用します。32ビット中継では、ゼロ除算や負数の平方根による無効演算のマスクを解除すると、DLL内で発生した該当の例外を<code>EXCEPT</code>で捕捉できます。例外が発生した呼出しの戻り値の代入先と<code>VAR</code>引数には呼出し前の値が残り、その後もDLLを呼び出せます。既定の設定で上の例を実行すると、表示は4です。対応済みのスカラー戻り型に末尾の <code>[]</code> が付いている場合も、返る値は1つです。たとえば <code>INT[]</code> は <code>INT</code> と、<code>STRING[]</code> は <code>STRING</code> と同じ型の値を返します。配列や構造体の値を返す呼出しは未対応です。UWSC#で構造体を戻り型に指定した関数を呼ぶと、DLLを実行する前にエラーが発生します。このエラーは<code>EXCEPT</code>で捕捉できます。</p>
+<p>原版UWSC Free 5.3.0.2からCOMイベント処理を移植する場合、整数と参照渡しの取消フラグを受け取る同期イベントでは、発火時の制御語によって<code>EVENT_PRM</code>の内容が異なります。原版のスクリプトで、発火前に<code>SET8087CW</code>で<code>0x007f</code>、<code>0x047f</code>、<code>0x0c7f</code>を指定し、通知処理内で<code>0</code>、<code>0x077f</code>、<code>0x087f</code>のいずれかを指定した比較では、整数を<code>EVENT_PRM[2]</code>から読み取れました。<code>EVENT_PRM[1]</code>に代入せずに戻ると、取消値は通知された整数が0なら偽、非ゼロなら真でした。 同じ発火条件で通知処理内の制御語指定を省いた比較では、整数が42でも0でも取消値は偽でした。 通知処理内で<code>0x007f</code>、<code>0x047f</code>、<code>0x0c7f</code>のいずれかを指定した比較でも、取消値は偽でした。比較したコマンドライン版とUWSC# アプリの別プロセス通知では、整数は<code>EVENT_PRM[0]</code>に入り、<code>EVENT_PRM[1]</code>に代入せずに戻ると取消フラグの初期値を保持しました。</p>
+<p>Windows上でコマンドライン版とUWSC# アプリをビルドすると、実行ファイルと同じ場所の <code>dll-relay</code> フォルダーに中継プログラムが配置されます。ネイティブ32bit DLLを呼ぶにはx86版の.NET 10が必要です。<code>dll-relay/runtime</code> にx86版の.NETを配置した場合は、そのランタイムを使用します。32bit DLLにはStdCallの関数を指定してください。同じスクリプトのメイン処理や各<code>THREAD</code>からの中継呼出しは、それぞれ同じ中継スレッドで処理します。メイン処理と<code>THREAD</code>の呼出しは並行できます。構造体の<code>HWND</code>・<code>HMENU</code>フィールドに文字列を渡し、DLLの復帰時に中継側の一時領域を指している場合は、元の文字列を保持します。原版では数値が書き戻ります。呼出しを送信した後は、THREADの停止やメイン処理の終了が要求されても、DLLから応答が返るまで待って書き戻します。中継との通信が途切れた場合、応答を待っていた呼出しはエラーになり、自動で再送されません。中継でも、構造体の <code>HWND</code>・<code>HMENU</code> の値フィールドに文字列を渡せます。DLLがフィールドを数値で書き換えると、その値を書き戻します。フィールドが中継の呼出し用領域を指したままなら、渡した文字列を保持します。</p>
+<p><code>HWND</code>と<code>HMENU</code>は、64bit DLLの値渡し引数、<code>VAR</code>引数、配列引数、構造体のフィールド、戻り型に指定できます。DLLとの受渡しでは64ビット幅を使い、値渡し引数の<code>NULL</code>は0として渡します。値渡し引数に文字列を指定すると、ANSIのNUL終端バッファのアドレスを渡します。空文字列にも領域を確保します。文字列の変換にはWindowsのANSIコードページを使います。文字列のアドレスはDLL呼出し中に使用できます。構造体の値フィールドに文字列を渡すときも、同じANSIバッファを使います。この動作は通常配置と<code>PACK</code>のどちらでも、入れ子の構造体の値フィールドに適用されます。単体の<code>VAR</code>引数、配列要素、構造体の参照・配列フィールドの文字列は数値として変換し、数値に変換できない場合はエラーになります。戻り値、単体の<code>VAR</code>引数、構造体の値フィールドの書戻しは<code>VARTYPE</code>が5です。配列に書き戻した要素は、32ビットに収まる値が19、超える値が21です。たとえば<code>GetDesktopWindow</code>の戻り値を<code>HWND</code>として受け取り、<code>IsWindow</code>の引数に渡せます。構造体に書き戻されたハンドルも引数に使えます。たとえば<code>GetComboBoxInfo</code>が書いた<code>HWND</code>を<code>IsWindow</code>に渡せます。</p>
+<p>対応する数値型には<code>VAR</code>を付けられます。DLLから戻ると、変数や配列要素へ引数順に書き戻します。同じ変数を複数の引数に指定した場合は最後の書戻しが有効です。配列の添字は読取り時と書戻し時に評価されます。定数やリテラルの値は変わりません。</p>
+<p>数値の<code>VAR</code>で<code>NULL</code>を直接指定すると、ヌルポインターを渡し、その引数の書戻しを省きます。NULLを格納した変数・配列要素・定数や、NULLを返す関数呼出しもヌルポインターを渡しますが、DLLから戻った後、その引数の書戻し位置でエラーになります。前の引数への反映は残り、それ以降の書戻しは行いません。原版のアクセス違反の代わりに、捕捉可能なスクリプトエラーを返します。構造体内の数値VARも同じ規則です。</p>
+<pre><code>DEF_DLL QueryPerformanceFrequency(VAR longlong):bool:kernel32.dll
+DIM frequency=0
+QueryPerformanceFrequency(frequency)
+PRINT frequency</code></pre>
+<p>対応する数値型に<code>[]</code>を付けると、配列引数になります。多次元配列も行の順に並べ、<code>VAR</code>の有無にかかわらず元の配列や部分配列へ書き戻します。配列の長さが必要な関数では別の引数で指定してください。空配列はエラーです。ヌルポインターを渡すには<code>NULL</code>を指定します。</p>
+<p>数値配列は引数の順に書き戻します。同じ配列の全体と部分配列を同時に渡すと、後の配列全体に残っていた元の値で、先に書き戻した部分配列の変更が上書きされる場合があります。配列を3個使うVARなしの直接引数と通常配置の構造体では、11型でこの順序を原版と比較しています。</p>
+<p>対応する数値11型では、同じ配列の全体・行・要素を繰り返し渡しても、各引数には別のポインターを渡します。配列のVAR有無や数値VARとの組合せでも同じです。DLL側の変更は引数順に反映され、後の引数の値が残ります。Main・手続き・関数で、直接引数・構造体内・PACKを原版と比較しています。</p>
+<p>UINT/DWORDの配列と数値VARが同じ要素を指定する場合、VARTYPEも最後の書戻しに従います。最後が配列引数なら19、数値VARなら5となります。</p>
+<p>次元を明記したVAR仮引数へ同じ配列を複数渡す場合、DLLの変更を受けた後、仮引数順に呼出し元へ書き戻します。重なる部分には後の仮引数の値が残ります。数値11型の直接引数・構造体内・PACKで原版とコマンドライン版とUWSC# アプリを比較しています。</p>
+<p>本実装では配列を別変数へ代入した後の内容を独立して扱います。VAR仮引数はDLLからの書戻しを受けた後、仮引数順に呼出し元へ反映します。今回調べた2次元配列のDIM初期値・全体代入と、次元を指定しないVAR仮引数への2次元配列渡しは、原版Free 5.3.0.2ではメイン前の診断となりました。本実装の<a href="data-types.html#array-copy">配列コピーとVAR引数の採用仕様</a>とは分けて扱います。</p>
+<p>構造体は宣言で型を<code>{}</code>で囲み、呼出しではフィールドの順に引数を並べます。対応するフィールドは数値型、文字列型、数値型の配列、子構造体です。DLLには構造体へのポインターを渡し、DLLから戻ると変数や配列要素へ順に書き戻します。通常は数値型と<code>CHAR</code>・<code>WCHAR</code>を型の幅に合わせて配置します。DLL名の後に<code> PACK</code>または<code>:PACK</code>を付けると、子ポインター以外の対応フィールドを1バイト境界に置きます。</p>
+<pre><code>DEF_DLL GetCursorPos({long,long}):bool:user32.dll
+DIM x=0, y=0
+IF GetCursorPos(x,y) THEN PRINT x+","+y</code></pre>
+<p>子構造体を含む<code>{byte,{long,long}}</code>では、親の<code>BYTE</code>、子の1番目と2番目の<code>LONG</code>の順に引数を渡します。親の領域には子へのポインターを置きます。x64では<code>PACK</code>でも子ポインターを8バイト境界に配置します。DLLがポインターの値を変えた場合も、最初に渡した子の領域から書き戻します。</p>
+<p>構造体内の数値配列には、<code>BYTE</code>・<code>BOOLEAN</code>・<code>WORD</code>・<code>INT</code>・<code>LONG</code>・<code>BOOL</code>・<code>UINT</code>・<code>DWORD</code>・<code>LONGLONG</code>・<code>FLOAT</code>・<code>DOUBLE</code>の型名に<code>[]</code>を付けます。たとえば<code>{byte,int[],byte}</code>では、BYTEの値、配列、後続のBYTEの値の順に引数を渡します。</p>
+<p>配列の要素は宣言型の連続領域へ変換し、構造体にはそのポインターを置きます。x64の通常配置では8バイト境界、<code>PACK</code>では1バイト境界です。<code>VAR</code>の有無にかかわらず、DLLが変更した値を元の配列へ書き戻します。DLLがポインターを差し替えても、書戻しには最初に渡した領域を使います。二次元配列は行優先で渡り、部分配列も指定できます。配列の要素数が必要なDLLには、別の引数で渡してください。</p>
+<p>配列フィールドへ数値単体を指定すると、1要素の領域を渡し、結果を変数へ書き戻します。<code>UINT</code>・<code>DWORD</code>の書戻しは、配列要素も単体値も<code>VARTYPE</code>が19になります。<code>NULL</code>の直接指定はヌルポインターを渡します。<code>NULL</code>を格納した変数は<code>UINT</code>・<code>DWORD</code>で値0へ変換し、ほかの9型では拒否します。空配列は指定できません。</p>
+<p>配列ではない数値フィールドにも、上記11型で<code>VAR</code>を指定できます。たとえば<code>{byte,VAR int,byte}</code>は、数値1つを別領域に置き、構造体にはポインターを渡します。x64の通常配置は8バイト境界、<code>PACK</code>は1バイト境界です。呼出し後は最初に渡した領域から変数へ書き戻します。<code>UINT</code>・<code>DWORD</code>の書戻しの<code>VARTYPE</code>は5です。配列は全11型で指定できません。NULLの受渡しと書戻しは、外側の数値VAR引数と同じ規則です。</p>
+<p><code>VAR {int,int}</code>や<code>{byte,VAR {int,int}}</code>のように、構造体引数全体や子構造体へ<code>VAR</code>を付けることはできません。原版と同じく宣言時にエラーになります。<code>{int,int}[]</code>や<code>{byte,{int,int}[],byte}</code>のように、構造体引数全体や子構造体へ<code>[]</code>を付けた場合も宣言時にエラーになります。構造体の戻り型には未対応です。</p>
+<p>1回のDLL呼出しで使える構造体は、親・子・兄弟と別の引数を合わせて7個までです。たとえば構造体引数が4個あり、そのうち3個が子を1個ずつ持つと合計7個です。構造体ごとの上限は、最後のフィールドまでの長さで2048バイトです。たとえば2048バイトの構造体を2個、同じ呼出しの別々の引数として渡せます。末尾のパディングは数えません。子構造体・数値配列・<code>VAR</code>文字列の内容を置く別領域は親の容量に含めず、親に置くポインターと、その配置に必要なパディングを数えます。入れ子では親と子がそれぞれ2048バイトまで使えます。子へのポインターは<code>PACK</code>でもポインター幅の境界に置きます。たとえば配列本体が2052バイトになる513要素の<code>INT[]</code>も、親構造体が2048バイトに収まる配置で渡せます。32ビットDLL中継では、配列本体が10240バイトになる1024要素の<code>EXTENDED[]</code>も同じ条件で渡せます。32ビットDLL中継では、構造体に複数の<code>EXTENDED[]</code>フィールドを置けます。別々の配列を渡すと、各フィールドの<code>VAR</code>指定の有無にかかわらず、それぞれの配列に値を書き戻します。同じ配列を2つのフィールドに渡した場合は、DLLには別々の領域を渡し、後ろのフィールドの配列全体が最後に書き戻されます。親構造体の<code>EXTENDED[]</code>と子構造体の<code>VAR EXTENDED[]</code>に同じ配列を渡す場合も、通常配置と<code>PACK</code>の両方で、宣言順で後ろのフィールドの配列全体が残ります。たとえば<code>{BYTE,VAR STRING,STRING,INT}</code>の通常配置では、VARなしの<code>STRING</code>に32ビット中継で2036バイト、64ビット直接呼出しで2028バイトまで渡せます。<code>PACK</code>ではそれぞれ2039バイトと2035バイトまでです。超過はDLLを呼び出す前の実行時エラーになります。たとえば<code>{BYTE,STRING,INT}</code>を<code>PACK</code>で宣言し、ASCII文字列を2044バイトにすると、UWSC#では構造体が2049バイトになるためエラーになります。原版UWSC Free 5.3.0.2の実行比較では、この条件でDLLの呼出しと書戻しが完了しました。<code>{BYTE,WSTRING,INT}</code>を<code>PACK</code>で宣言して2044 UTF-16コード単位を渡した条件でも、同じ結果になりました。日本語を含む <code>STRING</code> をANSIで2044バイトにした場合と、補助文字を含む <code>WSTRING</code> を2044 UTF-16コード単位にした場合も、原版ではDLLの呼出しと書戻しが完了し、UWSC#は呼出し前に拒否しました。<code>{BYTE,EXTENDED[],STRING,INT}</code>で204要素の配列を渡し、<code>PACK</code>の親構造体を2049バイトにした条件でも、原版は書き戻し、UWSC#は呼出し前に拒否しました。</p>
+<p>外側の引数領域は2048バイトまでです。値渡しの<code>DOUBLE</code>・<code>LONGLONG</code>は1引数8バイト、ほかの対応する数値型・文字型と、構造体・参照・配列・文字列へのポインターは1引数4バイトとして上限を判定します。たとえば<code>INT</code>だけなら512引数、<code>DOUBLE</code>だけなら256引数までです。<code>PACK</code>を指定してもこの上限は変わりません。構造体内部のフィールド数は外側の引数数には含めません。上限の判定には原版の32bit幅を使い、実際のx64呼出しでは各型とポインターの本来の幅を使います。</p>
+<p><code>VAR</code>付きの<code>STRING</code>・<code>PCHAR</code>・<code>PBYTE</code>・<code>WSTRING</code>・<code>PWCHAR</code>は、NULLを直接指定する場合もNULL変数を渡す場合も40番目までです。41番目ではDLLを呼び出す前にエラーになります。</p>
+<p>数値配列引数には、要素のある数値配列のほか、書込み可能な単体変数・配列要素、<code>NULL</code>の直接指定を使えます。数値リテラル・定数・関数呼出しは、その値を評価する前に拒否します。数値を持つ単体変数や配列要素には、宣言型の1要素を渡して書き戻します。<code>NULL</code>変数・<code>NULL</code>配列要素は<code>UINT</code>・<code>DWORD</code>だけが0として受け付け、ほかの数値型は拒否します。<code>NULL</code>直接指定はヌルポインターを渡し、書戻しを行いません。<code>UINT</code>・<code>DWORD</code>の配列引数は、単体値も配列全体も書戻し時の<code>VARTYPE</code>を19にします。これらは<code>VAR</code>の有無と直接引数・構造体内で共通です。</p>
+<p>数値配列引数へ渡す単体変数には、文字列の<code>"11"</code>・<code>"11.5"</code>、<code>EMPTY</code>、<code>TRUE</code>・<code>FALSE</code>も格納できます。数値文字列は宣言型へ変換し、<code>EMPTY</code>は0、<code>TRUE</code>・<code>FALSE</code>は1・0として渡します。空文字と数値に変換できない文字列はDLLを呼び出す前に拒否し、元の値を維持します。</p>
+<p>DLL呼出しでは、まず数値配列以外の引数の値を左から右に評価します。その後、宣言順に型変換と数値配列の形式検査・参照解決を行います。配列引数の形式が不正でも、通常引数の関数の副作用は先に発生します。添字を含む配列要素は参照解決時と書戻し時に評価します。通常引数の関数から、VAR引数を通じて配列の元のDIM変数を書き換えた場合も、変更後の値を渡します。</p>
+<p>PUBLIC変数を数値配列引数へ直接指定すると、原版に合わせ、PUBLIC名の登録順と同じ位置のローカル値をDLLへ渡します。書戻し先は指定したPUBLIC変数です。CONSTと未実行のDIM宣言は、この登録位置に含みません。Mainの先頭位置はPARAM_STR、関数はRESULT、手続きは最初の引数です。対応するローカル値がない場合や、必要な配列範囲より短い場合は、DLL呼出し前にエラーにします。PUBLIC名と同名のローカル変数があれば、そのローカル変数を使います。指定したPUBLICの値を渡すには、いったんDIM変数へコピーしてDLLに渡し、必要に応じてPUBLICへ代入してください。</p>
+<p>同じPUBLIC配列の全体・行・要素を繰り返し指定する場合も、数値配列引数には対応する位置のローカル値を渡します。数値VARには指定したPUBLIC要素の値を渡します。DLLから戻るとPUBLICへ引数順に書き戻し、入力元のローカル配列は変更しません。数値11型の直接引数・構造体内・PACKで、Main・手続き・関数、配列のVAR有無、配列と数値VARの両順序を原版、コマンドライン版、UWSC# アプリで比較しています。</p>
+<p>PUBLIC配列とローカル配列を同じ呼出しに渡す場合、PUBLIC配列への入力には対応する位置のローカル値を使います。各引数は別のポインターで渡し、DLLから戻ると指定したPUBLIC変数とローカル変数へそれぞれ書き戻します。配列全体と先頭の数値VARについて、数値11型の直接引数で、Main・手続き・関数、配列のVAR有無、配列と数値VARの両順序を原版、コマンドライン版、UWSC# アプリで比較しています。</p>
+<p>PUBLICとローカル配列の混在は、数値11型の直接引数で2行3列の第1行<code>[0]</code>と要素<code>[0][1]</code>も原版、コマンドライン版、UWSC# アプリで比較しています。行では3要素、要素指定では1要素を書き戻し、範囲外の値とVARTYPEを保ちます。UINT/DWORDでは配列の書戻しが型19、数値VARの書戻しが型5になります。</p>
+<p>PUBLIC配列とローカル配列の混在は、通常配置の構造体内とPACKでも数値11型で配列全体・第1行<code>[0]</code>・要素<code>[0][1]</code>を原版、コマンドライン版、UWSC# アプリで比較しています。Main・手続き・関数、配列のVAR有無、配列と数値VARの両順序で、値・VARTYPE・呼出し回数が一致しています。行では3要素、要素指定では1要素を書き戻し、範囲外の値とVARTYPEを保ちます。</p>
+<p>INTの直接引数では、全体と行・全体と要素・行と要素の異なる範囲の両順序も、PUBLICとローカルの両順序、Main・手続き・関数、配列のVAR有無を含めて原版、コマンドライン版、UWSC# アプリで比較しています。各引数を別のポインターで渡し、それぞれの指定先へその範囲だけを書き戻します。ほかの数値型と構造体内・PACKの異なる範囲同士は未確認です。</p>
+<p>DIM配列と通常のPUBLIC配列を数値配列引数へ渡す場合、添字を行の順に換算した通し位置と、そこから渡す要素数で範囲を判定します。2行3列なら、<code>[0][3]</code>は<code>[1][0]</code>、<code>[1][-1]</code>は<code>[0][2]</code>と同じ位置を渡して書き戻します。通常のDIM添字の読出し・代入はこれらを範囲外として拒否します。DLLへ渡す範囲が配列の総要素数を超える場合も、呼出し前のエラーになります。PUBLICではPUBLIC側の形状で位置と必要個数を決め、同じ登録位置のローカル値からコピーします。コピー元の次元形が違っても、必要な範囲があれば受け付けます。コピー元の長さには、指定範囲より前にある要素も数えます。たとえばPUBLIC配列の7番目から3要素を渡す場合、コピー元には9要素が必要です。この境界は、要素のバイト幅が異なるBYTE・INT・DOUBLEで原版と比較しました。三次元配列から二次元の範囲を切り出す場合も同じです。たとえば7番目から2行3列の6要素を渡す場合、コピー元には12要素が必要です。2行3列を指定する例では、BYTE・INT・DOUBLEで必要な要素数が同じになることを原版と比較しました。単体要素をDLLの配列引数へ渡す場合も、コピー元には指定した要素までの長さが必要です。たとえば7番目の要素を渡すには、コピー元に7要素が必要です。DLLから戻ると、その1要素に書き戻します。三次元配列から末尾の次元を切り出して渡す場合も、メインとTHREADの両方でこの規則を確認しました。対応するローカルがないPUBLIC配列は、直接の配列引数と構造体の配列フィールドで拒否されます。登録位置が対応するローカル配列があれば、通常配置とPACKの構造体フィールドでも、DLLにはローカル配列の値を渡し、戻った値をPUBLIC配列へ書き戻します。</p>
+<p>Main・関数・手続きでPUBLICが2行3列の場合に、コピー元の単体変数・1次元4/6/8要素・2行3列・3行2列を使い、BYTE・BOOLEAN・WORD・INT・LONG・BOOL・UINT・DWORD・LONGLONG・FLOAT・DOUBLEの11型、VAR有無、直接引数と構造体内（通常配置・PACK）を原版と比較しています。構造体では配列ポインターの前後に整数を置いて配置も確認しています。コピー元が単体変数の場合は先頭要素の指定だけを受理し、全体・行の指定や先頭以外の要素指定は呼出し前に拒否します。コピー元が4要素の場合、必要な範囲がコピー元を超える指定は拒否します。8要素あってもPUBLIC側の総範囲を超える指定は拒否します。コピー元の次元形が異なっても、PUBLIC側の形状で通し位置とコピーする要素数を決めます。PUBLIC側の別の次元形・要素数、WITH/モジュール・THREAD・CALL先、3次元以上や非ゼロ下限、コピー元の文字列・NULL等は未確認です。手続きの明示RESULTは、原版の診断でDLL呼出しに到達せず未比較です。</p>
+<p>通常のPUBLIC配列に範囲外の定数添字を含めると、原版がメイン処理前に診断する条件があります。UWSC#ではTRYで捕捉する実行時エラーとなる差があり、診断時点を調査中です。</p>
+<p>構造体のフィールドを宣言順に展開した後、領域を確保する数値配列は20番目、数値の<code>VAR</code>と<code>STRING</code>・<code>PCHAR</code>・<code>PBYTE</code>・<code>WSTRING</code>・<code>PWCHAR</code>の文字列用領域は40番目までに置きます。波括弧と配列の要素数は数えません。ほかの引数を前に置く場合も、その位置を含めて数えます。超過はDLLを呼び出す前の実行時エラーになります。<code>EXTENDED[]</code>に<code>NULL</code>を直接指定すると配列用の領域を確保しないため、21番目でもヌルポインターを渡せます。単体の<code>VAR EXTENDED</code>に<code>NULL</code>を直接指定すると、41番目でもヌルポインターを渡せます。<code>NULL</code>を格納した変数でもヌルポインターで呼び出しますが、DLLから戻った後に書戻しエラーになります。</p>
+<p>文字列引数には<code>STRING</code>・<code>PCHAR</code>・<code>PBYTE</code>（WindowsのANSIコードページ）と<code>WSTRING</code>・<code>PWCHAR</code>（UTF-16）を使えます。入力を変換した後のバイト数またはUTF-16コード単位数に、終端のNULを1つ加えた領域を渡します。DLLが書き込む場合は、必要な容量を満たす長さの文字列を用意してください。</p>
+<p><code>VAR STRING</code>と<code>VAR WSTRING</code>は最初のNULまでを書き戻します。<code>VAR PCHAR</code>・<code>VAR PBYTE</code>・<code>VAR PWCHAR</code>は入力の長さ分を、途中のNULも含めて書き戻します。<code>NULL</code>はヌルポインターとして渡し、<code>VAR</code>の代入先には空文字を返します。これらの型はDLLの直接の引数に指定できます。</p>
+<pre><code>DEF_DLL CharUpperBuffW(VAR WSTRING,dword):dword:user32.dll
+DIM label="hello"
+CharUpperBuffW(label,LENGTH(label))
+PRINT label</code></pre>
+<p>文字列ポインターを返すDLLには<code>STRING</code>・<code>PCHAR</code>・<code>PBYTE</code>（ANSI）または<code>WSTRING</code>・<code>PWCHAR</code>（UTF-16）の戻り型を指定できます。最初のNULまでをコピーし、ヌルポインターは空文字として返します。引数の領域を指す場合はその範囲内を読み、ほかの領域では終端を含めて16 MiBまで読み取ります。終端が見つからない場合や読み取れない場合はスクリプトエラーになります。</p>
+<p><code>CHAR</code>・<code>WCHAR</code>は値渡しの引数と戻り型に指定できます。入力は文字列へ変換し、<code>CHAR</code>はWindowsのANSIコードページで符号化した先頭1バイト、<code>WCHAR</code>はUTF-16の先頭1コード単位を渡します。空文字と<code>NULL</code>は値0を渡します。DLLから返った値は文字列になり、NULも1単位として保持します。<code>VAR</code>と<code>[]</code>は指定できません。</p>
+<p>構造体内のVARなしの<code>STRING</code>・<code>PCHAR</code>・<code>PBYTE</code>・<code>WSTRING</code>・<code>PWCHAR</code>は、文字列の内容をフィールド位置に置きます。通常配置では4バイト境界に置き、終端のNULは追加しません。ANSIは変換後のバイト数、UTF-16は原版に合わせてコード単位数と同じバイト数だけ先頭からコピーします。たとえばANSIコードページ932の<code>STRING</code>では、「日」1文字が構造体の容量を2バイト使います。<code>WSTRING</code>の「𠮷」はUTF-16の2コード単位に当たるため、構造体の容量には2バイトを数えます。<code>LENGTH</code>では1文字です。</p>
+<p><code>STRING</code>と<code>WSTRING</code>はDLLが変更したバイトを元の文字列に重ね、最初のNULまでを書き戻します。<code>PCHAR</code>・<code>PBYTE</code>・<code>PWCHAR</code>は変換した入力をそのまま書き戻します。空文字では配置時にバイトを追加せず、書戻し時は4バイト進むため後続フィールドの読取り位置がずれます。<code>NULL</code>は4バイトのゼロを配置します。構造体の容量は配置時の長さで判定します。親と子に<code>STRING</code>がある場合、UWSC#はそれぞれの内容を対応する変数に書き戻します。原版UWSC Free 5.3.0.2では、親子で長さが異なる場合に、一方の変数へもう一方の文字列が入る条件がありました。短い文字列でも起き、フィールド順によって書戻し結果が異なりました。末尾のフィールドに空文字または<code>NULL</code>を渡すと、そのフィールドの変数は元の値を保持します。</p>
+<p>構造体内の文字列型に<code>VAR</code>を付けると、文字列へのポインターを配置します。x64の通常配置は8バイト境界、<code>PACK</code>では1バイト境界です。32bit DLLを中継する場合は、通常配置で4バイト境界、<code>PACK</code>では1バイト境界に配置します。空文字はNULだけを持つ領域、<code>NULL</code>はヌルポインターを渡し、どちらも型に応じた空文字を書き戻します。</p>
+<p><code>VAR STRING</code>・<code>VAR WSTRING</code>はDLLが差し替えたポインターから最初のNULまで読みます。差替え先は借用として読み、解放しません。読取り範囲は文字列の戻り値と同じです。<code>VAR PCHAR</code>・<code>VAR PBYTE</code>・<code>VAR PWCHAR</code>は、ポインターが差し替わっても最初に渡した領域から元の長さ分を書き戻します。入れ子の子構造体にある<code>VAR</code>付き文字列にも、同じ書戻し規則を適用します。子構造体が複数ある場合や、同じ子構造体に文字列フィールドが複数ある場合も、型ごとの規則で書き戻します。同じ変数を複数の<code>VAR</code>付き文字列フィールドに渡すと、宣言順に書き戻すため、最後に書き戻された値が変数に残ります。たとえば32ビットDLL中継で、UTF-16とANSIのフィールドに同じ変数を渡すと、UTF-16側を先に宣言した場合はANSI側の値が残り、ANSI側を先に宣言した場合はUTF-16側の値が残ります。配列要素を渡した場合は、書戻し時にフィールドの宣言順で添字を評価し直し、その結果が指す要素へ書き戻します。両方が同じ要素を指せば、後ろのフィールドの値が残ります。2つの子スレッドから同じ32ビットDLLを呼び、別々の配列へ書き戻す場合は、それぞれの呼出しが指定した配列を更新します。同じ配列に書き戻す場合も、別々の要素であれば両方の値が残ります。同じ要素に順に書き戻す場合は、最後に書き戻した呼出しの値が残ります。2つの呼出しが同じ要素に並行して書き戻す場合は、どちらの値が残るかは実行順によります。<code>OPTION OPTFINALLY</code>を指定して待機中の子スレッドの片方を停止した比較では、停止した側もDLLの復帰後に書戻しと返値の代入を済ませ、通常の後続文を省いて<code>FINALLY</code>を実行しました。もう一方の子スレッドは後続処理まで完了しました。<code>OPTFINALLY</code>を省いた場合も、停止した側はDLLの復帰後に書戻しと返値の代入を済ませました。この場合は通常の後続文と<code>FINALLY</code>を省き、もう一方の子スレッドは後続処理まで完了しました。片方の子スレッドに停止を要求してから両方のDLL呼出しを同じ合図で解放した場合も、両方の書戻しと返値の代入を確認しました。DLLの実行中に別スレッドが共有添字を変更すると、書戻し時に変更後の添字を使います。メインがDLLを呼ぶ間に別スレッドが共有添字を範囲外へ変えた比較では、原版はダイアログを表示し、UWSC#は<code>EXCEPT</code>で捕捉できる範囲外エラーを通知しました。構造体の<code>VAR</code>付き文字列フィールドの書戻し先が範囲外になると、そのフィールドを飛ばし、後続のフィールドを書き戻した後で範囲外エラーを通知します。範囲外が2件の場合、UWSC#は最初の1件を通知します。原版の32ビット版では、入れ子の<code>TRY</code>で内側と外側の<code>EXCEPT</code>に宣言順で通知される場合があります。文字列フィールド2件と単体の<code>VAR INT</code>がすべて範囲外になった比較では、原版は3階層の<code>EXCEPT</code>に内側から順に1件ずつ通知し、UWSC#は最初の1件を通知しました。単体の数値VARや構造体内の数値VARフィールドの書戻し先が範囲外になった場合も、その引数やフィールドを飛ばして後続の書戻しを続けます。文字列フィールドと単体のVAR INTの計4件が範囲外になった比較では、原版は4階層のEXCEPTへ順に通知し、UWSC#は最初の1件を通知しました。文字列フィールドの添字を数値に変換できない場合は、その時点で書戻しを打ち切ります。先に範囲外があった場合、UWSC#はその範囲外エラーを通知します。後続の単体VAR引数やVAR配列引数の添字を数値に変換できない場合も同じです。配列引数の添字が有効なら、先の範囲外エラーを通知する前にその配列へ書き戻します。</p>
+<p>DLL名はファイル名やパスとして記述します。原版の<code>DEF_DLL</code>では空白を含むパスにも引用符を付けません。変数や文字列連結は評価されません。</p>
+<p>UWSC#は本体DLLの読込み時に必要な依存DLLを、本体DLLの隣とWindowsのシステムディレクトリから探します。同じプロセスですでに読み込まれた同名の依存DLLがあると、本体DLLの隣を探す前にそのDLLが使われる場合があります。32ビットDLLの中継にも同じ探索範囲を適用します。読込みに失敗した場合は、依存DLLを本体DLLの隣に置いてから、同じスクリプトの中で呼出しを再試行できます。原版では作業ディレクトリや<code>PATH</code>からも読み込めることを確認しました。</p>
+<p>DLLが関数の呼出し時に依存先を遅延読込みする場合、探索先はそのDLLの実装によって決まります。MSVCの標準ヘルパーを使う検証では、本体DLLの隣に置くだけでは読み込めず、依存DLLの関数を絶対パスで指定して呼び出した後に再試行すると読み込めました。</p>
+<p>CALL先を含む同じ実行のメインとTHREADはDLLのロードを共有します。実行終了時も、実行中のDLL呼出しが戻るまでDLLを保持します。</p>
+<p>DLLの同期呼出し中に終了・取消を要求しても、その呼出しを強制中断しません。THREADの子処理がDLL呼出し中の場合、メインの終了は呼出しの復帰と子処理の後片付けを待ちます。DLLが正常に復帰した場合は、数値VAR、数値配列やVAR付き文字列を書き戻してから取消を通知します。FINALLYは書戻し後の値と型を参照できます。</p>
+<p>UWSC#で配列やHASHTBLの要素を数値VARや構造体の数値フィールドに渡すと、DLLから戻った後にキーや添字を評価し直し、その結果が指す要素へ書き戻します。二次元配列では呼出し時と書戻し時のどちらも行、列の順に評価します。</p>
+<p>書戻し時の添字は再評価します。数値配列の書戻し先が範囲外になった場合は、その引数だけを飛ばし、後続の文字列や数値VARを書き戻します。DLL呼出し前の範囲外はエラーになります。FINALLYの外で停止済みのDLL書戻しを行う場合は、ユーザー関数を新たに実行せずEMPTYを使います。数値の添字では0になるため、入力時と違う行へ書き戻すことがあります。取消前に入った添字関数は、取消を確認したところで残りの文を省きます。停止前のRESULTを保持し、OPTFINALLY付きのFINALLYを実行してから書戻しに使います。入れ子のDLLが正常に戻った場合も、そのDLLの書戻しを終えてから関数を抜けます。この停止経路でも、関数のVAR引数はFINALLY後の値を呼出し元へ書き戻します。同じ単体変数を2個のVAR引数へ渡した場合は、後の仮引数の値が残ります。添字関数のVAR書戻しでスクリプトエラーが起きた場合も、残るVAR引数と外側のDLL引数を書き戻してからエラーを通知します。取消が届いていれば取消の通知を優先し、書戻しの期限が切れた場合は途中で打ち切ります。</p>
+<p>子スレッドの停止を要求した場合や、メインが終端まで進むかメイン自身が<code>EXITEXIT</code>を実行した場合は、子スレッドが呼び出したDLLの復帰を待ちます。単純な代入文の右辺で呼んだDLLが正常に復帰し、VARの書戻しを終えると、DLLの返値を代入してから後続の文を省きます。メインの終端到達や<code>EXITEXIT</code>で子スレッドを停止する場合も、代入の右辺がDLLの返値に定数を足す式なら、加算してから代入します。後続のユーザー関数を足す式では、その関数の本文を省いてEMPTYを使います。DLLの返値や後続の加算を括弧で囲んだ式も代入まで進みます。後続の<code>ABS</code>・<code>VAL</code>は、引数にあるユーザー関数の呼出しをEMPTYとして扱い、残る演算を進めます。省いた関数の返値を<code>VAL</code>の第1引数に直接渡すと、既定値を指定しても0を返します。UWSC#は、後続のユーザー関数を省く場合は引数も評価しません。<code>ABS</code>の引数にDLL呼出しやファイル操作がある場合は、その操作を開始せず、代入前に停止します。原版では、引数の<code>CopyFileW</code>や<code>DELETEFILE</code>が停止要求後に実行される場合があります。DLL書戻し中に停止を確認した場合、OPTFINALLYの指定がなければ保留中のFINALLYを省略します。すでに実行中の添字関数は、停止を確認するまでに更新したVAR引数を書き戻し、DLLの残りの引数も反映します。</p>
+<p>FINALLYの外のDLL書戻しでは、停止後のVARTYPEとVALは引数を評価して空のUTF-16文字列を返します。その返値の型は、FINALLY内のVARTYPEで258です。実行中の添字関数が内側の関数の返値を使う式では、後続のユーザー関数の本文を省いてEMPTYを使い、ABSは計算します。式の代入を終えてから、外側の後続文を省きます。OPTFINALLYを省略した停止時も、式の代入までは同じ規則で進みます。停止後に式の続きを処理するとき、モジュール内のDEF_DLLに解決される呼出しは開始しません。同名のグローバル関数がある場合も同じです。DLL書戻し中の添字関数で、DLL引数の評価中に停止した場合も、新たなDLL呼出しを開始せず、外側のDLLの書戻しを進めます。数値などの通常引数は、評価直後に停止を確認します。停止した場合は、その値をDLLの型に変換する前に添字関数を抜けます。DLLの配列引数の添字も、数値変換や範囲検査の前に停止を確認します。ファイル操作やWindows操作の組込み関数でも、引数を評価している間に停止した場合は新たな操作を開始せず、外側のDLLの書戻しを進めます。COMメンバーの引数やプロパティの代入値を評価している間に停止した場合も、COM操作の開始前に停止を確認します。EVALの入力や動的CALLの呼出し先を評価している間に停止した場合は、値の型を検査する前に停止を処理します。THREAD文やEVAL経由のTHREADも、呼出し先や引数の評価中に停止した場合は、新しいスレッドを準備せず、外側のDLLの書戻しを進めます。CTRLTRDのIDや制御方法の評価中に停止した場合は、引数を整数に変換する前に停止を確認します。IDの評価中に停止した場合は、制御方法の式も評価しません。</p>
+<p>通常時に添字の評価から未処理のVAR書戻しエラーが外へ出ると、その添字式の残りを省いて添字0を使います。多次元配列では、失敗した添字だけに0を使います。先に評価した添字を保ち、後続の添字も順に評価します。二次元から四次元まで、失敗する添字の位置を変え、添字の評価順と書戻し先を原版と比較しました。残りのDLL引数を書き戻してからエラーを通知します。停止後の空文字列を数値化できず、添字式がエラーになった場合も、添字0で書戻しを続けます。OPTFINALLY付きで停止とVAR書戻しエラーが重なった場合、実行中の添字関数が停止時に返した値を書戻しに使います。停止後に新たに呼ぶ添字関数は省き、数値の添字には0を使います。三次元配列で原版と比較しました。OPTFINALLYを省略した多次元配列の比較でも、子を停止すると、停止前に更新した単体VARとDLLの数値VARを親から確認できました。子のローカル配列の停止後の要素値は未確認です。</p>
+<p>取消済みで書戻しを始めた場合は開始から5秒、途中で取消が届いた場合はその時点から5秒で、再評価用の取消を要求します。スクリプトの取消確認箇所で打ち切り、それまでの書戻しは残します。添字関数内のFINALLYもこの期限を共有します。既存のFINALLYの期限は延ばしません。同期DLL内の処理は復帰を待ちます。</p>
+<p>DLL書戻し中の添字関数が別のユーザー関数を呼ぶ場合、内側のVAR書戻しエラーは呼出し元のEXCEPTで処理できます。未処理の場合は外側のVARとDLLの残りの書戻しを終えてから通知します。内側の関数で停止を確認した場合は、FINALLYとVAR書戻し後の返値を呼出し元へ代入してから、外側の後続文を省きます。二階層の単体VARと範囲外の配列要素を比較した結果です。</p>
+<p>添字関数が三階層または四階層になる場合も、内側のVAR書戻しエラーは中間または外側のEXCEPTで処理できます。中間で処理して関数が正常に戻れば、外側は返値を受け取ります。OPTFINALLY付きで停止した場合は、各階層のFINALLYで更新したVAR引数を順に書き戻します。</p>
+<p>UWSC#では、添字関数を含む四階層の呼出しでも、内側のFINALLYで更新したVARが外側へ順に届きます。通常時に内側のVAR書戻しエラーが添字関数の外へ出ると、添字0を使って外側のDLL引数を書き戻した後に通知します。</p>
+<p>添字関数の本文から静的CALLを実行する場合も、CALL先のVAR書戻しエラーは、CALL先または添字関数のEXCEPTで処理できます。停止時は、CALL先で完了した代入を保持し、添字関数のCALL後の文を省略します。OPTFINALLYを指定していれば、CALL先から添字関数へ順に保留中のFINALLYを実行します。OPTFINALLYを省略した通常実行では、VAR書戻しエラーがCALL先の外へ伝わると原版の共有変数が0になる場合があります。UWSC#は失敗した式の代入先を保持します。</p>
+<p>静的CALLで事前登録したファイルを添字関数から<code>EVAL(&quot;CALL ファイル名.uws&quot;)</code>で呼び出す場合も、書戻し、エラーの伝わり方、停止時の後片付けは静的CALLと同じです。</p>
+<p>VAR配列の添字関数がスクリプトを静的CALLする場合と、事前登録したスクリプトを動的CALLする場合を比較しました。どちらも、呼出し先の範囲外エラーが未処理のまま添字関数を抜けると、添字0へ書き戻しました。添字関数内でエラーを捕捉した場合は、関数が返した添字へ書き戻します。呼出し先の減算で数値変換に失敗した比較でも、未処理なら添字0、添字関数が捕捉した場合はその関数が返した添字へ書き戻しました。CALLが正常に戻り、その後に添字の数値変換に失敗した場合は、その配列への書戻しを打ち切ります。UWSC#は未処理の書戻しエラーのうち、最初の1件を通知します。</p>
+<p>UWSC#では、静的CALLで事前登録していないファイルも、添字関数から<code>EVAL(&quot;CALL ファイル名.uws&quot;)</code>で取り込めます。比較したコマンドライン版とUWSC# アプリでは、通常実行、子スレッドの停止、メイン終了の書戻しは、事前登録した場合と同じでした。空白や日本語を含むファイル名を式で組み立てる場合も同じです。たとえば<code>EVAL(&quot;CALL &lt;#DBL&gt;bridge &lt;#DBL&gt;+&lt;#DBL&gt;日本語.uws&lt;#DBL&gt;&quot;)</code>は<code>bridge 日本語.uws</code>を取り込みます。原版UWSC Free 5.3.0.2では、未登録ファイルは取り込まれず、動的CALLのエラーは添字関数内または外側の<code>EXCEPT</code>で捕捉されました。子スレッドの停止要求やメイン終了がDLLの復帰より先に進んだ比較では、原版とコマンドライン版とUWSC# アプリはいずれもDLLが戻るまで待ち、未登録ファイルの取込みには進みませんでした。DLL復帰後、添字関数に入ってから動的CALLの直前で停止した比較でも、取込みには進みませんでした。<code>OPTFINALLY</code>を指定した条件では、3環境とも添字関数が停止前に設定した添字1を使って書き戻し、添字関数と子スレッドの<code>FINALLY</code>を実行しました。</p>
+<p>スクリプトファイルを引数にしてコマンドライン版とUWSC# アプリを起動した場合は、通常終了とEXITEXITでも、この後片付けを待ってからプロセスを終了します。</p>
+<p>ファイル引数で起動した実行では、コマンドライン版のCtrl+C・Ctrl+BreakやUWSC# アプリの停止・閉じる要求でも、DLL呼出しの復帰と後片付けを待って終了します。</p>
+<p>編集画面から再生したときは、通常終了やEXITEXIT、停止要求の後も画面が残り、後片付け後に編集・再生できます。再生中の閉じる要求は停止を要求します。DLL呼出しと後片付けが終わってから、もう一度閉じてください。</p>
+
+<h2 id="with">WITHでmodule・objectを省略する</h2>
+<pre><code>WITH Sample
+    PRINT .value
+    .value=3
+ENDWITH
+MODULE Sample
+    PUBLIC value=2
+ENDMODULE</code></pre>
+<p>WITHの対象を1回評価して保持し、本文では先頭ドットで変数・メソッドを参照します。module/classとCOM objectに利用でき、入れ子では内側の対象を使用します。外側のWITHが例外・取消・break/returnで終了しても対象を復元します。数値・文字列・EMPTY・NULL・NOTHINGは対象にできません。</p>
+<p>モジュールの省略した変数はVAR引数やTOKENの書戻しにも利用できます。COMの全provider・型・VAR形態の互換を確認したものではありません。WITH外の先頭ドットはエラーです。</p>
+<nav class="pager" aria-label="前後のページ"><a href="data-types.html">← 変数・配列・OPTION</a> <a href="control-flow.html">次へ：制御文</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#procedure">PROCEDURE：戻り値のない手続き</a></li><li><a href="#function">FUNCTION・RESULT：値を返す関数</a></li><li><a href="#defaults">既定引数</a></li><li><a href="#scope">変数のスコープ</a></li><li><a href="#reference">VAR引数：呼出し元へ値を書き戻す</a></li><li><a href="#array-parameters">配列パラメーター</a></li><li><a href="#modules">MODULE・CLASS：変数と関数をまとめる</a></li><li><a href="#thread">THREAD：別の処理を並行して実行する</a></li><li><a href="#recursion">再帰と制限</a></li><li><a href="#with">WITHでmodule・objectを省略する</a></li></ul></nav>
+</div></div></body></html>

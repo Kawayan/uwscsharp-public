@@ -1,0 +1,15 @@
+<Project>
+  <Target Name="CopyDllRelayToOutput"
+          AfterTargets="Build"
+          Condition="'$(OS)' == 'Windows_NT' and '@(DllRelayBuildOutput)' != ''">
+    <ItemGroup>
+      <_DllRelayFile Include="@(DllRelayBuildOutput)" />
+      <_DllRelayFile Include="@(DllRelayBuildOutput->'%(RootDir)%(Directory)%(Filename).deps.json')" />
+      <_DllRelayFile Include="@(DllRelayBuildOutput->'%(RootDir)%(Directory)%(Filename).runtimeconfig.json')" />
+      <_DllRelayFile Include="@(DllRelayBuildOutput->'%(RootDir)%(Directory)UWSCSharp.Core.dll')" />
+      <_DllRelayFile Include="@(DllRelayBuildOutput->'%(RootDir)%(Directory)UWSCSharp.Windows.dll')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DllRelayFile)" DestinationFolder="$(OutDir)dll-relay"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

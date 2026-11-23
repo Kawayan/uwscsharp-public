@@ -1,0 +1,1921 @@
+{
+  "updated": "2026-11-17",
+  "baseline": "0.1.0",
+  "features": [
+    {
+      "id": "FN-INT",
+      "title": "INT",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "0方向へ小数部を切り捨てます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-ABS",
+      "title": "ABS",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "絶対値を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-ZCUT",
+      "title": "ZCUT",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "入力と0の大きい方を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-ROUND",
+      "title": "ROUND",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定する桁で数値を丸めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-SQRT",
+      "title": "SQRT",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "平方根を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-POWER",
+      "title": "POWER",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "べき乗を計算します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-SIN",
+      "title": "SIN",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ラジアンで指定した角度の正弦を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-COS",
+      "title": "COS",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ラジアンで指定した角度の余弦を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-TAN",
+      "title": "TAN",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ラジアンで指定した角度の正接を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-EXP",
+      "title": "EXP",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "自然対数の底eのべき乗を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-LN",
+      "title": "LN",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "自然対数を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-LOGN",
+      "title": "LOGN",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "底を指定して対数を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-GETID",
+      "title": "GETID — 指定ウィンドウの ID を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "タイトルなどでウィンドウを探し、この実行内で使うIDを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinWindowSelectors.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsHostWindow.cs",
+        "src/UWSCSharp.Windows/Automation/WindowRegistrationTable.cs"
+      ]
+    },
+    {
+      "id": "FN-EXEC",
+      "title": "EXEC — アプリの起動",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "実行可能ファイルを引数付きで起動し、ウィンドウIDまたは終了コードを返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ExecArguments.cs",
+        "src/UWSCSharp.Windows/Automation/ExecProcess.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationExec.cs"
+      ]
+    },
+    {
+      "id": "FN-MSGBOX",
+      "title": "MSGBOX — メッセージボックス",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "メッセージと指定したボタンを表示し、押されたボタンの値を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Dialogs/NativeDialogService.cs"
+      ]
+    },
+    {
+      "id": "FN-CTRLWIN",
+      "title": "CTRLWIN — Window コントロール CTRLWIN ( ID, 命令 )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ウィンドウの表示状態や最前面固定を変更し、任意メッセージを送信します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Abstractions/WindowControlArguments.cs"
+      ]
+    },
+    {
+      "id": "FN-SLEEP",
+      "title": "SLEEP — スリープ SLEEP ( 秒 )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定時間だけ実行を待機します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Abstractions/IScriptHost.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptPauseControl.cs"
+      ]
+    },
+    {
+      "id": "FN-SENDSTR",
+      "title": "SENDSTR — 文字列の送信 SENDSTR ( ID, 文字列, [番号, 送信モード, ACC指定] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "編集欄やセルへ文字列を送り、ID=0ではクリップボードへ書き込みます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardBackend.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardApi.cs"
+      ]
+    },
+    {
+      "id": "FN-MMV",
+      "title": "MMV — マウス移動 MMV ( x, y, [ms] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "マウスポインターを指定位置へ移動します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptPauseControl.cs"
+      ]
+    },
+    {
+      "id": "FN-BTN",
+      "title": "BTN — マウスボタン BTN ( ボタン, [状態, x, y, ms] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "マウスボタンの押下・解放、ホイール回転、最大2接点のタッチ入力を送ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptPauseControl.cs",
+        "src/UWSCSharp.Windows/Input/NativeInputSender.cs",
+        "src/UWSCSharp.Windows/Input/DirectInputSession.cs",
+        "src/UWSCSharp.Windows/Recording/RecordingBuffer.cs"
+      ]
+    },
+    {
+      "id": "FN-KBD",
+      "title": "KBD — キーボード KBD ( 仮想KEY, [状態, ms] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "仮想キーまたはUTF-16単位の押下・解放を送ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptPauseControl.cs",
+        "src/UWSCSharp.Windows/Input/NativeInputSender.cs"
+      ]
+    },
+    {
+      "id": "FN-ACW",
+      "title": "ACW — ウィンドウ状態変更 ACW ( ID, [x, y, 幅, 高さ, ms] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ウィンドウの位置と大きさを変更し、前面化を要求します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptPauseControl.cs"
+      ]
+    },
+    {
+      "id": "FN-FUKIDASI",
+      "title": "FUKIDASI — 吹出し BALLOON ( メッセージ, [x, y, 向き, フォントサイズ, フォント名, 文字色, 背景色, 透明化] ) ",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "実行中のTHREADごとに1枚の吹出しを表示・更新します。FUKIDASIとBALLOONは同じ画面を操作します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/BalloonRequest.cs",
+        "src/UWSCSharp.Windows/Dialogs/NativeBalloon.cs",
+        "src/UWSCSharp.Windows/Dialogs/BalloonTextLayout.cs"
+      ]
+    },
+    {
+      "id": "FN-CLKITEM",
+      "title": "CLKITEM — アイテムのクリック // (ボタン,メニュー,チェックボックス,ラジオボタン,リストボックス,コンボボックス,タブコントロール,ビ",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "名前で指定したボタンやメニュー、一覧項目などを操作します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Controls/ListViews/NativeListViewControl.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListControl.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeSelectionTarget.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListSelectionBackend.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/MultipleListMatcher.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListNameMatcher.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlOperation.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlTextBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlBufferOwner.cs",
+        "src/UWSCSharp.Windows/Controls/Toolbars/NativeToolbarClickBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/Tabs/NativeTabClickBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreeClickBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/ListViews/NativeListViewClickBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlMouse.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreeControl.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreeSelection.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreePath.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonControl.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleApi.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleNode.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleWalk.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonPointWindow.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonRouteGate.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleRoute.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleSession.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleBackend.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleSource.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Windows/UIAutomation/NativeLinkAvailability.cs"
+      ]
+    },
+    {
+      "id": "FN-DOSCMD",
+      "title": "DOSCMD — コマンドライン(コマンドプロンプト)の実行",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "Windowsのコマンドプロンプトで実行し、出力文字列または終了コードを返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/DosCommandRequest.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationDosCommand.cs"
+      ]
+    },
+    {
+      "id": "FN-SCKEY",
+      "title": "SCKEY — ショートカットキーの実行 SCKEY ( ID, キー, [キー, キー, キー, ...] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "対象ウィンドウへ修飾キーとキー列を送ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationShortcut.cs",
+        "src/UWSCSharp.Windows/Input/ShortcutKeySequence.cs"
+      ]
+    },
+    {
+      "id": "FN-INPUT",
+      "title": "INPUT — インプットボックス",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "文字列の入力画面を表示し、OKで確定した内容を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/InputBoxRequest.cs",
+        "src/UWSCSharp.Windows/Dialogs/NativeDialogService.cs"
+      ]
+    },
+    {
+      "id": "FN-COPY",
+      "title": "COPY — 文字列コピー",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列の一部を切り出します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/CopyOperations.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-LENGTH",
+      "title": "LENGTH — 文字数を返す （もしくは配列サイズ）",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列の論理長、配列の第1次元の長さ、ハッシュのキー件数などを返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Com/ComSession.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Syntax/Expression.cs",
+        "src/UWSCSharp.Core/Syntax/Expressions.cs",
+        "src/UWSCSharp.Core/Syntax/ScriptCompiler.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Core/Values/UwscHashTable.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Windows/Com/ComSafeArray.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Windows/Com/NativeComEnumerator.cs",
+        "src/UWSCSharp.Core/Builtins/LengthOperations.cs",
+        "src/UWSCSharp.Core/Runtime/BuiltinInvocation.cs"
+      ]
+    },
+    {
+      "id": "FN-POS",
+      "title": "POS — 文字列に指定文字列があるか探す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定文字列が現れる位置を探します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/PositionOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-GETSTR",
+      "title": "GETSTR — 文字列の取得",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "編集欄、ラベル、ステータスバーなどの文字列を読み取ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardBackend.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardApi.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlTextBuffer.cs"
+      ]
+    },
+    {
+      "id": "FN-CHKNUM",
+      "title": "CHKNUM — 数値であるかをチェック",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列が共通文法の有限doubleへ変換できるかを調べます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-SETSLIDER",
+      "title": "SETSLIDER — スライダー(トラックバー、スクロールバー)の値を設定する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "対応するトラックバーやスクロールバーの位置を変更します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Controls/Scrolling/NativeScrollControl.cs",
+        "src/UWSCSharp.Windows/UIAutomation/UiaSlider.cs"
+      ]
+    },
+    {
+      "id": "FN-STATUS",
+      "title": "STATUS — ウィンドウの各種状態を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ウィンドウの位置、寸法、タイトルなどを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-GETALLWIN",
+      "title": "GETALLWIN — 全ウィンドウの IDを取得",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "全ウィンドウまたは指定した親の子ウィンドウを列挙します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationEnumeration.cs"
+      ]
+    },
+    {
+      "id": "FN-GETTIME",
+      "title": "GETTIME — 日付、時間の取得（時間変数に時間を設定する）",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "現在または指定した日時を基に日時情報を計算します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ScriptTime.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-LOGPRINT",
+      "title": "LOGPRINT",
+      "research": "調査完了",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "UWSC# アプリのPRINT専用ログウィンドウを表示・非表示にし、位置と寸法を変更します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptLogViewHost.cs",
+        "src/UWSCSharp.Wpf.Logic/Output/OutputHistory.cs",
+        "src/UWSCSharp.Wpf/Views/LogWindow.xaml.cs"
+      ]
+    },
+    {
+      "id": "FN-VAL",
+      "title": "VAL — 文字型を数値に変える",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "数値文字列を数値へ変換します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-FOPEN",
+      "title": "FOPEN — ファイル オープン",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ファイルを読み書き用のバッファへ開きます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-FCLOSE",
+      "title": "FCLOSE — ファイル クローズ",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "バッファを保存してファイルIDを破棄します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Cli/Program.cs"
+      ]
+    },
+    {
+      "id": "FN-FGET",
+      "title": "FGET — ファイル 読み込み",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "開いたファイルの行や列を読み取ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-FPUT",
+      "title": "FPUT — ファイル 書き込み FPUT ( ファイルID, 書込み値, [行, 列] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "書込みバッファへ値を追加・更新します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-SETCLEAR",
+      "title": "SETCLEAR — 配列を指定された値で埋める SETCLEAR ( var 配列変数, [値] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "配列を同じ値で埋め、変数へ書き戻します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-FORMAT",
+      "title": "FORMAT — フォーマット",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "数値の表示形式を整えるか、文字列を指定幅まで反復します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/FormatOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-STOPFORM",
+      "title": "STOPFORM — UWSCが再生時に出すウィンドウの表示/非表示 STOPFORM ( 表示フラグ, [x, y] ) // 再生中に出るSTOPボ",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "コマンドライン版またはUWSC# アプリで実行全体が共有する停止画面を表示・非表示にし、位置を変更します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Abstractions/IScriptStopFormHost.cs",
+        "src/UWSCSharp.Windows/Dialogs/WindowsStopFormHost.cs",
+        "src/UWSCSharp.Wpf/Views/StopWindow.xaml.cs"
+      ]
+    },
+    {
+      "id": "FN-CHGMOJ",
+      "title": "CHGMOJ — 指定文字列を置換する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "REPLACEと同じ処理を別名で呼び出します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-CHKBTN",
+      "title": "CHKBTN — ボタン類（チェックボックス、ラジオボタン）の状態を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "チェックボックスやラジオボタンなどの状態を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlTextBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/ListViews/NativeListViewControl.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlOperation.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreeControl.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreeClickBuffer.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreeSelection.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListNameMatcher.cs",
+        "src/UWSCSharp.Windows/Controls/Trees/NativeTreePath.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleApi.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleNode.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleWalk.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonPointWindow.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonRouteGate.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleRoute.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleSession.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleBackend.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonAccessibleSource.cs",
+        "src/UWSCSharp.Windows/Controls/Buttons/NativeButtonControl.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs"
+      ]
+    },
+    {
+      "id": "FN-SLCTBOX",
+      "title": "SLCTBOX — セレクトボックス",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "ボタン・チェック・ラジオ・コンボ・リスト方式の選択画面を表示します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/SelectionBoxRequest.cs",
+        "src/UWSCSharp.Windows/Dialogs/NativeSelectionDialog.cs"
+      ]
+    },
+    {
+      "id": "FN-MOUSEORG",
+      "title": "MOUSEORG — マウス座標を相対座標にする、 またはマウスとキー情報を直接ウィンドウへ送る MOUSEORG ( ID, [基準指定, 画面取得指",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "座標の基準、直接送信先、PEEKCOLOR・CHKIMGの画面取得元を設定します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptPauseControl.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationImages.cs",
+        "src/UWSCSharp.Windows/Imaging/NativeImageCapture.cs",
+        "src/UWSCSharp.Core/Builtins/WindowsConstants.cs"
+      ]
+    },
+    {
+      "id": "FN-TRIM",
+      "title": "TRIM — 文字の両端の空白と制御文字を取り除く",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "両端の空白・制御文字を取り除きます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-GETITEM",
+      "title": "GETITEM — キャプション文字やリスト等を全て取得する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定種別の項目を収集し、件数とALL_ITEM_LISTを公開します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListControl.cs",
+        "src/UWSCSharp.Windows/Controls/ListViews/NativeListViewControl.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeSelectionTarget.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListNameMatcher.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlTextBuffer.cs"
+      ]
+    },
+    {
+      "id": "FN-PEEKCOLOR",
+      "title": "PEEKCOLOR — 指定位置の色を得る",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "画面またはクリップボード画像の1画素の色を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Imaging/PixelImage.cs",
+        "src/UWSCSharp.Windows/Imaging/ImageMatcher.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardBackend.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardApi.cs"
+      ]
+    },
+    {
+      "id": "FN-CHKIMG",
+      "title": "CHKIMG — 指定画像が画面上にあるかチェック、あればその情報を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "画面から指定の画像を探し、結果座標を公開します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Imaging/PixelImage.cs",
+        "src/UWSCSharp.Windows/Imaging/ImageMatcher.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardBackend.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardApi.cs",
+        "src/UWSCSharp.Windows/Imaging/DibDecoder.cs"
+      ]
+    },
+    {
+      "id": "FN-SAVEIMG",
+      "title": "SAVEIMG — 画像の保存 SAVEIMG ( [画像名, ID, x, y, 幅, 高さ, クライアント指定, JPEG指定, 画面取得指定] ",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定した画面またはウィンドウの画像を、BMP・JPEG・クリップボードへ保存します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Imaging/PixelImage.cs",
+        "src/UWSCSharp.Windows/Imaging/ImageMatcher.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardBackend.cs",
+        "src/UWSCSharp.Windows/Clipboard/ClipboardApi.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationSaveImage.cs",
+        "src/UWSCSharp.Windows/Imaging/BitmapEncoding.cs",
+        "src/UWSCSharp.Windows/Imaging/BitmapFileWriter.cs",
+        "src/UWSCSharp.Windows/Imaging/BitmapConversionApi.cs",
+        "src/UWSCSharp.Windows/Imaging/ImageSavePath.cs"
+      ]
+    },
+    {
+      "id": "FN-KINDOFOS",
+      "title": "KINDOFOS — ＯＳ種別",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "OS種別、またはOSが64bitかどうかを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Runtime/OperatingSystemInformation.cs",
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs"
+      ]
+    },
+    {
+      "id": "FN-CHR",
+      "title": "CHR — 文字コードから文字を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字コードから文字列を作成します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-ASC",
+      "title": "ASC — 文字から文字コードを返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "先頭文字の文字コードを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-GETKEYSTATE",
+      "title": "GETKEYSTATE — キークリック、トグルキー情報",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "通常キー、マウスボタン、トグル、前面IMEの状態を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/KeyStateRequest.cs",
+        "src/UWSCSharp.Windows/Input/KeyStateReader.cs",
+        "src/UWSCSharp.Windows/Input/NativeKeyStateBackend.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationKeyState.cs",
+        "src/UWSCSharp.Windows/Input/MouseKeyHistory.cs"
+      ]
+    },
+    {
+      "id": "FN-RANDOM",
+      "title": "RANDOM",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "上限未満の擬似乱数を返し、共有する乱数状態を1段進めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs"
+      ]
+    },
+    {
+      "id": "FN-LOCKHARD",
+      "title": "LOCKHARD — ハードウェア（キーボード、マウス）からの入力禁止 LOCKHARD ( 禁止フラグ )",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "キーボード・マウスからの入力を実行全体で禁止し、解除します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/InputLockRequest.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationInputOwnership.cs",
+        "src/UWSCSharp.Windows/Input/NativeInputOwnershipBackend.cs"
+      ]
+    },
+    {
+      "id": "FN-GETDIR",
+      "title": "GETDIR — ファイル名の取得",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "直下のファイル名またはディレクトリ名を列挙します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.IO/Directories/IniDirectoryOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-GETOLEITEM",
+      "title": "GETOLEITEM — コレクションの取得",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "COMコレクションまたは配列を列挙して結果を公開します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Syntax/Expression.cs",
+        "src/UWSCSharp.Core/Syntax/Expressions.cs",
+        "src/UWSCSharp.Core/Syntax/ScriptCompiler.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Windows/Com/ComVariantValue.cs",
+        "src/UWSCSharp.Windows/Com/ComErrorInfo.cs",
+        "src/UWSCSharp.Windows/Com/NativeComDispatch.cs",
+        "src/UWSCSharp.Windows/Com/NativeComEnumerator.cs",
+        "src/UWSCSharp.Windows/Com/ComValueBudget.cs"
+      ]
+    },
+    {
+      "id": "FN-MUSCUR",
+      "title": "MUSCUR — マウスカーソル種別を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "現在のグローバルカーソルの種類を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Input/CursorReader.cs"
+      ]
+    },
+    {
+      "id": "FN-GETCTLHND",
+      "title": "GETCTLHND — ボタン等、オブジェクトのハンドルを取得する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "名前またはclassで子controlを探し、生のハンドルを返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationControlHandle.cs"
+      ]
+    },
+    {
+      "id": "FN-IDTOHND",
+      "title": "IDTOHND — ID<->ハンドル変換 ハンドル = IDTOHND ( ID ) // IDをAPI等で利用する為にハンドル値に変換 ID = ",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "この実行のウィンドウIDをネイティブのウィンドウハンドルへ変換します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Automation/WindowRegistrationTable.cs"
+      ]
+    },
+    {
+      "id": "FN-HNDTOID",
+      "title": "HNDTOID",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ウィンドウハンドルをこの実行のIDへ登録します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Automation/WindowRegistrationTable.cs"
+      ]
+    },
+    {
+      "id": "FN-TOKEN",
+      "title": "TOKEN — トークンの切り出し （指定文字で区切ったものを返す）",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "先頭のトークンを取り出し、元の変数へ残りを書き戻します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-CPUUSERATE",
+      "title": "CPUUSERATE — CPU使用率",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "CPU使用率を1秒以上の差分で取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Runtime/CpuUsageSampler.cs"
+      ]
+    },
+    {
+      "id": "FN-RESIZE",
+      "title": "RESIZE — 配列のサイズを変更する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "配列の第1次元の上限添字を取得・変更します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-POSACC",
+      "title": "POSACC — 座標位置の文字（情報）を取得する",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "受入確認済み",
+      "scope": "指定した座標からアクセシビリティ情報を読み取ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-SPEAK",
+      "title": "SPEAK — 音声合成 SPEAK ( 発声文字, [平行処理フラグ, 中断フラグ] )",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "指定した文字列をWindowsの音声エンジンで読み上げます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.Speech.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationSpeech.cs"
+      ]
+    },
+    {
+      "id": "FN-RECOSTATE",
+      "title": "RECOSTATE — 音声認識 開始/停止 RECOSTATE ( 開始フラグ, [単語登録, 単語登録, ...] )",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "音声認識を開始・停止し、必要に応じて認識する単語を登録します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.SpeechRecognition.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationRecognition.cs"
+      ]
+    },
+    {
+      "id": "FN-DICTATE",
+      "title": "DICTATE — 音声の取得",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "認識結果を文字列として取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.SpeechRecognition.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationRecognition.cs"
+      ]
+    },
+    {
+      "id": "FN-BALLOON",
+      "title": "BALLOON",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "実行中のTHREADごとに1枚の吹出しを表示・更新します。FUKIDASIとBALLOONは同じ画面を操作します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/BalloonRequest.cs",
+        "src/UWSCSharp.Windows/Dialogs/NativeBalloon.cs",
+        "src/UWSCSharp.Windows/Dialogs/BalloonTextLayout.cs"
+      ]
+    },
+    {
+      "id": "FN-DELETEFILE",
+      "title": "DELETEFILE — ファイルの削除",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定した通常ファイルを削除します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.IO/Directories/IniDirectoryOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-CREATEOLEOBJ",
+      "title": "CREATEOLEOBJ — COMオブジェクト生成",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "登録されたCOMクラスからobjectを作成します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Syntax/Expression.cs",
+        "src/UWSCSharp.Core/Syntax/Expressions.cs",
+        "src/UWSCSharp.Core/Syntax/ScriptCompiler.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Com/NativeComDispatch.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Windows/Com/ComVariantValue.cs",
+        "src/UWSCSharp.Windows/Com/ComErrorInfo.cs",
+        "src/UWSCSharp.Windows/Com/ComSafeArray.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Windows/Com/NativeComEnumerator.cs"
+      ]
+    },
+    {
+      "id": "FN-GETACTIVEOLEOBJ",
+      "title": "GETACTIVEOLEOBJ — 既に起動中のCOMオブジェクトに対してのアクセス",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "既に起動・登録されているCOM objectを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Core/Syntax/Expression.cs",
+        "src/UWSCSharp.Core/Syntax/Expressions.cs",
+        "src/UWSCSharp.Core/Syntax/ScriptCompiler.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Com/NativeComDispatch.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Windows/Com/ComVariantValue.cs",
+        "src/UWSCSharp.Windows/Com/ComErrorInfo.cs",
+        "src/UWSCSharp.Windows/Com/ComSafeArray.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Windows/Com/NativeComEnumerator.cs"
+      ]
+    },
+    {
+      "id": "FN-LENGTHB",
+      "title": "LENGTHB",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "CP932のバイト長を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-COPYB",
+      "title": "COPYB",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "元のバイト列の一部を切り出します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-POSB",
+      "title": "POSB",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "CP932の文字境界を探してバイト位置を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-SENSOR",
+      "title": "SENSOR — センサーからの情報を返す",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "Windows Sensor APIの機器から指定項目の値を取得します（一部実装）。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationSensors.cs",
+        "src/UWSCSharp.Windows/Sensors/SensorSession.cs",
+        "src/UWSCSharp.Windows/Sensors/SensorScriptValue.cs"
+      ]
+    },
+    {
+      "id": "FN-POPUPMENU",
+      "title": "POPUPMENU — ポップアップメニュ",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "配列の項目を階層メニューとして表示し、選択した項目の元配列位置を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/PopupMenuRequest.cs",
+        "src/UWSCSharp.Windows/Dialogs/NativePopupMenu.cs"
+      ]
+    },
+    {
+      "id": "FN-ISUNICODE",
+      "title": "ISUNICODE — 文字列にUNICODE専用文字（SJISに無い文字）が含まれているかを調べる",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "CP932で表現できない文字が含まれるかを調べます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs",
+        "src/UWSCSharp.Core/Values/ScriptEncodings.cs"
+      ]
+    },
+    {
+      "id": "FN-FDELLINE",
+      "title": "FDELLINE — ファイル 指定行の削除 FDELLINE ( ファイルID, 行 )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "ファイルの書込みバッファから1行を削除します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-CEIL",
+      "title": "CEIL",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "数値以上で最小の整数値へ切り上げます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-ARCSIN",
+      "title": "ARCSIN",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "逆正弦を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-ARCCOS",
+      "title": "ARCCOS",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "逆余弦を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-ARCTAN",
+      "title": "ARCTAN",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "逆正接を求めます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-DROPFILE",
+      "title": "DROPFILE — ファイルをウィンドウにドロップする DROPFILE ( ID, ディレクトリ, ファイル名, [ファイル名, ファイル名, ..",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "受信登録のあるウィンドウへ、ファイルやディレクトリをドロップします。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/DropFileRequest.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationDropFile.cs",
+        "src/UWSCSharp.Windows/Automation/FileDropTarget.cs",
+        "src/UWSCSharp.Windows/Automation/FileDropPaths.cs"
+      ]
+    },
+    {
+      "id": "FN-STRCONV",
+      "title": "STRCONV — 文字列を変換する （大文字小文字、かなカナ、全角半角）",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "大小・かな・全半角を変換します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-IEGETDATA",
+      "title": "IEGETDATA — Web上(IE)より値取得",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "COMオブジェクトのdocumentから、フォームの値やタグの表示文字列を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.Html.cs"
+      ]
+    },
+    {
+      "id": "FN-IESETDATA",
+      "title": "IESETDATA — Web上(IE)に値を設定",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "COMオブジェクトのdocumentにあるフォームの値やタグの表示文字列を変更します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.Html.cs"
+      ]
+    },
+    {
+      "id": "FN-IELINK",
+      "title": "IELINK — Web上(IE)のリンクの選択",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "COMオブジェクトのdocumentで、表示文字列が一致するリンクをクリックします。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.Html.cs"
+      ]
+    },
+    {
+      "id": "FN-ENCODE",
+      "title": "ENCODE — 文字のエンコード処理",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列を符号化・エスケープ・型付きバイト配列へ変換します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-DECODE",
+      "title": "DECODE — 文字のデコード処理",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "符号化された文字列・UI1配列を復号します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-OLEEVENT",
+      "title": "OLEEVENT — イベント処理の定義 OLEEVENT ( オブジェクト, インタフェース名, イベント名, Procedure名 )",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "COMイベントをProcedureへ同期配送します。対象だけを指定すると、その対象の全イベント登録を解除します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.ComEvents.cs",
+        "src/UWSCSharp.Core/Runtime/ScriptComEventDispatcher.cs",
+        "src/UWSCSharp.Windows/Com/ComSession.Events.cs",
+        "src/UWSCSharp.Windows/Com/NativeComEventConnection.TypeInformation.cs"
+      ]
+    },
+    {
+      "id": "FN-REPLACE",
+      "title": "REPLACE",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列中の一致箇所を別の文字列へ置換します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-ASCB",
+      "title": "ASCB",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "先頭の1バイトを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-VARTYPE",
+      "title": "VARTYPE — 変数の型を返す、もしくは型を変換する",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "値の型番号を調べるか、指定した型へ変換した値を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/VariantTypeRequest.cs",
+        "src/UWSCSharp.Core/Abstractions/WindowsFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinConstantNames.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Windows/Com/ComSession.VariantConversion.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationInvocation.cs",
+        "src/UWSCSharp.Windows/Com/ComVariantValue.cs"
+      ]
+    },
+    {
+      "id": "FN-READINI",
+      "title": "READINI — INIファイル 読み込み",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "INIの最初のsection内で、最初に一致したキーを読み取ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.IO/Directories/ReadIniOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-WRITEINI",
+      "title": "WRITEINI — INIファイル 書き込み WRITEINI ( セクション, キー, 値, [INIファイル名] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "INIの最初のsection内の最初のkeyを更新し、なければ追加します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.IO/Directories/WriteIniOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-DELETEINI",
+      "title": "DELETEINI — INIファイル キーの削除 DELETEINI ( セクション, [キー, INIファイル名] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "INIの最初のsectionまたは最初のkeyを削除します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/IScriptFiles.cs",
+        "src/UWSCSharp.IO/Files/ScriptFiles.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.IO/Directories/WriteIniOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-IEGETSRC",
+      "title": "IEGETSRC — Web上(IE)にて指定タグのソースを取得",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "指定した要素のHTMLを、開始タグと終了タグを含めて取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.Html.cs"
+      ]
+    },
+    {
+      "id": "FN-BETWEENSTR",
+      "title": "BETWEENSTR — 指定文字列間の文字列を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "前後の区切り文字の間にある文字列を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BetweenOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-EVAL",
+      "title": "EVAL — 文字列を評価し値を返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列を呼出元のscopeで式として評価します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs"
+      ]
+    },
+    {
+      "id": "FN-GETSLCTLST",
+      "title": "GETSLCTLST — COMBOBOX, LISTBOX, ITM_LISTVIEW, ITM_TREEVIEW での選択項目を取得する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "一覧やツリーで選択されている項目の文字列を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/UIAutomation/UiaSelection.cs",
+        "src/UWSCSharp.Windows/UIAutomation/UiaMozillaPreparation.cs",
+        "src/UWSCSharp.Windows/Controls/Lists/NativeListControl.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeSelectionTarget.cs",
+        "src/UWSCSharp.Windows/Controls/ListViews/NativeListViewControl.cs",
+        "src/UWSCSharp.Windows/Controls/Common/NativeControlTextBuffer.cs"
+      ]
+    },
+    {
+      "id": "FN-CHRB",
+      "title": "CHRB",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "下位8bitからCP932の1バイト文字列を作ります。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ByteTextOperations.cs",
+        "src/UWSCSharp.Core/Values/EncodedText.cs"
+      ]
+    },
+    {
+      "id": "FN-SHIFTARRAY",
+      "title": "SHIFTARRAY — 配列データをシフトする SHIFTARRAY ( var 配列変数, シフト値 )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "配列の要素をずらし、変数へ書き戻します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs"
+      ]
+    },
+    {
+      "id": "FN-CALCARRAY",
+      "title": "CALCARRAY — 配列データを計算",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "配列の指定範囲を集計します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/CalculateOperations.cs",
+        "src/UWSCSharp.Core/Builtins/NumericOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-SAFEARRAY",
+      "title": "SAFEARRAY — SAFEARRAY型の作成",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "上下限と要素型を指定した1次元または2次元の配列を作成します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Abstractions/WindowsFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/SafeArrayRequest.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Com/ComSession.cs"
+      ]
+    },
+    {
+      "id": "FN-POWERSHELL",
+      "title": "POWERSHELL — POWERSHELLの実行",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "Windows PowerShell 5.1でコマンドを実行し、出力とエラーを文字列として取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/PowerShellRequest.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsPowerShellCommand.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationPowerShell.cs"
+      ]
+    },
+    {
+      "id": "FN-SET8087CW",
+      "title": "SET8087CW",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "現在の実行主体で使うx87浮動小数点制御語を指定します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.NumericControl.cs",
+        "src/UWSCSharp.Windows/Numerics/FloatingPointEnvironment.cs"
+      ]
+    },
+    {
+      "id": "FN-SETHOTKEY",
+      "title": "SETHOTKEY — ホットキーの設定",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "ホットキーを登録し、通知された時に指定したProcedureを呼び出します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.Hotkeys.cs",
+        "src/UWSCSharp.Core/Abstractions/SelectiveInputEmergencyShortcut.cs"
+      ]
+    },
+    {
+      "id": "FN-GETSLIDER",
+      "title": "GETSLIDER — スライダー(トラックバー、スクロールバー)の値を取得する",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "トラックバーやスクロールバーの位置・範囲・座標などを取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Windows/Controls/Scrolling/NativeScrollControl.cs",
+        "src/UWSCSharp.Windows/UIAutomation/UiaSlider.cs"
+      ]
+    },
+    {
+      "id": "FN-SPLIT",
+      "title": "SPLIT — 文字列を区切り配列を作成し返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列を区切り文字列で分割し、1次元配列にします。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-JOIN",
+      "title": "JOIN — 配列の中身を区切文字で結合し文字列として返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "配列の要素を表示文字列にして結合します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/JoinOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-SLICE",
+      "title": "SLICE — 配列の中を指定範囲の配列で返す",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "指定範囲の要素を新しい1次元配列にします。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/JoinOperations.cs"
+      ]
+    },
+    {
+      "id": "FN-QSORT",
+      "title": "QSORT — 配列の中身をソートする QSORT ( var キー配列, [順列, var 配列, var 配列, ...] )",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "キー配列を並べ替え、対応する別配列も同じ順序で並べ替えます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/ArrayOperations.cs",
+        "src/UWSCSharp.Core/Values/UwscArray.cs",
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/QSortStringComparison.cs"
+      ]
+    },
+    {
+      "id": "FN-IESETSRC",
+      "title": "IESETSRC — IEにて指定タグのソースを書き換え",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "指定した要素を、開始タグと終了タグを含めてHTMLで置き換えます。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.Html.cs"
+      ]
+    },
+    {
+      "id": "FN-MONITOR",
+      "title": "MONITOR — マルチモニタ情報",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "現在のモニター数、または指定したモニターの情報を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Display/DisplayEnvironment.cs",
+        "src/UWSCSharp.Windows/Display/NativeDisplayPlatform.cs",
+        "src/UWSCSharp.Core/Abstractions/WindowsDisplayVariable.cs"
+      ]
+    },
+    {
+      "id": "FN-CTRLTRD",
+      "title": "CTRLTRD",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "THREADで開始したworkerの停止・再開・終了・優先度を制御します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.Threads.cs",
+        "src/UWSCSharp.Core/Runtime/WorkerThreadControl.cs"
+      ]
+    },
+    {
+      "id": "FN-LOCKHARDEX",
+      "title": "LOCKHARDEX — キーボード、マウスからの入力禁止 LOCKHARDEX ( ID, [モード] )",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "指定したウィンドウを含む条件に従って入力を禁止し、解除します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/SelectiveInputLockRequest.cs",
+        "src/UWSCSharp.Core/Abstractions/IWindowsAutomation.cs",
+        "src/UWSCSharp.Windows/Automation/WindowsAutomationSelectiveInput.cs"
+      ]
+    },
+    {
+      "id": "FN-LENGTHS",
+      "title": "LENGTHS",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "文字列全体のUTF-16コード単位数を返します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctions.cs",
+        "src/UWSCSharp.Core/Builtins/StringOperations.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinFunctionNames.cs",
+        "src/UWSCSharp.Core/Builtins/BuiltinText.cs"
+      ]
+    },
+    {
+      "id": "FN-IEGETFRAME",
+      "title": "IEGETFRAME — Web上(IE)のフレームを返す",
+      "research": "調査中",
+      "implementation": "一部実装",
+      "verification": "回帰テストあり",
+      "scope": "文書のフレームを名前または番号で選び、ウィンドウのCOM参照を取得します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Windows/Com/ComSession.Html.cs"
+      ]
+    },
+    {
+      "id": "LANG-PRINT",
+      "title": "PRINT・ログ",
+      "research": "調査完了",
+      "implementation": "実装済み",
+      "verification": "受入確認済み",
+      "scope": "コマンドライン版の標準出力、またはUWSC# アプリの実行結果へ値を表示します。",
+      "remaining": "",
+      "sources": [
+        "src/UWSCSharp.Core/Runtime/Interpreter.cs",
+        "src/UWSCSharp.Core/Syntax/ScriptCompiler.cs",
+        "src/UWSCSharp.Core/Values/Value.cs",
+        "src/UWSCSharp.Core/Syntax/Expression.cs",
+        "src/UWSCSharp.Windows/Com/ComSession.cs",
+        "src/UWSCSharp.Windows/Com/ComVariantValue.cs",
+        "src/UWSCSharp.Windows/Com/ComErrorInfo.cs",
+        "src/UWSCSharp.Windows/Com/NativeComDispatch.cs",
+        "src/UWSCSharp.IO/Logging/ScriptLogHost.cs",
+        "src/UWSCSharp.Core/Runtime/PrintFormatter.cs"
+      ]
+    }
+  ]
+}

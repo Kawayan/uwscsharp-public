@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <_FloatingPointScripts>$(MSBuildThisFileDirectory)../../../../scripts</_FloatingPointScripts>
+    <FloatingPointNativeDirectory>$(MSBuildThisFileDirectory)../../../../artifacts/native/floating-point/$(Configuration)/x64</FloatingPointNativeDirectory>
+    <!-- アプリ側から生成する場合は、他のアプリの並行ビルドと出力を分けます。 -->
+    <FloatingPointNativeDirectory Condition="'$(MSBuildProjectName)' != 'UWSCSharp.Windows'">$(FloatingPointNativeDirectory)/$(MSBuildProjectName)</FloatingPointNativeDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="$(FloatingPointNativeDirectory)/UWSCSharp.FloatingPoint.Native.dll"
+             Link="UWSCSharp.FloatingPoint.Native.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(FloatingPointNativeDirectory)/UWSCSharp.X86Call.Native.dll"
+             Link="dll-relay/UWSCSharp.X86Call.Native.dll"
+             ExcludeFromSingleFile="true"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="BuildFloatingPointNativeLibrary"
+          BeforeTargets="PrepareForBuild"
+          Inputs="$(MSBuildThisFileDirectory)arithmetic.asm;$(MSBuildThisFileDirectory)boundary.cpp;$(MSBuildThisFileDirectory)x86_call.cpp;$(_FloatingPointScripts)/build_floating_point_native.ps1"
+          Outputs="$(FloatingPointNativeDirectory)/UWSCSharp.FloatingPoint.Native.dll;$(FloatingPointNativeDirectory)/UWSCSharp.X86Call.Native.dll">
+    <Error Condition="'$(OS)' != 'Windows_NT'"
+           Text="浮動小数点native DLLの生成にはWindowsとMSVCが必要です。" />
+    <Exec Command="pwsh -NoProfile -File &quot;$(_FloatingPointScripts)/build_floating_point_native.ps1&quot; -OutputDirectory &quot;$(FloatingPointNativeDirectory)&quot; -IncludeX86Call" />
+  </Target>
+</Project>

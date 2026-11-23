@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UWSC 記録・再生 実機検証</title>
+<style>
+body { font-family: sans-serif; margin: 24px; max-width: 850px; color: #202124; }
+button, input { font: inherit; padding: 8px; margin: 4px; }
+input { width: 250px; }
+#track { position: relative; height: 140px; border: 2px solid #556; margin: 16px 0; touch-action: none; }
+#block { position: absolute; left: 0; top: 40px; width: 64px; height: 56px; background: #1769aa; color: white; display: grid; place-items: center; user-select: none; cursor: grab; }
+textarea { box-sizing: border-box; width: 100%; min-height: 160px; }
+#status { min-height: 2em; font-weight: bold; }
+</style>
+<h1>記録・再生の比較画面</h1>
+<p>記録中は次の入力欄・対象ボタン・青い箱だけを操作してください。基準保存やリセットは記録停止後に行います。</p>
+<label for="text">記録対象の入力欄（IMEをオフにして abc123）</label><br>
+<input id="text" autocomplete="off" spellcheck="false">
+<button id="target" type="button">記録対象のボタン</button>
+<span id="clicks" aria-live="polite">クリック 0回</span>
+<div id="track" aria-label="ドラッグ領域"><div id="block">ドラッグ</div></div>
+<p>青い箱を右へ動かして解放します。再生時はウィンドウの位置・大きさ・Edgeのズームを同じにしてください。</p>
+<button id="baseline" type="button">現在の結果を基準に保存</button>
+<button id="reset" type="button">入力・カウント・箱をリセット</button>
+<button id="compare" type="button">再生結果を基準と比較</button>
+<p id="status" role="status">基準は未保存です。結果はこのページ内だけに保持します。</p>
+<label for="report">比較結果（コピーして検証記録へ保存できます）</label>
+<textarea id="report" readonly></textarea>
+<script>
+'use strict';
+const text = document.getElementById('text');
+const track = document.getElementById('track');
+const block = document.getElementById('block');
+const clicksLabel = document.getElementById('clicks');
+const status = document.getElementById('status');
+const report = document.getElementById('report');
+let clicks = 0;
+let downs = 0;
+let ups = 0;
+let position = 0;
+let pointer = null;
+let anchor = 0;
+let baseline = null;
+const snapshot = () => ({ text: text.value, clicks, downs, ups, position, held: pointer !== null });
+function render() {
+    block.style.left = position + 'px';
+    clicksLabel.textContent = 'クリック ' + clicks + '回';
+}
+document.getElementById('target').addEventListener('click', () => { clicks++; render(); });
+block.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || pointer !== null) return;
+    pointer = event.pointerId;
+    anchor = event.clientX - position;
+    downs++;
+    block.setPointerCapture(pointer);
+    event.preventDefault();
+});
+block.addEventListener('pointermove', event => {
+    if (event.pointerId !== pointer) return;
+    position = Math.round(Math.max(0, Math.min(track.clientWidth - block.offsetWidth, event.clientX - anchor)));
+    render();
+});
+block.addEventListener('pointerup', event => {
+    if (event.pointerId !== pointer) return;
+    ups++;
+    block.releasePointerCapture(pointer);
+    pointer = null;
+});
+block.addEventListener('lostpointercapture', () => { pointer = null; });
+document.getElementById('baseline').addEventListener('click', () => {
+    baseline = snapshot();
+    status.textContent = '基準を保存しました。記録停止後、リセットして再生してください。';
+    report.value = JSON.stringify({ baseline }, null, 2);
+});
+document.getElementById('reset').addEventListener('click', () => {
+    if (pointer !== null) block.releasePointerCapture(pointer);
+    pointer = null;
+    text.value = '';
+    clicks = downs = ups = position = 0;
+    render();
+    status.textContent = baseline ? 'リセットしました。基準は保持しています。' : 'リセットしました。基準は未保存です。';
+});
+document.getElementById('compare').addEventListener('click', () => {
+    const actual = snapshot();
+    const validBaseline = baseline && baseline.text === 'abc123' && baseline.clicks === 1 &&
+        baseline.downs === 1 && baseline.ups === 1 && baseline.position > 0 && !baseline.held;
+    const matched = Boolean(validBaseline && JSON.stringify(actual) === JSON.stringify(baseline));
+    status.textContent = !baseline ? '基準がありません。' : !validBaseline ? '基準の操作が条件を満たしていません。' :
+        matched ? '一致しました。画面構成・倍率・対象権限も別途記録してください。' : '一致しません。結果を確認してください。';
+    report.value = JSON.stringify({ matched, baseline, actual, browser: navigator.userAgent,
+        screen: { x: window.screenX, y: window.screenY, width: screen.width, height: screen.height,
+            devicePixelRatio, zoomNote: 'devicePixelRatioにはブラウザーのズームの影響も含まれます' } }, null, 2);
+});
+</script>
+</html>

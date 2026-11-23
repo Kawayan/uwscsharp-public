@@ -1,0 +1,112 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="UiIsolationProbe" />
+  </ItemGroup>
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <ProjectReference Include="../../src/UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.Cli/UWSCSharp.Cli.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.IO/UWSCSharp.IO.csproj" />
+    <ProjectReference Include="../../src/UWSCSharp.Wpf.Logic/UWSCSharp.Wpf.Logic.csproj" />
+    <ProjectReference
+      Include="../../src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+    />
+    <ProjectReference
+      Include="../UWSCSharp.ControlFixture/UWSCSharp.ControlFixture.csproj"
+      ReferenceOutputAssembly="false"
+    />
+    <ProjectReference
+      Include="../UWSCSharp.UiaFixture/UWSCSharp.UiaFixture.csproj"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+    />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource
+      Include="Fixtures/safearray-com-probe.cs.txt"
+      LogicalName="UWSCSharp.Windows.Tests.SafeArrayComProbe.cs"
+      WithCulture="false"
+    />
+    <EmbeddedResource
+      Include="Fixtures/variant-type-com-probe.cs.txt"
+      LogicalName="UWSCSharp.Windows.Tests.VariantTypeComProbe.cs"
+      WithCulture="false"
+    />
+    <EmbeddedResource
+      Include="Fixtures/com-event-probe.cs.txt"
+      LogicalName="UWSCSharp.Windows.Tests.ComEventProbe.cs"
+      WithCulture="false"
+    />
+    <None Update="Fixtures/sound-silence.wav" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures/sound-silence.mid" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures/sound-midi-note.mid" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures/sound-video.avi" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures/Authoring/*.uws" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource
+      Include="Clipboard/peekcolor-cases.json"
+      LogicalName="UWSCSharp.Windows.Tests.Clipboard.peekcolor-cases.json"
+    />
+    <None
+      Update="Fixtures/window-basic-operations-acceptance.uws"
+      TargetPath="window-basic-operations-acceptance.uws"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+    <None
+      Update="Fixtures/window-controls-images-acceptance.uws"
+      TargetPath="window-controls-images-acceptance.uws"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Fixtures/launcher-child-probe.uws"
+      LogicalName="UWSCSharp.Windows.Tests.LauncherChildProbe" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Shared/ProcessReceiptReader.cs" Link="Support/ProcessReceiptReader.cs" />
+    <Using Include="UWSCSharp.Testing" />
+  </ItemGroup>
+  <Target Name="BuildDefDllAbiFixture"
+    AfterTargets="Build"
+    Condition="'$(OS)' == 'Windows_NT'"
+    Inputs="$(MSBuildProjectDirectory)/../NativeFixtures/DefDllAbiProbe/fixture.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/DefDllAbiProbe/com_control.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/DefDllAbiProbe/com_control.idl;$(MSBuildProjectDirectory)/../NativeFixtures/FloatingPointControlProbe/com_dispatch_control.asm;$(MSBuildProjectDirectory)/../NativeFixtures/build_def_dll_probe.ps1"
+    Outputs="$(TargetDir)floating-point-boundary/x64/DefDllAbiFixture.dll;$(TargetDir)floating-point-boundary/x86/DefDllAbiFixture.dll">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../NativeFixtures/build_def_dll_probe.ps1&quot; -OutputDirectory &quot;$(TargetDir)floating-point-boundary&quot;" />
+  </Target>
+  <Target Name="BuildNativeDllLifetimeFixture"
+    AfterTargets="Build"
+    Condition="'$(OS)' == 'Windows_NT'"
+    Inputs="$(MSBuildProjectDirectory)/../NativeFixtures/NativeDllLifetimeProbe/fixture.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/build_native_dll_lifetime_probe.ps1"
+    Outputs="$(TargetDir)native-dll-lifetime/UwscOwnedLifetimeProbe.dll">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../NativeFixtures/build_native_dll_lifetime_probe.ps1&quot; -OutputDirectory &quot;$(TargetDir)native-dll-lifetime&quot;" />
+  </Target>
+  <Target Name="BuildNativeDllFrontendLifetimeFixture"
+    AfterTargets="Build"
+    Condition="'$(OS)' == 'Windows_NT'"
+    Inputs="$(MSBuildProjectDirectory)/../NativeFixtures/NativeDllFrontendLifetimeProbe/fixture.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/NativeDllLifetimeProbe/fixture.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/build_native_dll_frontend_lifetime_probe.ps1"
+    Outputs="$(TargetDir)native-dll-frontend-lifetime/UwscOwnedFrontendLifetimeProbe.dll">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../NativeFixtures/build_native_dll_frontend_lifetime_probe.ps1&quot; -OutputDirectory &quot;$(TargetDir)native-dll-frontend-lifetime&quot;" />
+  </Target>
+  <Target Name="BuildNativeDllBufferLifetimeFixture"
+    AfterTargets="Build"
+    Condition="'$(OS)' == 'Windows_NT'"
+    Inputs="$(MSBuildProjectDirectory)/../NativeFixtures/NativeDllBufferLifetimeProbe/fixture.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/build_native_dll_buffer_lifetime_probe.ps1"
+    Outputs="$(TargetDir)native-dll-buffer-lifetime/UwscOwnedBufferLifetimeProbe.dll">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../NativeFixtures/build_native_dll_buffer_lifetime_probe.ps1&quot; -OutputDirectory &quot;$(TargetDir)native-dll-buffer-lifetime&quot;" />
+  </Target>
+  <Target Name="BuildDropFileFixture" AfterTargets="Build"
+          Condition="'$(OS)' == 'Windows_NT'"
+          Inputs="$(MSBuildProjectDirectory)/../NativeFixtures/DropFileProbe.cpp;$(MSBuildProjectDirectory)/../NativeFixtures/build_drop_file_probe.ps1"
+          Outputs="$(TargetDir)drop-file-probe/x86/DropFileProbe.exe;$(TargetDir)drop-file-probe/x64/DropFileProbe.exe">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../NativeFixtures/build_drop_file_probe.ps1&quot; -Architecture x86 -OutputDirectory &quot;$(TargetDir)drop-file-probe&quot;" />
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../NativeFixtures/build_drop_file_probe.ps1&quot; -Architecture x64 -OutputDirectory &quot;$(TargetDir)drop-file-probe&quot;" />
+  </Target>
+</Project>

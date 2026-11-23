@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Version Condition="'$(Version)' == ''">0.1.0</Version>
+    <IncludeSourceRevisionInInformationalVersion Condition="'$(Version)' == '0.1.0'">false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>UWSCSharp.Cli</RootNamespace>
+    <AssemblyName>UWSCSharp.Cli</AssemblyName>
+    <Title>UWSC#</Title>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../UWSCSharp.Core/UWSCSharp.Core.csproj" />
+    <ProjectReference
+      Include="../UWSCSharp.Windows/UWSCSharp.Windows.csproj"
+    />
+    <ProjectReference Include="../UWSCSharp.IO/UWSCSharp.IO.csproj" />
+    <ProjectReference Include="../UWSCSharp.DllRelay/UWSCSharp.DllRelay.csproj"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="DllRelayBuildOutput"
+                      GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishSingleFile" />
+  </ItemGroup>
+  <Import Project="../UWSCSharp.DllRelay/CopyDllRelay.targets" />
+  <Import Project="../UWSCSharp.Windows/Native/FloatingPoint/FloatingPointNative.targets"
+          Condition="'$(BuildFloatingPointNative)' == '' and '$(RuntimeIdentifier)' == 'win-x64' and '$(CliPreview)' != 'true'" />
+</Project>

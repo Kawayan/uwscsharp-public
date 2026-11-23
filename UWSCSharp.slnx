@@ -1,0 +1,28 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/UWSCSharp.Mcp/UWSCSharp.Mcp.csproj" />
+    <Project Path="src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj" />
+    <Project Path="src/UWSCSharp.Wpf.Logic/UWSCSharp.Wpf.Logic.csproj" />
+    <Project Path="src/UWSCSharp.Cli/UWSCSharp.Cli.csproj" />
+    <Project Path="src/UWSCSharp.Core/UWSCSharp.Core.csproj" />
+    <Project Path="src/UWSCSharp.IO/UWSCSharp.IO.csproj" />
+    <Project Path="src/UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
+    <Project Path="src/UWSCSharp.DllRelay/UWSCSharp.DllRelay.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UWSCSharp.RecordingSoak/UWSCSharp.RecordingSoak.csproj" />
+    <Project Path="tests/UWSCSharp.RecordingSmoke/UWSCSharp.RecordingSmoke.csproj" />
+    <Project Path="tests/UWSCSharp.ControlFixture/UWSCSharp.ControlFixture.csproj" />
+    <Project Path="tests/UWSCSharp.Core.Tests/UWSCSharp.Core.Tests.csproj" />
+    <Project Path="tests/UWSCSharp.IO.Tests/UWSCSharp.IO.Tests.csproj" />
+    <Project Path="tests/UWSCSharp.Smoke/UWSCSharp.Smoke.csproj" />
+    <Project Path="tests/UWSCSharp.UiaFixture/UWSCSharp.UiaFixture.csproj" />
+    <Project Path="tests/UWSCSharp.Windows.Tests/UWSCSharp.Windows.Tests.csproj" />
+  </Folder>
+</Solution>

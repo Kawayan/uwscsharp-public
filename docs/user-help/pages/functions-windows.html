@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>ウィンドウ関連 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a aria-current="page" href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / ウィンドウ関連</p>
+<h1>ウィンドウ関連</h1><p class="lead">ウィンドウの検索・状態取得・移動とID変換を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<p>対象IDはGETIDで取得します。実行ごとに管理され、別の実行へ持ち越せません。</p>
+<section class="reference-entry"><h2 id="getid">GETID</h2>
+<p>タイトルなどでウィンドウを探し、この実行内で使うIDを取得します。</p>
+<h3>書式</h3><pre><code>GETID(title, [className, seconds, mdiChildTitle])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>title</code></dt><dd>通常のタイトル、またはGET_ACTIVE_WIN、GET_FROMPOINT_WIN、GET_FROMPOINT_OBJ、GET_THISUWSC_WIN、GET_LOGPRINT_WIN、GET_STOPFORM_WIN、GET_BALLOON_WIN（GET_FUKIDASI_WIN）、GET_FORM_WIN、GET_FORM_WIN2、GET_SCHEDULE_WIN。</dd>
+<dt><code>className</code></dt><dd>省略時はクラスを限定しません。指定時は前方一致。</dd>
+<dt><code>seconds</code></dt><dd>省略・0は約0.1秒、正数は待機秒数、-1は見つかるまで待機。</dd>
+<dt><code>mdiChildTitle</code></dt><dd>親の配下で探す子タイトル。省略・空文字列は親を返します。通常の子や孫も対象です。</dd>
+</dl><h3>戻り値・結果</h3><p>見つかったウィンドウのID。見つからなければ-1。</p><h3>対応範囲と注意</h3><ul>
+<li>通常タイトルと子タイトルは大小文字を区別せず、完全一致を優先してから部分一致で探します。クラス名は親に対する前方一致の条件です。</li>
+<li>子を指定した場合も先に親を選びます。完全一致する親に子がなければ部分一致する別の親は探しません。通常の子や孫も対象です。</li>
+<li>特殊指定は現在の対象を直接取得し、クラス・待機秒数・子タイトルで絞り込みません。対象がなければ-1を返します。引数数や不正な待機値は取得前に検査します。</li>
+<li>UWSC# アプリのGET_THISUWSC_WINは本体画面、GET_STOPFORM_WINは独立した再生コントロールを返します。GET_STOPFORM_WINとGET_LOGPRINT_WINは、まだ表示していない画面も表示せずに取得できます。通常のコマンドライン版のGET_STOPFORM_WINは、必要に応じて非表示の停止画面を作成して返します。他のホスト専用画面がない場合は-1です。</li>
+<li>GET_BALLOON_WINとGET_FUKIDASI_WINは、現在の実行セッションがFUKIDASIまたはBALLOONで作成した吹き出しを取得します。未作成または破棄済みなら-1です。標準UWSC# アプリ/コマンドライン版にはフォーム・スケジュールの対象画面はなく、これらの指定は-1です。</li>
+<li>特殊定数の値は__GET_THISUWSC_WIN__などの識別文字列です。大小文字を区別しません。GET_BALLOON_WINとGET_FUKIDASI_WINは同じ値です。引用したGET_THISUWSC_WINは通常タイトルとして検索するため、通常は定数をそのまま指定してください。</li>
+<li>省略・0の待機は約0.1秒に固定し、原版の負荷や履歴による自動調整とは異なります。現行は可視・前面状態による候補の追加優先を行わず、検索から前面化を要求しません。必要な待機秒数と前面化は呼出し側で指定してください。</li>
+<li>通常タイトルは共通の文字列表示で扱います。NULLなど表示できない値はエラーです。取消はEXCEPTで通常の検索失敗として捕捉しません。</li>
+<li>ウィンドウの破棄・再生成後は、GETIDやHNDTOIDでIDを取り直してください。有効な対象を再発見すると、同じハンドル値でも以前と異なるIDになる場合があります。IDやハンドルの値だけで対象が生存し続けていると判断しないでください。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="getid"><code>DIM id=GETID(GET_THISUWSC_WIN)
+IFB id&gt;0
+    PRINT STATUS(id, ST_TITLE)
+ELSE
+    PRINT &quot;実行元の画面がありません&quot;
+ENDIF</code></pre>
+<p>期待出力：</p><pre><code>実行元の画面がありません
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="exec">EXEC</h2>
+<p>実行可能ファイルを引数付きで起動し、ウィンドウIDまたは終了コードを返します。</p>
+<h3>書式</h3><pre><code>EXEC(command, [wait, x, y, width, height])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>command</code></dt><dd>空でないコマンド文字列。実行ファイル名と引数を含めます。空白を含む実行ファイルのパスは引用符で囲んでください。</dd>
+<dt><code>wait</code></dt><dd>省略・0はウィンドウを探して返ります。0以外は起動したプロセスの終了を待ちます。</dd>
+<dt><code>x, y</code></dt><dd>物理スクリーン座標。独立して省略でき、省略した軸は元の位置を保ちます。</dd>
+<dt><code>width, height</code></dt><dd>ウィンドウ全体の幅と高さ。省略・0は元の値を保ちます。負数はエラーです。</dd>
+</dl><h3>戻り値・結果</h3><p>非同期起動は同じPIDの可視トップレベルウィンドウのID、最大5秒で見つからないか先に終了した場合は-1。終了待ちは符号付き32bitの終了コード。</p><h3>対応範囲と注意</h3><ul>
+<li>CreateProcessWで実行可能ファイルを直接起動します。文書・URLの関連付け、シェル演算子や環境変数の自動展開には対応しません。必要な場合はcmd.exeなどをコマンド内で明示してください。</li>
+<li>引数の過不足・必須引数の省略は式の評価前に拒否し、値の型・範囲は起動前にすべて検査します。NULを含む文字列、空白だけの文字列、32766文字を超えるコマンドはエラーです。数値引数は既存の整数変換に従い、小数部を切り捨てます。</li>
+<li>起動失敗はEXCEPTで捕捉できるエラーです。原版の存在しない実行ファイル・空文字列に対する-1とは異なります。余分な引数は拒否し、省略可能位置の独立した省略を許可します。</li>
+<li>探索は起動したPIDだけが対象です。別プロセスへ転送するストアアプリ・Explorer・単一起動アプリの転送先IDは保証しません。複数の可視トップレベルウィンドウがある場合は列挙で最初のものを選びます。</li>
+<li>位置・サイズはウィンドウ検出時に変更します。終了待ちでも指定があれば最大5秒探索した後に終了待ちを続けます。同期Win32 APIそのものの返却時間や、アプリによる位置の再変更は制御しません。</li>
+<li>取消は待機を中断します。取消とセッション終了では起動したアプリを終了させず、所有ハンドルだけを解放します。終了コード259を実行中の判定に使いません。実行元の環境変数と作業ディレクトリを継承します。</li>
+<li>DPI非対応の起動先では、Windowsの座標変換で位置・寸法が丸められる場合があります。150%表示の専用画面では、指定x=130に対して131を観測しました。指定値との完全一致は保証しません。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="exec"><code>DIM code=EXEC(&quot;cmd.exe /d /c exit 7&quot;,TRUE)
+PRINT code</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="status">STATUS</h2>
+<p>ウィンドウの位置、寸法、タイトルなどを取得します。</p>
+<h3>書式</h3><pre><code>STATUS(id, item)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>GETID/HNDTOIDで取得したID。0は呼出し時点の前面ウィンドウ。未設定値EMPTYは指定できません。</dd>
+<dt><code>item</code></dt><dd>ST_X/ST_Y、ST_WIDTH/ST_HEIGHT、ST_CLX/ST_CLY、ST_CLWIDTH/ST_CLHEIGHT、ST_TITLE、ST_ICON、ST_MAXIMIZED、ST_VISIBLE、ST_ACTIVE、ST_CLASS、ST_BUSY、ST_PARENT、ST_PATH、ST_PROCESS、ST_WIN64、ST_MONITOR、ST_ISID。</dd>
+</dl><h3>戻り値・結果</h3><p>タイトル・クラス・パスは文字列、座標・寸法・状態などは数値です。ST_ISIDは有効IDなら1、それ以外は0。</p><h3>対応範囲と注意</h3><ul>
+<li>ST_CLX/ST_CLYはクライアント領域左上の画面座標です。</li>
+<li>対応する項目番号は1〜21です。ST_JAVAは対象外です。</li>
+<li>無効IDでは文字列項目は空文字列、ST_PARENTは-1、その他は0を返します。OSへの問い合わせ失敗は例外になる場合があります。</li>
+<li>ST_X/ST_Y/ST_WIDTH/ST_HEIGHTはGetWindowRectの外枠です。原版のログウィンドウで確認したDWM可視外枠とは、不可視の枠の分だけ異なる場合があります。</li>
+<li>座標・寸法は物理ピクセルです。取得中だけスレッドのDPI認識を切り替え、呼出し後に元へ戻します。</li>
+<li>ST_MONITORはOSの列挙順で0から数えます。恒久的なモニター識別子ではありません。</li>
+<li>ST_BUSYは1000ms指定の応答検査に失敗すると1を返します。応答不能と送信失敗の原因は区別しません。</li>
+<li>ST_VISIBLEは最小化中でもOSが可視とする場合は1です。</li>
+<li>100%/150%の2画面で、画面内と境界の親・子8条件のST_MONITORが原版と一致しました。全構成での一致は未確認です。境界上のモニター番号とウィンドウDPIは分けて扱ってください。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="status"><code>PRINT STATUS(-1, ST_ISID)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="ctrlwin">CTRLWIN</h2>
+<p>ウィンドウの表示状態や最前面固定を変更し、任意メッセージを送信します。</p>
+<h3>書式</h3><pre><code>CTRLWIN(id, operation, [wParam, lParam])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象のウィンドウID。明示的な0は前面ウィンドウです。EMPTYは指定できません。</dd>
+<dt><code>operation</code></dt><dd>ACTIVATE、CLOSE、CLOSE2、HIDE、SHOW、MIN、MAX、NORMAL、TOPMOST、NOTOPMOST、TOPNOACTV。 1〜11以外の値はメッセージ番号です。0〜4294967295の整数へ切り捨てます。</dd>
+<dt><code>wParam</code></dt><dd>メッセージの追加値。省略・EMPTYは0。切り捨て後0〜4294967295。</dd>
+<dt><code>lParam</code></dt><dd>メッセージの追加値。省略・EMPTYは0。切り捨て後-2147483648〜2147483647。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。操作結果は対象の状態で確認してください。</p><h3>対応範囲と注意</h3><ul>
+<li>ACTIVATEは前面化、CLOSE/CLOSE2は終了要求です。対象アプリが要求を受け入れる保証はありません。</li>
+<li>引数の検証後、無効IDの場合は何もしません。権限差やOS制約で操作に失敗する場合があります。</li>
+<li>TOPNOACTVは表示状態・位置・寸法を保ち、アクティブ化を要求せず最前面固定を設定します。非表示で属性が付かなかった場合は、非表示を維持してZ順序を更新します。追加要求は2回に限定します。</li>
+<li>NORMALは最大化後に最小化した場合も通常状態へ戻します。SHOWは最小化・最大化を解除しません。ACTIVATEは表示状態の変更を要求せず、前面化を1回要求し、OSによる拒否だけでは例外にしません。</li>
+<li>任意メッセージはPostMessageでキューへ登録し、受信側の処理完了は待ちません。登録失敗は操作エラーになります。Windows x64でもwParamは32bit符号なし、lParamは32bit符号付きの値です。任意ポインターのマーシャリングは行いません。</li>
+<li>任意引数は途中・末尾を省略すると0です。原版の途中省略のエラーと異なります。引数は2〜4個とし、原版で受理した5個目以降は評価前に拒否します。組み込み命令に付けた任意引数も型・範囲を検査しますが、処理には使いません。</li>
+<li>CLOSEは受信側が拒否できる終了要求です。CLOSE2はWM_QUITの要求であり、プロセスを強制終了しません。通常の終了要求にはCLOSEを使ってください。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="acw">ACW</h2>
+<p>ウィンドウの位置と大きさを変更し、前面化を要求します。</p>
+<h3>書式</h3><pre><code>ACW(id, [x, y, width, height, ms])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>対象ID。0は直前のACWで解決した対象ID。必須IDのEMPTYは指定できません。</dd>
+<dt><code>x, y</code></dt><dd>物理ピクセル。トップレベルは画面座標、子ウィンドウは親クライアント相対座標です。省略した軸は現在位置を保持します。</dd>
+<dt><code>width, height</code></dt><dd>0または省略時は現在の寸法を維持します。整数化後に負数となる値は指定できません。</dd>
+<dt><code>ms</code></dt><dd>操作前の待機ミリ秒。既定0。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>引数検査に成功したうえで対象IDが無効なら何もしません。変更後の寸法は対象アプリやOSの制約を受けます。</li>
+<li>再生時の配置や倍率が記録時と異なる場合は、操作対象を再確認してください。</li>
+<li>位置・寸法の単位は物理ピクセルです。DPI認識の切替は待機後の同期区間だけで行い、元へ戻します。子の座標省略と片軸変更は専用ウィンドウで確認しています。</li>
+<li>OSや対象アプリの制約、DPI丸めにより、指定値と実際の位置・寸法が異なる場合があります。</li>
+<li>任意の数値引数のEMPTYは0として扱います。必須IDのEMPTYとは区別します。</li>
+<li>位置または寸法の変更が必要な場合に通常表示を要求します。IDだけの呼出しや同値指定では表示状態を維持します。</li>
+<li>通常表示へ復元する場合、省略した位置・寸法は復元後の値を使用します。</li>
+<li>前面化は1回の要求です。OSが拒否した場合も配置を続け、前面化のために全体設定や入力キューを変更しません。</li>
+<li>取消は待機中と操作の区切りで確認します。既に行った表示変更や前面化を巻き戻す機能ではありません。同期Win32呼出しの時間上限は保証しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="acw"><code>ACW(-1)
+PRINT &quot;変更対象なし&quot;</code></pre>
+<p>期待出力：</p><pre><code>変更対象なし
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="idtohnd">IDTOHND</h2>
+<p>この実行のウィンドウIDをネイティブのウィンドウハンドルへ変換します。</p>
+<h3>書式</h3><pre><code>IDTOHND(id)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>この実行のGETID/HNDTOIDなどで取得したID。明示的な数値0は、変換時点のアクティブウィンドウです。</dd>
+</dl><h3>戻り値・結果</h3><p>ハンドルを表す数値。未登録IDやInt32範囲内の負ID、変換時点で無効な対象は0。入力の型や数値範囲が不正な場合はエラー。</p><h3>対応範囲と注意</h3><ul>
+<li>IDとハンドルは別の値です。別実行のIDを流用しないでください。</li>
+<li>数値と数値文字列はゼロ方向へ切り捨て、Int32範囲を検査します。-0.9も0となり、アクティブ対象を参照します。</li>
+<li>EMPTY、NULL、空文字、非数値、非有限値、整数範囲外はエラーです。未設定のEMPTYをID0として扱いません。</li>
+<li>引数は1個必須です。引数数と必須省略は、実引数を評価する前に拒否します。</li>
+<li>ハンドルを取得しても対象の寿命は延びません。破棄やOSのハンドル再利用をまたぐ識別は保証しません。</li>
+<li>ネイティブAPIをスクリプトから任意に呼び出すDEF_DLLは未実装です。</li>
+<li>ウィンドウの破棄・再生成後は、GETIDやHNDTOIDでIDを取り直してください。有効な対象を再発見すると、同じハンドル値でも以前と異なるIDになる場合があります。IDやハンドルの値だけで対象が生存し続けていると判断しないでください。</li>
+<li>この変換は現在のハンドルの有効性を確認する処理です。登録時から同じウィンドウが存続していることや、所有者が変わっていないことは保証しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="idtohnd"><code>PRINT IDTOHND(-1)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="hndtoid">HNDTOID</h2>
+<p>ウィンドウハンドルをこの実行のIDへ登録します。</p>
+<h3>書式</h3><pre><code>HNDTOID(handle)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>handle</code></dt><dd>数値または数値文字列。数値変換後の絶対値は2^53-1以下。小数はゼロ方向へ切り捨てます。</dd>
+</dl><h3>戻り値・結果</h3><p>登録したIDを返します。有効な同じ登録では同じIDです。照会不能のままの再登録も以前の数値IDを維持し、有効な所有者を再発見した登録には別のIDを返す場合があります。変換後の0は-1となり、ID番号を消費しません。正のIDでもウィンドウが有効とは限りません。</p><h3>対応範囲と注意</h3><ul>
+<li>EMPTY、NULL、空文字・非数値、非有限値、精度上限超過はエラーです。未設定のEMPTYと明示的な0を区別します。</li>
+<li>Windows 11 x64ではInt32へ変換せず、nint値を保持します。登録時に所有者情報を照会しますが、照会できない非ゼロ値も受け付けます。IDTOHNDでは逆引きする時点でハンドルの有効性を確認します。</li>
+<li>異なる数値がOS上の同じウィンドウを参照できる場合でも、現行のID表では別IDになることがあります。異なるIDが必ず別のウィンドウを意味するわけではありません。</li>
+<li>ハンドルを登録しても寿命は延びません。破棄・再作成・OSのハンドル再利用をまたぐ同一性は保証しません。</li>
+<li>原版とは無効な非ゼロ値、高位bit、数値上限、余分な引数の扱いが異なる条件があります。引数は1個必須で、過不足と必須省略は評価前に拒否します。</li>
+<li>ウィンドウの破棄・再生成後は、GETIDやHNDTOIDでIDを取り直してください。有効な対象を再発見すると、同じハンドル値でも以前と異なるIDになる場合があります。IDやハンドルの値だけで対象が生存し続けていると判断しないでください。</li>
+<li>保存した所有者情報が異なる・以前に失効を観測した・登録時に所有者が不明だった場合、有効な所有者を明示的に再発見した登録へ新IDを割り当てます。同じ所有者を引き続き確認できる登録は同じIDを返します。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="hndtoid"><code>PRINT HNDTOID(0)</code></pre>
+<p>期待出力：</p><pre><code>-1
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="getallwin">GETALLWIN</h2>
+<p>全ウィンドウまたは指定した親の子ウィンドウを列挙します。</p>
+<h3>書式</h3><pre><code>GETALLWIN([id])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>省略・0はトップレベル全体。正のIDはその親の子孫を列挙します。</dd>
+</dl><h3>戻り値・結果</h3><p>件数を返し、ALL_WIN_IDへゼロ始まりのID配列を公開します。FOR INへ直接指定するとIDを反復します。</p><h3>対応範囲と注意</h3><ul>
+<li>IDはこの実行内のID表を共有します。無効な親は0件と空配列です。</li>
+<li>取消と取得失敗では前回の公開配列を保持します。OSの列挙中に消えたウィンドウは除外します。</li>
+<li>表示状態での絞込みや並べ替えはしません。列挙はスナップショットであり、その後の対象の存続を保証しません。</li>
+<li>原版は自身の一部画面やIME等の補助ウィンドウを除外します。新実装はWin32の列挙対象を返すため、全件数が原版と一致するとは限りません。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="getallwin"><code>PRINT GETALLWIN()</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="getctlhnd">GETCTLHND</h2>
+<p>名前またはclassで子controlを探し、生のハンドルを返します。</p>
+<h3>書式</h3><pre><code>GETCTLHND(id, item, [number])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>実行内のウィンドウID。0は前面ウィンドウです。</dd>
+<dt><code>item</code></dt><dd>captionまたはclass名。GET_MENU_HNDはメニュー、GET_SYSMENU_HNDはシステムメニューを取得します。</dd>
+<dt><code>number</code></dt><dd>同名候補の1始まり番号。省略・0・負数は1として扱います。</dd>
+</dl><h3>戻り値・結果</h3><p>ハンドルの数値。対象がない場合は0です。</p><h3>対応範囲と注意</h3><ul>
+<li>子孫をOSの列挙順で探し、caption一致を先に全候補で確認します。該当番号がなければclass一致を探します。classは大小文字を区別せず、captionは既存のボタン名正規化と照合します。</li>
+<li>非表示・無効controlも候補です。メニュー取得では番号を使用しません。</li>
+<li>control探索は共有native workerを使い、待機枠と実行待ちにそれぞれ2秒の期限があります。取消後も同期APIが復帰するまでworkerを保持します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="getctlhnd"><code>id = GETID(GET_THISUWSC_WIN)
+PRINT GETCTLHND(id, GET_MENU_HND)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="monitor">MONITOR</h2>
+<p>現在のモニター数、または指定したモニターの情報を取得します。</p>
+<h3>書式</h3><pre><code>MONITOR([number, item])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>number</code></dt><dd>0が主画面。省略するとモニター数を返します。取得時点の一覧を使い、画面構成変更後の番号を固定しません。</dd>
+<dt><code>item</code></dt><dd>省略時はMON_X。MON_X=0、MON_Y=1、MON_WIDTH=2、MON_HEIGHT=3、MON_PRIMARY=4、MON_NAME=5。</dd>
+</dl><h3>戻り値・結果</h3><p>引数なしはモニター数。位置・幅・高さ・主画面フラグは数値、MON_NAMEは表示名です。存在しない番号は数値0（False）を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>座標と大きさは物理ピクセルです。主画面を先頭にし、他の画面はOSの列挙順を保持します。Windows設定画面の識別番号とは別です。</li>
+<li>MON_NAMEはGeneric PnP Monitorなどの表示名です。表示名を列挙できなかった場合は空文字になります。デバイスパスではありません。</li>
+<li>数値は有限の32bit範囲で0方向へ切り捨てます。取得項目の省略とMON_PRIMARY、存在しない番号のFalseは原版の追加観測に基づきます。</li>
+<li>省略穴・余分な引数・未知の取得項目・範囲外数値を拒否します。不正な引数個数と省略穴は引数式の評価前に拒否します。</li>
+<li>実機の複数画面・接続変更・倍率混在と、STATUSのST_MONITORとの全構成の採番一致は未確認です。実画面の追加試験の保留は維持します。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="monitor"><code>PRINT MONITOR()
+PRINT MONITOR(0,MON_WIDTH)
+PRINT MONITOR(0,MON_NAME)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions.html">← スクリプト関数一覧</a> <a href="functions-input.html">次へ：マウス・キーボード入力</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#getid">GETID</a></li><li><a href="#exec">EXEC</a></li><li><a href="#status">STATUS</a></li><li><a href="#ctrlwin">CTRLWIN</a></li><li><a href="#acw">ACW</a></li><li><a href="#idtohnd">IDTOHND</a></li><li><a href="#hndtoid">HNDTOID</a></li><li><a href="#getallwin">GETALLWIN</a></li><li><a href="#getctlhnd">GETCTLHND</a></li><li><a href="#monitor">MONITOR</a></li></ul></nav>
+</div></div></body></html>

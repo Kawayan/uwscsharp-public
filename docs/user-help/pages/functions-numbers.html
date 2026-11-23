@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>数値・数学 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a aria-current="page" href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 数値・数学</p>
+<h1>数値・数学</h1><p class="lead">数値の丸め、べき乗、対数、三角関数などを説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="int">INT</h2>
+<p>0方向へ小数部を切り捨てます。</p>
+<h3>書式</h3><pre><code>INT(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、またはASCII数字・小数点・E/e指数による数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>切捨て後の数値。</p><h3>対応範囲と注意</h3><ul>
+<li>有限doubleへ変換してから0方向へ切り捨てます。EMPTYは0。整数型の範囲へは制限しません。</li>
+<li>文字列はOSや表示言語に依存しない規則で解析し、前後の空白を受理します。桁区切り・全角数字・D指数・不完全な指数・埋込みNUL・16進表記はエラーです。</li>
+<li>引数の過不足・省略は引数式を評価する前にエラーとし、正しい1引数は1回評価します。</li>
+<li>NULL、NOTHING、配列、連想配列、ERROR、未変換objectや非有限値はエラーです。COM既定memberは暗黙に呼び出しません。</li>
+<li>COMのVT_BOOLはTRUEを-1として数値化します。通常のTRUEリテラルは1です。</li>
+<li>原版の32bit丸め、追加引数、不完全な指数などとは意図した仕様差があります。ゼロ除算は例外となり、TRY/EXCEPTで処理できます。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="int"><code>PRINT INT(-1.8)</code></pre>
+<p>期待出力：</p><pre><code>-1
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="abs">ABS</h2>
+<p>絶対値を求めます。</p>
+<h3>書式</h3><pre><code>ABS(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、またはASCII数字・小数点・E/e指数による数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>符号を取り除いた有限doubleの数値。負の0は正の0になります。</p><h3>対応範囲と注意</h3><ul>
+<li>文字列はOSや表示言語に依存しない規則でdoubleへ変換してから絶対値を求めます。前後の空白を受理し、独自の文字数上限は設けません。</li>
+<li>EMPTYは0、通常のTRUE/FALSEは1/0です。COM VT_BOOLのTRUE/FALSEも絶対値の結果は1/0です。</li>
+<li>引数の過不足・省略は引数式を評価する前にエラーとし、正しい1引数は1回評価します。</li>
+<li>非有限値、NULL、NOTHING、ERROR、配列、連想配列、未変換objectはエラーです。COM既定memberは暗黙に呼び出しません。</li>
+<li>桁区切り・全角数字・D指数・不完全指数・埋込みNUL・16進文字列はエラーです。16進数リテラルは数値として利用できます。</li>
+<li>原版の32bit丸めや追加引数の処理とは意図した仕様差があります。ゼロ除算は例外となり、TRY/EXCEPTで処理できます。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="abs"><code>PRINT ABS(-3)</code></pre>
+<p>期待出力：</p><pre><code>3
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="zcut">ZCUT</h2>
+<p>入力と0の大きい方を返します。</p>
+<h3>書式</h3><pre><code>ZCUT(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、またはASCII数字・小数点・E/e指数による数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>負の数と負の0なら正の0、正の数なら元の有限double。</p><h3>対応範囲と注意</h3><ul>
+<li>文字列はOSや表示言語に依存しない規則でdoubleへ変換してから処理します。前後の空白を受理し、独自の文字数上限は設けません。</li>
+<li>EMPTYと通常のFALSEは0、通常のTRUEは1です。COM VT_BOOLはTRUE=-1、FALSE=0として数値化するため、ZCUTの結果はどちらも0です。</li>
+<li>引数の過不足・省略は引数式を評価する前にエラーとし、正しい1引数は1回評価します。</li>
+<li>非有限値、NULL、NOTHING、ERROR、配列、連想配列、未変換objectはエラーです。COM既定memberは暗黙に呼び出しません。</li>
+<li>桁区切り・全角数字・D指数・不完全指数・埋込みNUL・16進文字列はエラーです。16進数リテラルは数値として利用できます。</li>
+<li>原版の32bit丸めや追加引数の処理とは意図した仕様差があります。ゼロ除算は例外となり、TRY/EXCEPTで処理できます。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="zcut"><code>PRINT ZCUT(-3)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="sqrt">SQRT</h2>
+<p>平方根を求めます。</p>
+<h3>書式</h3><pre><code>SQRT(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>0以上の有限数、EMPTY、またはASCII数字・小数点・E/e指数の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>非負の有限doubleの平方根。負の0は符号を保持します。</p><h3>対応範囲と注意</h3><ul>
+<li>負数はSQRTの定義域エラーになります。原版がNANを返す場合も、有限double設計により例外としてTRY/EXCEPTで処理します。</li>
+<li>文字列はOSや表示言語に依存しない規則で解析します。前後の空白を受理し、独自の文字数上限は設けません。全角・桁区切り・D指数・不完全指数・埋込みNUL・16進文字列はエラーです。</li>
+<li>EMPTYと通常のFALSEは0、通常のTRUEは1です。COM VT_BOOLはTRUE=-1、FALSE=0として数値化するため、TRUEは定義域エラー、FALSEは0になります。</li>
+<li>引数の過不足・省略は引数式を評価する前にエラーとし、正しい1引数は1回評価します。</li>
+<li>NULL、NOTHING、ERROR、配列、連想配列、未変換object、非有限値はエラーです。COM既定memberは暗黙に呼び出しません。</li>
+<li>Math.Sqrtを使用し、原版の全精度・FPU/CW・文字列変換を再現するものではありません。ゼロ除算は例外となります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="sqrt"><code>PRINT SQRT(9)</code></pre>
+<p>期待出力：</p><pre><code>3
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="sin">SIN</h2>
+<p>ラジアンで指定した角度の正弦を求めます。</p>
+<h3>書式</h3><pre><code>SIN(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>ラジアンの有限数、EMPTY、またはASCII数字・小数点・E/e指数の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>-1～1の有限doubleの正弦。負の0は符号を保持します。</p><h3>対応範囲と注意</h3><ul>
+<li>全有限角度をMath.Sinで計算します。原版の大角度で入力値を返す動作は採用していません。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。</li>
+<li>文字列は前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>引数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全localeを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="sin"><code>PRINT SIN(0)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="cos">COS</h2>
+<p>ラジアンで指定した角度の余弦を求めます。</p>
+<h3>書式</h3><pre><code>COS(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>ラジアンの有限数、EMPTY、またはASCII数字・小数点・E/e指数の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>-1～1の有限doubleの余弦。正負の0からはいずれも1を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>全有限角度をMath.Cosで計算します。原版の大角度で入力値を返す動作は採用していません。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。</li>
+<li>文字列は前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>引数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全localeを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="cos"><code>PRINT COS(0)</code></pre>
+<p>期待出力：</p><pre><code>1
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="tan">TAN</h2>
+<p>ラジアンで指定した角度の正接を求めます。</p>
+<h3>書式</h3><pre><code>TAN(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>ラジアンの有限数、EMPTY、またはASCII数字・小数点・E/e指数の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>有限doubleの正接。負の0は符号を保持します。極に近い角度では絶対値が大きくなります。</p><h3>対応範囲と注意</h3><ul>
+<li>全有限角度をMath.Tanで計算します。原版の大角度でNANを返す動作は採用していません。</li>
+<li>TAN(1.5707963267948966)はπ/2を近似したdoubleの正接を返します。極の近傍を任意のしきい値で拒否しません。非有限の結果はエラーになります。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。</li>
+<li>文字列は前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>引数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全localeを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="tan"><code>PRINT TAN(0)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="exp">EXP</h2>
+<p>自然対数の底eのべき乗を求めます。</p>
+<h3>書式</h3><pre><code>EXP(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、またはASCII数字・小数点・E/e指数の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>自然対数の底eのvalue乗を有限doubleで返します。正負の0からはいずれも1を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Expで計算し、非有限の結果はエラーにします。原版のINFを返す動作は採用していません。</li>
+<li>非正規化数とアンダーフローによる正の0は受理します。固定の入力しきい値は設けず、計算結果の有限性で判定します。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。</li>
+<li>文字列は前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>引数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全localeを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="exp"><code>PRINT EXP(0)</code></pre>
+<p>期待出力：</p><pre><code>1
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="ln">LN</h2>
+<p>自然対数を求めます。</p>
+<h3>書式</h3><pre><code>LN(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>0より大きい有限数、または同じ範囲の値へ変換できるASCII数字・小数点・E/e指数の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>有限doubleの自然対数。1からは正の0、0より大きく1未満の入力からは負の結果、1より大きい入力からは正の結果を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Logで計算します。0以下はLNの定義域エラーになります。原版の-INF/NANを返す動作は採用していません。</li>
+<li>最小の正の非正規化数から最大有限値までを扱い、1の近傍を任意に1へ丸めません。文字列の数値変換で0へ丸められた入力も拒否します。</li>
+<li>EMPTYは0なので定義域外です。通常TRUEは1なので結果は0、FALSEは定義域外です。COM VT_BOOLは-1/0なのでTRUE/FALSEとも定義域外になります。</li>
+<li>文字列は前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>引数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全localeを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="ln"><code>PRINT LN(1)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="arcsin">ARCSIN</h2>
+<p>逆正弦を求めます。</p>
+<h3>書式</h3><pre><code>ARCSIN(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>-1以上1以下の有限数、EMPTY、または同じ範囲の値へ変換できる数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>-π/2～π/2のラジアン角度を有限doubleで返します。正負の0の符号を保持します。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Asinで計算します。変換後のdoubleが-1～1を外れる場合はARCSINの定義域エラーにし、任意に端点へ補正しません。</li>
+<li>十進文字列がdoubleの1へ丸められる場合は端点として受理します。判定対象は変換後の値です。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。文字列の変換で-0へ丸められた場合も符号を保持します。</li>
+<li>文字列はInvariantCultureとNumberStyles.Floatで変換します。前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>個数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全locale・NANを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="arcsin"><code>PRINT ARCSIN(0)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="arccos">ARCCOS</h2>
+<p>逆余弦を求めます。</p>
+<h3>書式</h3><pre><code>ARCCOS(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>-1以上1以下の有限数、EMPTY、または同じ範囲の値へ変換できる数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>0～πのラジアン角度を有限doubleで返します。正負の0からはπ/2、入力1からは正の0、入力-1からはπを返します。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Acosで計算します。変換後のdoubleが-1～1を外れる場合はARCCOSの定義域エラーにし、任意に端点へ補正しません。</li>
+<li>十進文字列がdoubleの1へ丸められる場合は端点として受理します。判定対象は変換後の値です。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。文字列の変換で正負の0へ丸められた入力からもπ/2を返します。</li>
+<li>文字列はInvariantCultureとNumberStyles.Floatで変換します。前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>個数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全locale・NANを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="arccos"><code>PRINT ARCCOS(1)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="arctan">ARCTAN</h2>
+<p>逆正接を求めます。</p>
+<h3>書式</h3><pre><code>ARCTAN(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、または有限値へ変換できる数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>-π/2～π/2のラジアン角度を有限doubleで返します。大きな有限入力では丸めにより±π/2になります。正負の0の符号を保持します。</p><h3>対応範囲と注意</h3><ul>
+<li>全有限値をMath.Atanで計算します。NaN・無限大の入力は受理しません。</li>
+<li>EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0として扱います。文字列の変換で-0へ丸められた入力も符号を保持します。</li>
+<li>文字列はInvariantCultureとNumberStyles.Floatで変換します。前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>個数の過不足・省略は式評価前にエラーにし、正しい1引数は1回評価します。原版のx87精度・FPU/CW・全localeを再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="arctan"><code>PRINT ARCTAN(0)</code></pre>
+<p>期待出力：</p><pre><code>0
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="set8087cw">SET8087CW</h2>
+<p>現在の実行主体で使うx87浮動小数点制御語を指定します。</p>
+<h3>書式</h3><pre><code>SET8087CW([controlWord])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>controlWord</code></dt><dd>0～65535の制御語。有限数、TRUE・FALSE、数値文字列を受け取り、小数部分を0方向へ切り捨ててから範囲を検査します。0、省略、EMPTYは通常の数値演算に戻します。</dd>
+</dl><h3>戻り値・結果</h3><p>空文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>非ゼロの指定には、Windows x64向けにビルドしたコマンドライン版またはUWSC# アプリに付属する浮動小数点DLLが必要です。DLLを読み込めない場合はエラーになります。</li>
+<li>UWSC# アプリでは編集画面からの再生、引数・関連付け起動、予約実行で使用できます。</li>
+<li>制御語は式の加減乗除、FORの加算、SQRT・SIN・COS・TAN・EXP・LN・ARCTAN・INT・ABS・LOGN・ARCSIN・ARCCOS・CEIL・ZCUT・POWERの演算に適用されます。引数と結果は有限値に限り、ゼロ除算はエラーです。例外をマスクしていても、演算結果が有限範囲を超えるとエラーになります。</li>
+<li>VARTYPEはWindowsのVariant変換を使い、MODは.NETのdouble剰余を使います。どちらも指定したx87制御語から独立しています。</li>
+<li>制御語の変更や0による復元は、呼出し元と、その後に開始するTHREADに反映されます。既に動いている別のTHREADは自身の設定を使い続けます。</li>
+<li>CALL先は呼出し元の設定を引き継ぎ、そこで変更した設定は呼出し元へ戻った後も有効です。</li>
+<li>一時停止から再開した実行は設定を引き継ぎます。新しく始めた独立した実行では通常の数値演算が有効です。</li>
+<li>原版Free 5.3.0.2ではEMPTYはエラーで、NOTHINGを渡すと復元します。UWSC#ではEMPTYで復元し、NOTHINGはエラーです。原版は余分な引数も評価します。UWSC#で引数を2個以上渡すと、評価前にエラーになります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="set8087cw"><code>SET8087CW(0)
+PRINT SQRT(4)</code></pre>
+<p>期待出力：</p><pre><code>2
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="round">ROUND</h2>
+<p>指定する桁で数値を丸めます。</p>
+<h3>書式</h3><pre><code>ROUND(value, [digits])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、またはASCII数字・小数点・E/e指数の数値文字列。必須。</dd>
+<dt><code>digits</code></dt><dd>既定0。省略位置とEMPTYも0。数値化して0方向へ切り捨てた後の許容範囲は-20～20。負数は小数側、正数は整数側の桁を指定します。20.9は20として受理します。</dd>
+</dl><h3>戻り値・結果</h3><p>指定桁で丸めた数値。</p><h3>対応範囲と注意</h3><ul>
+<li>既存の.NET doubleによる偶数丸めを採用しています。ROUND(2.675,-2)とROUND(2.685,-2)はどちらも2.68です。原版の80bit計算とは意図した差があり、十進数の理想計算と常に一致するものでもありません。</li>
+<li>指定単位がdoubleの刻みより細かい場合は入力をそのまま返します。巨大な有限値を不要に拡大してエラーにしません。符号付き0とunderflowの0を受理します。</li>
+<li>両引数の文字列変換はOSや表示言語に依存しません。全角・桁区切り・D指数・不完全指数・埋込みNUL・16進文字列はエラーです。</li>
+<li>EMPTYは0、通常のTRUE/FALSEは1/0、COM VT_BOOLは-1/0として数値化します。NULL、NOTHING、ERROR、配列、連想配列、未変換object、非有限値はエラーです。COM既定memberは暗黙に呼び出しません。</li>
+<li>個数の過不足・第1引数の省略は式評価前にエラーになります。正しい個数では全引数式を左から1回ずつ評価してから変換するため、値の変換エラーがあっても後続式の副作用は発生し得ます。</li>
+<li>桁数の符号を小数桁数指定と取り違えないでください。ゼロ除算は例外となり、TRY/EXCEPTで処理できます。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="round"><code>PRINT ROUND(2.5)
+PRINT ROUND(1234, 2)</code></pre>
+<p>期待出力：</p><pre><code>2
+1200
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="ceil">CEIL</h2>
+<p>数値以上で最小の整数値へ切り上げます。</p>
+<h3>書式</h3><pre><code>CEIL(value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>value</code></dt><dd>有限数、EMPTY、通常Boolean、または採用文法の数値文字列。必須1引数。</dd>
+</dl><h3>戻り値・結果</h3><p>有限doubleの切上げ結果。整数値はそのまま返します。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Ceilingを使い、Int32/Int64への変換や32bit折返しは行いません。CEIL(2147483647.1)は2147483648です。原版や旧実装の折返しとは意図的に異なります。</li>
+<li>文字列はInvariantCulture/NumberStyles.Floatで有限doubleへ変換してから切り上げます。E/e指数と前後の空白を受理し、16進文字列・桁区切り・全角・D指数・不完全指数・NUL・非有限値を拒否します。</li>
+<li>EMPTY=0、通常TRUE/FALSE=1/0、COM VT_BOOL=-1/0です。NULL・NOTHING・配列・連想配列・ERROR・未変換objectは拒否し、COM既定memberを暗黙に呼びません。</li>
+<li>過不足と省略は式評価前に拒否し、正しい1引数は1回評価します。正負の0を保持し、CEIL(-0.1)は-0になります。</li>
+<li>全有限doubleを受理します。十進文字列の厳密値、全localeやx87中間精度の原版完全再現は採用しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="ceil"><code>PRINT CEIL(1.2)
+PRINT CEIL(-1.2)</code></pre>
+<p>期待出力：</p><pre><code>2
+-1
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="power">POWER</h2>
+<p>べき乗を計算します。</p>
+<h3>書式</h3><pre><code>POWER(base, exponent)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>base</code></dt><dd>底。有限数、EMPTY、または採用文法の数値文字列。必須。</dd>
+<dt><code>exponent</code></dt><dd>指数。有限数、EMPTY、または採用文法の数値文字列。必須。負の底には整数を指定します。</dd>
+</dl><h3>戻り値・結果</h3><p>べき乗の数値。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Powで計算します。0の負の累乗と、負の底に非整数指数を指定する計算は定義域エラーです。POWER(0,0)は1です。</li>
+<li>旧実装の「一部の指数では底0から0を返す」互換処理は廃止しました。POWER(0,-0.5)やPOWER(0,-2147483648)も例外になります。</li>
+<li>POWER(-0,0.5)は正の0、POWER(-0,3)は負の0です。非有限結果はエラーにし、underflowの正負の0は受理します。指数もdoubleなので巨大整数を任意精度で区別するものではありません。</li>
+<li>両引数の文字列はOSの表示言語に依存しない規則で解析し、指数表記はE/eです。全角・桁区切り・D指数・不完全指数・NUL・16進文字列は拒否します。EMPTYは0、通常TRUE/FALSEは1/0、COM VT_BOOLは-1/0です。</li>
+<li>両引数が必須です。個数の過不足と省略は式評価前に拒否します。正しい2引数では全式を左から1回ずつ評価してから変換するため、変換不能な底の後続式も評価されます。</li>
+<li>NULL、NOTHING、ERROR、配列、連想配列、未変換object、非有限入力は拒否します。COM既定memberは暗黙に呼び出しません。原版のNAN/INF・x87中間精度・32bitの指数経路・追加引数とは意図した差があります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="power"><code>PRINT POWER(2, 3)</code></pre>
+<p>期待出力：</p><pre><code>8
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="logn">LOGN</h2>
+<p>底を指定して対数を求めます。</p>
+<h3>書式</h3><pre><code>LOGN(base, value)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>base</code></dt><dd>0より大きく1以外の有限数、または同じ範囲へ変換できる数値文字列。必須。</dd>
+<dt><code>value</code></dt><dd>0より大きい有限数、または同じ範囲へ変換できる数値文字列。必須。</dd>
+</dl><h3>戻り値・結果</h3><p>指定した底の有限doubleの対数。真数1では、底が1より大きい場合は正の0、1未満の場合は負の0を返します。</p><h3>対応範囲と注意</h3><ul>
+<li>Math.Log(value, base)で計算します。底0・底1・負の底と、0以下の真数はLOGNの定義域エラーになります。真数1でも底0は拒否します。</li>
+<li>0より大きく1未満の底と、1に隣接する正のdoubleも扱います。最小の正の非正規化数から最大有限値までを入力として扱い、1付近を任意に1へ丸めません。</li>
+<li>EMPTYは0なので両位置で定義域外です。通常TRUEは真数1として使えますが、底1は定義域外です。FALSEとCOM VT_BOOLのTRUE/FALSEは両位置で定義域外です。</li>
+<li>両引数の文字列はInvariantCultureとNumberStyles.Floatで変換します。前後の空白とE/e指数を受理し、独自の文字数上限を設けません。16進文字列・全角・桁区切り・D指数・不完全指数・NUL・非有限値は拒否します。</li>
+<li>NULL・NOTHING・ERROR・配列・連想配列・未変換objectは拒否し、COM既定memberを暗黙に呼び出しません。</li>
+<li>個数の過不足・省略は式評価前にエラーにします。正しい2引数は左から1回ずつ式を評価し、全式の評価後に底・真数の順で変換、底・真数の順で定義域検査を行います。</li>
+<li>原版のx87精度・FPU/CW・全locale・INF/NAN・底0の特例を再現するものではありません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="logn"><code>PRINT LOGN(10, 100)</code></pre>
+<p>期待出力：</p><pre><code>2
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="random">RANDOM</h2>
+<p>上限未満の擬似乱数を返し、共有する乱数状態を1段進めます。</p>
+<h3>書式</h3><pre><code>RANDOM([range])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>range</code></dt><dd>省略時は0以上1未満の小数。指定時は有限数へ変換し、0方向へ切り捨てたInt32を上限として使います。</dd>
+</dl><h3>戻り値・結果</h3><p>正のrangeでは0以上range未満の整数。range=0は0。省略時は小数。結果の型は数値です。</p><h3>対応範囲と注意</h3><ul>
+<li>0でも状態を1段消費します。不正な変換や取消ではこの呼出しの状態を進めません。余分な引数は評価前に拒否します。有効な1引数は1回評価し、評価済みOmitted値は省略として扱います。</li>
+<li>文字列はInvariantCulture/NumberStyles.Floatで変換します。E/e指数と前後の空白を受理し、16進文字列・桁区切り・全角・D指数・不完全指数・NUL・非有限値は拒否します。切捨て後にInt32範囲を検査します。</li>
+<li>EMPTY=0、通常TRUE/FALSE=1/0、COM VT_BOOL=-1/0です。NULL・NOTHING・配列・連想配列・ERROR・未変換objectは拒否します。COM既定memberを暗黙に呼びません。</li>
+<li>負のrangeも既存互換のため受理します。unsignedへ読み替えた上限と状態の積の上位32bitをsigned整数として返すため、通常の0以上range未満という範囲にはなりません。負値を拒否する案はRANDOM-COMPLETION.mdに記録しています。</li>
+<li>既定はプロセス内共有の32bit LCGで、状態更新はlockで保護します。初期seedはEnvironment.TickCount、ホストは明示seedのUwscRandomを注入できます。並行時の呼出し順序や原版の初期seed・全localeの再現、暗号用途の品質は保証しません。</li>
+</ul>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-strings.html">← 文字列</a> <a href="functions-arrays.html">次へ：配列</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#int">INT</a></li><li><a href="#abs">ABS</a></li><li><a href="#zcut">ZCUT</a></li><li><a href="#sqrt">SQRT</a></li><li><a href="#sin">SIN</a></li><li><a href="#cos">COS</a></li><li><a href="#tan">TAN</a></li><li><a href="#exp">EXP</a></li><li><a href="#ln">LN</a></li><li><a href="#arcsin">ARCSIN</a></li><li><a href="#arccos">ARCCOS</a></li><li><a href="#arctan">ARCTAN</a></li><li><a href="#set8087cw">SET8087CW</a></li><li><a href="#round">ROUND</a></li><li><a href="#ceil">CEIL</a></li><li><a href="#power">POWER</a></li><li><a href="#logn">LOGN</a></li><li><a href="#random">RANDOM</a></li></ul></nav>
+</div></div></body></html>

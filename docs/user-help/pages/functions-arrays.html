@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>配列 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a aria-current="page" href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / 配列</p>
+<h1>配列</h1><p class="lead">配列の生成、分割・結合・範囲取得・更新・集計・ソートを説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="safearray">SAFEARRAY</h2>
+<p>上下限と要素型を指定した1次元または2次元の配列を作成します。</p>
+<h3>書式</h3><pre><code>SAFEARRAY([lower [, upper [, elementType]]]) / SAFEARRAY(lower, upper, lower2, upper2 [, elementType])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>lower</code></dt><dd>第1軸の下限。全引数を省略した場合は1。引数を指定するときは省略できません。</dd>
+<dt><code>upper</code></dt><dd>第1軸の上限。省略時は0。添字の範囲は上下限を含みます。</dd>
+<dt><code>lower2 / upper2</code></dt><dd>第2軸の上下限。4/5引数形では両方が必要です。</dd>
+<dt><code>elementType</code></dt><dd>3引数形の第3引数、または5引数形の第5引数で指定するVARTYPE番号。省略時は12（VARIANT）。</dd>
+</dl><h3>戻り値・結果</h3><p>非ゼロ下限と要素型を保持する配列。既定のVARIANT要素はEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>通常のコマンドライン版とUWSC# アプリで利用できます。Windows専用です。</li>
+<li>0～5引数に対応します。3引数形の第3引数は第2軸ではなく要素型です。6引数以上や必須位置の省略は、引数式を評価する前に拒否します。有効な引数は左から各1回だけ評価します。</li>
+<li>SAFEARRAY()とSAFEARRAY(1)は下限1・上限0の空配列、SAFEARRAY(0)は添字0の1要素配列です。各軸で上限が下限-1なら空軸となり、それより小さい上限は拒否します。</li>
+<li>上下限は32bit符号付き整数の範囲です。境界と型番号は既存の整数変換を使い、小数部分は切り捨てます。EMPTYやNULLなどの数値へ変換できない値は拒否します。</li>
+<li>要素型は2(I2)、3(I4)、4(R4)、5(R8)、6(CY)、7(DATE)、8(BSTR)、9(DISPATCH)、10(ERROR)、11(BOOL)、12(VARIANT)、13(UNKNOWN)、16(I1)、17(UI1)、18(UI2)、19(UI4)に対応します。</li>
+<li>初期値は数値型が0、BOOLがFALSE、BSTRが表示上の空文字列、DISPATCH/UNKNOWNがNOTHING、ERRORがコード0、VARIANTがEMPTYです。BSTRの初期値はCOMへ戻すときのnull表現を保持します。</li>
+<li>型付き要素への代入は、その型へ変換してから保存します。変換できない値や範囲外の値はエラーとなり、準備途中の配列を書き込みません。部分配列・コピー・RESIZEでも要素型を保持します。</li>
+<li>LENGTHは型付き配列でも第1軸の長さを返します。全軸の積ではなく、他の軸が空でも第1軸の長さを返します。</li>
+<li>既存配列と同じ合計100万要素を上限とし、超過はNative配列の確保前に拒否します。各軸の長さも0～100万の範囲です。</li>
+<li>原版では型付き配列のLENGTHがエラーになる条件と、6引数で生成できる条件を観測しました。現行版は型付きLENGTHの正常化、最大5引数の事前拒否、100万要素上限を採用しています。</li>
+<li>同期Native/COM呼出し自体を強制停止する仕様ではありません。呼出し前後とコピー・変換の確認点で取消を検出します。VARIANT以外の型付き配列の更新では、生成した実行で共有するCOM所有範囲を使います。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="safearray"><code>a=SAFEARRAY(-2,-1,5,7,3)
+a[-2,5]=&quot;7&quot;
+PRINT LENGTH(a)
+PRINT a[-2,5]</code></pre>
+<p>期待出力：</p><pre><code>2
+7
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="split">SPLIT</h2>
+<p>文字列を区切り文字列で分割し、1次元配列にします。</p>
+<h3>書式</h3><pre><code>SPLIT(text, [separator, skipEmpty, numeric])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>text</code></dt><dd>分割元の文字列。</dd>
+<dt><code>separator</code></dt><dd>既定は半角空白。空文字列も半角空白として扱います。</dd>
+<dt><code>skipEmpty</code></dt><dd>TRUEで空要素を除去します。既定FALSE。</dd>
+<dt><code>numeric</code></dt><dd>TRUEで数値化します。変換できない要素は空文字列。既定FALSE。</dd>
+</dl><h3>戻り値・結果</h3><p>0始まりの1次元配列。元が空文字列なら0要素。</p><h3>対応範囲と注意</h3><ul>
+<li>通常版は必須1/最大4引数。引数の過不足と必須位置の省略は評価前に拒否します。任意位置の省略は既定値を使います。</li>
+<li>区切り文字列全体を大小文字を区別して非重複で検索します。OPTION SAMESTRや文化設定に依存せず、CSVの引用符や正規表現は解析しません。</li>
+<li>有効なサロゲートペアの内部では分割しません。孤立単位とNULの区切りは扱い、NULの後も保持します。正規化しません。</li>
+<li>textとseparatorは共通の有限文字列化を使います。EMPTYは空文字、COM Booleanは-1/0。非有限Number、NULL・NOTHING・ERROR・配列・連想配列・objectは型エラーです。</li>
+<li>フラグは有限数値へ変換し、0方向へ切り捨てた値が0以外なら真です。数値文字列とEMPTYを使えますが、16進文字列や非有限値は拒否します。</li>
+<li>数値モードは有限doubleと完全なE/e指数を扱います。失敗した要素を空文字へ変えた後で空除外を適用します。数値0は除外しません。</li>
+<li>数値要素だけは1,234、-2,345.5、1,234e2のような厳密な3桁区切りも使えます。12,34や1,,000、16進文字列、NaN/Infinity、不完全指数、埋込みNULは空文字になります。</li>
+<li>返値は独立した0始まりの1次元配列で、除外後の結果は100万要素までです。上限超過は例外となります。</li>
+<li>原版の全Unicode・locale・Variant条件の一致は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="split"><code>DIM values = SPLIT(&quot;a,b&quot;, &quot;,&quot;)
+PRINT values[0]
+PRINT LENGTH(values)</code></pre>
+<p>期待出力：</p><pre><code>a
+2
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="join">JOIN</h2>
+<p>配列の要素を表示文字列にして結合します。</p>
+<h3>書式</h3><pre><code>JOIN(array, [separator, skipEmpty, start, end])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>array</code></dt><dd>対象配列。</dd>
+<dt><code>separator</code></dt><dd>既定は半角空白。</dd>
+<dt><code>skipEmpty</code></dt><dd>TRUEで空文字列を除きます。既定FALSE。</dd>
+<dt><code>start, end</code></dt><dd>0始まりの両端を含む範囲。既定は全体。</dd>
+</dl><h3>戻り値・結果</h3><p>連結した文字列。</p><h3>対応範囲と注意</h3><ul>
+<li>通常版は必須1/最大5引数。引数の過不足と必須位置の省略は評価前に拒否します。任意位置の省略は既定値を使います。</li>
+<li>区切りの省略値は半角スペース。明示した空文字列・EMPTYは空区切りです。</li>
+<li>多次元配列も行優先で平坦化し、開始・終了は平坦化後の0始まり位置として両端を含みます。非ゼロ下限の配列でも各軸の添字とは異なります。</li>
+<li>開始・終了は有限数値を0方向へ切り捨て、範囲内へ切り詰めます。開始の既定は0、終了は末尾まで。終了のEMPTYは0なので省略とは異なります。逆順・範囲外は空文字を返します。</li>
+<li>フラグも有限変換し、切捨て後の非0で真を判定します。数値文字列とEMPTYは使えますが、16進文字列や非有限値は拒否します。</li>
+<li>要素と区切りは共通の有限文字列化を使います。通常TRUE/FALSEは1/0、COM Booleanは-1/0。負の0は-0、文字列NaN/Infinityはそのまま結合します。</li>
+<li>空除外は文字列化後に行い、EMPTYと空Stringだけを除外します。空白や数値0は残します。非有限Number、NULL・NOTHING・ERROR・入れ子配列・連想配列・object等の選択要素は型エラーです。選択範囲外の要素は変換しません。</li>
+<li>NULの後や孤立サロゲートもUTF-16単位のまま保持し、正規化しません。OPTION SAMESTRと文化設定に依存しません。</li>
+<li>出力長がInt32を超える場合は確保前に例外とします。範囲内でも環境のメモリ制限があります。</li>
+<li>空・NULLの扱いも本ページの規則に従い、原版の全型・locale・数値表示の一致は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="join"><code>DIM values = SPLIT(&quot;a,b&quot;, &quot;,&quot;)
+PRINT JOIN(values, &quot;/&quot;)</code></pre>
+<p>期待出力：</p><pre><code>a/b
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="slice">SLICE</h2>
+<p>指定範囲の要素を新しい1次元配列にします。</p>
+<h3>書式</h3><pre><code>SLICE(array, [start, end])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>array</code></dt><dd>対象配列。</dd>
+<dt><code>start</code></dt><dd>0始まりの開始位置。既定0。</dd>
+<dt><code>end</code></dt><dd>両端を含む終了位置。既定は末尾。</dd>
+</dl><h3>戻り値・結果</h3><p>独立した配列。範囲に要素がなければ0要素。</p><h3>対応範囲と注意</h3><ul>
+<li>必須1/最大3引数。過不足と必須位置の省略は評価前に拒否し、任意位置の省略は既定値を使います。</li>
+<li>開始は既定0、終了は末尾まで。有限数値へ変換して0方向へ切り捨て、範囲内へ切り詰めます。EMPTYは0なので終了の省略とは異なります。</li>
+<li>数値文字列は使えますが、16進文字列・非有限値・NULL・NOTHING等の境界は拒否します。COM Booleanは-1/0です。巨大な有限指定も範囲に応じて処理します。</li>
+<li>両端を含み、逆順・範囲外は空配列です。多次元や非ゼロ下限の配列も、行優先で平坦化した0始まり位置で指定します。</li>
+<li>返値は独立した下限0の1次元配列で、空結果の上限は-1。最大100万要素までの既存配列上限に従います。</li>
+<li>要素は文字列化・数値化せず、種類・payload・NUL/Unicode・参照を保持します。NULLやobjectを含む配列もコピーできますが、必須array自体には配列だけを受理します。</li>
+<li>返値のコンテナー更新は元配列に影響しません。入れ子配列やCOM object等は深い複製をせず参照を共有し、同じobjectへの操作は共有先にも反映されます。</li>
+<li>OPTION SAMESTRと文化設定には依存しません。型付きSAFEARRAYの元のコンテナー型をそのまま返す機能ではなく、原版の全型/locale条件の一致は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="slice"><code>DIM values = SPLIT(&quot;a,b,c&quot;, &quot;,&quot;)
+PRINT JOIN(SLICE(values, 1, 2), &quot;/&quot;)</code></pre>
+<p>期待出力：</p><pre><code>b/c
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="resize">RESIZE</h2>
+<p>配列の第1次元の上限添字を取得・変更します。</p>
+<h3>書式</h3><pre><code>RESIZE(array, [upperBound])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>array</code></dt><dd>変更時には書き戻し可能な配列変数。</dd>
+<dt><code>upperBound</code></dt><dd>第1次元の上限添字。有限数値を0方向へ切り捨てます。省略時は変更しません。0始まりの第1次元は-1で長さ0、0で長さ1になります。</dd>
+</dl><h3>戻り値・結果</h3><p>変更後、または現在の上限添字。</p><h3>対応範囲と注意</h3><ul>
+<li>要素数ではなく上限添字を指定します。多次元では第1次元の上限だけを変更し、各次元の下限と残りの上限を維持します。</li>
+<li>配列の総要素数と各軸の長さは最大1,000,000です。Int32範囲外の上限や、下限より2以上小さい上限はエラーです。</li>
+<li>既存の先頭要素を保持し、拡張部分はEMPTYです。縮小で外れた要素は失われます。要素の型や参照を変換せず、深い複製はしません。別変数の元配列は変わりません。</li>
+<li>照会は配列を返す式も使えます。変更時は書き戻し可能な非定数参照が必要です。添字や連想配列の単一キーは一度だけ評価します。部分配列の形状を親と異なる形へ変更する書戻しは拒否します。</li>
+<li>EMPTYは上限0で、省略とは異なります。通常TRUEは1、COM BooleanのTRUEは-1です。数値文字列は扱いますが、16進文字列・桁区切り・非有限値は拒否します。</li>
+<li>原版とは空配列・負の上限補正・余分な引数・配列以外の対象の扱いが異なります。現在は上下限と長さの関係を一貫させ、誤った指定をエラーにします。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="resize"><code>DIM values[1]
+PRINT RESIZE(values, 3)
+PRINT LENGTH(values)</code></pre>
+<p>期待出力：</p><pre><code>3
+4
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="setclear">SETCLEAR</h2>
+<p>配列を同じ値で埋め、変数へ書き戻します。</p>
+<h3>書式</h3><pre><code>SETCLEAR(array, [value])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>array</code></dt><dd>書き戻し可能な配列変数。</dd>
+<dt><code>value</code></dt><dd>埋める値。省略時はEMPTY。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。対象の要素数は維持します。</p><h3>対応範囲と注意</h3><ul>
+<li>要素数・各次元の上下限・形状を維持します。部分配列ならその部分だけを埋めます。第2引数を省略するとEMPTYで埋めます。</li>
+<li>値の型や文字列を変換せず、新しい配列へ書き戻します。別変数の元配列は変わりません。各要素に入る配列・HASHTBL・COM object等の参照は共有し、深い複製はしません。</li>
+<li>添字や連想配列の単一キーは一度だけ評価します。不正な対象なら充填値を評価せず、空配列でも明示した充填値は一度評価します。</li>
+<li>第1引数の省略、3個以上の引数、定数や書き戻せない式、配列以外の対象はエラーです。引数評価で既に発生した副作用は巻き戻しません。</li>
+<li>通常Booleanの表示は1/0、COM Booleanは-1/0です。原版のTrue/False表示とは異なります。原版が余分な引数や配列以外の対象を受理する場合も、現在の実装では拒否します。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="setclear"><code>DIM values[1]
+SETCLEAR(values, 7)
+PRINT JOIN(values, &quot;,&quot;)</code></pre>
+<p>期待出力：</p><pre><code>7,7
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="shiftarray">SHIFTARRAY</h2>
+<p>配列の要素をずらし、変数へ書き戻します。</p>
+<h3>書式</h3><pre><code>SHIFTARRAY(array, shift)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>array</code></dt><dd>書き戻し可能な配列変数。</dd>
+<dt><code>shift</code></dt><dd>有限の移動量。0方向へ切り捨て、正数は後方、負数は前方へ移動します。EMPTYは0、数値文字列も使えます。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。空いた要素はEMPTY。</p><h3>対応範囲と注意</h3><ul>
+<li>要素数・各次元の上下限・形状は維持します。多次元全体は行優先で移動し、部分配列ならその部分だけを変更します。範囲外へ出た要素は失われます。</li>
+<li>要素の型や文字列を変換せず、新しい配列へ書き戻します。別変数の元配列は変わりません。要素のobject等は参照を共有します。</li>
+<li>添字や連想配列の単一キーは一度だけ評価します。第1引数には書き戻し可能な変数参照が必要です。</li>
+<li>引数は正確に2個必要で、省略できません。16進文字列・桁区切り・非有限値や不正型はエラーです。巨大な有限シフトは全要素EMPTYとなります。</li>
+<li>通常TRUEは1、COM BooleanのTRUEは-1です。原版と型変換・余分な引数の扱いが異なります。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="shiftarray"><code>DIM values = SPLIT(&quot;a,b,c&quot;, &quot;,&quot;)
+SHIFTARRAY(values, 1)
+PRINT JOIN(values, &quot;/&quot;)</code></pre>
+<p>期待出力：</p><pre><code>/a/b
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="calcarray">CALCARRAY</h2>
+<p>配列の指定範囲を集計します。</p>
+<h3>書式</h3><pre><code>CALCARRAY(array, mode, [start, end])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>array</code></dt><dd>数値化できる値を含む配列。EMPTYは除外します。</dd>
+<dt><code>mode</code></dt><dd>1は合計、2は最小、3は最大、4は平均。</dd>
+<dt><code>start, end</code></dt><dd>0始まり、両端を含む範囲。省略時は全体。</dd>
+</dl><h3>戻り値・結果</h3><p>集計値。対象が空なら合計は0、他はEMPTY。</p><h3>対応範囲と注意</h3><ul>
+<li>必須2/最大4引数。過不足と必須位置の省略は評価前に拒否します。modeは有限変換・切捨て後の1=合計、2=最小、3=最大、4=平均だけを受理します。</li>
+<li>範囲は行優先で平坦化した0始まり位置で、開始/終了をともに含みます。開始の既定は0、終了は末尾まで。非ゼロ下限も各軸の添字とは区別します。</li>
+<li>境界は有限変換・切捨て後に切り詰めます。EMPTYは0なので終了の省略とは異なります。巨大な有限指定も範囲に応じて処理し、逆順・範囲外は空範囲です。</li>
+<li>EMPTY要素だけを無視します。空配列・全EMPTY・空範囲は合計0、それ以外のモードはEMPTYを返します。数値0は個数に含めます。</li>
+<li>数値文字列と完全なE/e指数は共通の有限構文で変換します。COM Booleanは-1/0です。16進文字列・桁区切り・空String・NaN/Infinity・NULや不正要素は型/数値エラーとなり、原版のように無視しません。範囲外の要素は変換しません。</li>
+<li>合計は左から加算し、途中で有限範囲を超えたら例外にします。後続の相殺は試しません。最小/最大は.NETの比較規則を使います。</li>
+<li>平均は合計を経由しない逐次計算で、和/差の中間超過を避けます。入力順による丸め差があり、合計/個数や原版とのbit一致を保証しません。単一-0の平均は-0を保持します。</li>
+<li>最大100万要素の既存上限に従い、入力配列を変更しません。OPTION SAMESTRや文化設定に依存しません。</li>
+<li>原版の全型/locale/異常通知の一致は未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="calcarray"><code>DIM values = SPLIT(&quot;1,2,3&quot;, &quot;,&quot;, FALSE, TRUE)
+PRINT CALCARRAY(values, 1)</code></pre>
+<p>期待出力：</p><pre><code>6
+</code></pre>
+</section>
+<section class="reference-entry"><h2 id="qsort">QSORT</h2>
+<p>キー配列を並べ替え、対応する別配列も同じ順序で並べ替えます。</p>
+<h3>書式</h3><pre><code>QSORT(keyArray, [mode, array2, ...])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>keyArray</code></dt><dd>書き戻し可能なキー配列。</dd>
+<dt><code>mode</code></dt><dd>0は通常昇順、1は通常降順、2/3はWindows Unicode文字列昇順/降順、4/5はWindows自然順の昇順/降順。</dd>
+<dt><code>array2, ...</code></dt><dd>連動する書込み可能な配列。キーを含め最大9配列。有効キー数以上の要素が必要です。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTY。各配列へ結果を書き戻します。</p><h3>対応範囲と注意</h3><ul>
+<li>キーの末尾のEMPTYだけを対象外とします。連動配列が有効キー数より短ければエラーです。対象外の末尾は保持します。</li>
+<li>通常昇順では数値とEMPTYの群を先に、文字列の群を後に並べます。EMPTYは0、数値は有限数値として比較し、文字列はOrdinalIgnoreCaseで比較します。数値文字列を数値へ変換しません。</li>
+<li>2/3はWindowsユーザーlocaleのUnicode文字列比較、4/5はWindows自然順です。有限数値は共通の文字列化を使い、OSの比較規則に従います。モード2～5はWindows専用です。</li>
+<li>modeは有限数値を0方向へ切り捨てた0～5です。通常TRUEは1、COM TRUEは-1なのでmodeではエラーです。16進文字列・非有限値・不正型や範囲外は拒否します。</li>
+<li>0/1件でも有効キーの型を検査します。キーは文字列・有限数値・EMPTYに限り、連動要素の型や参照は変換しません。</li>
+<li>添字や連想配列の単一キーは一度だけ評価します。全結果と親への書戻しを準備してから反映し、通常の検査失敗や取消で先行配列だけを更新しません。引数の副作用は巻き戻しません。</li>
+<li>同じ親の更新は引数順でまとめ、重なる指定は後の指定が優先します。通常のVAR引数の逐次書戻しとは異なります。</li>
+<li>等しいキーの順は保証しません。降順は昇順の有効範囲を反転します。形状・上下限・要素数と対象外の末尾を保持します。</li>
+<li>混在型の順序、短い連動配列、不正mode、参照評価等に原版との差があります。深い複製や固定の取消応答時間は保証しません。</li>
+</ul>
+<h3>例</h3><pre data-example="verified" data-name="qsort"><code>DIM values = SPLIT(&quot;3,1,2&quot;, &quot;,&quot;, FALSE, TRUE)
+QSORT(values)
+PRINT JOIN(values, &quot;,&quot;)</code></pre>
+<p>期待出力：</p><pre><code>1,2,3
+</code></pre>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-numbers.html">← 数値・数学</a> <a href="functions-files.html">次へ：ファイル・INI</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#safearray">SAFEARRAY</a></li><li><a href="#split">SPLIT</a></li><li><a href="#join">JOIN</a></li><li><a href="#slice">SLICE</a></li><li><a href="#resize">RESIZE</a></li><li><a href="#setclear">SETCLEAR</a></li><li><a href="#shiftarray">SHIFTARRAY</a></li><li><a href="#calcarray">CALCARRAY</a></li><li><a href="#qsort">QSORT</a></li></ul></nav>
+</div></div></body></html>

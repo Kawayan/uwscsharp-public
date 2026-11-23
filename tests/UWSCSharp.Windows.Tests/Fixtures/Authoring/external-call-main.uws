@@ -1,0 +1,3 @@
+PRINT "主ファイル開始"
+CALL "helper.uws"
+PRINT "主ファイル終了"

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="UWSCSharpの導入・操作・構文・制限を説明する利用者向けヘルプです。">
+<title>マウス・キーボード入力 | UWSC# ヘルプ</title>
+<link rel="stylesheet" href="../assets/help.css"><script src="../assets/search-index.js" defer></script>
+<script src="../assets/help.js" defer></script></head>
+<body><a class="skip" href="#main">本文へ移動</a>
+<aside class="sidebar"><a class="brand" href="../index.html">UWSC# <span>ヘルプ</span></a>
+<p class="version">UWSC# アプリ・コマンドライン版（プレビュー）</p>
+<nav aria-label="ヘルプの目次"><ul><li><a href="../index.html">はじめに</a></li><li><details class="nav-section"><summary>使い方</summary><ul><li><a href="getting-started.html">導入と最初の実行</a></li><li><a href="editor.html">読込・編集・保存</a></li><li><a href="recording.html">記録と再生</a></li><li><a href="scheduler.html">スクリプトを予約実行する</a></li><li><a href="cli.html">コマンドライン版の使い方と起動引数</a></li><li><a href="authoring.html">.uws作成支援（MCPサーバー）</a></li></ul></details></li><li><details class="nav-section"><summary>言語リファレンス</summary><ul><li><a href="language.html">スクリプトの基本</a></li><li><a href="data-types.html">変数・配列・OPTION</a></li><li><a href="routines.html">関数の定義</a></li><li><a href="control-flow.html">制御文</a></li></ul></details></li><li><details class="nav-section" open><summary>スクリプト関数</summary><ul><li><a href="functions.html">関数一覧</a></li><li><a href="functions-windows.html">ウィンドウ関連</a></li><li><a aria-current="page" href="functions-input.html">マウス・キーボード入力</a></li><li><a href="functions-controls.html">コントロール・アクセシビリティ</a></li><li><a href="functions-images.html">画面・画像</a></li><li><a href="functions-display.html">ダイアログ・表示関連</a></li><li><a href="functions-strings.html">文字列</a></li><li><a href="functions-numbers.html">数値・数学</a></li><li><a href="functions-arrays.html">配列</a></li><li><a href="functions-files.html">ファイル・INI</a></li><li><a href="functions-system.html">システム・時間・待機</a></li><li><a href="functions-com.html">COM連携</a></li></ul></details></li><li><details class="nav-section"><summary>困ったとき</summary><ul><li><a href="troubleshooting.html">制限と既知の問題</a></li></ul></details></li></ul></nav>
+<p class="aside-note">UWSCSharp 利用ガイド<br>原版との完全互換は未確認です。</p></aside>
+<div class="workspace"><header><label for="search">ヘルプ内を検索</label>
+<input id="search" data-help-root="../" type="search" placeholder="例：保存、F8、PARAM_STR" autocomplete="off" aria-controls="results">
+<p id="search-status" role="status" aria-live="polite"></p>
+<noscript>検索にはJavaScriptが必要です。目次からも閲覧できます。</noscript>
+<ol id="results" hidden></ol></header>
+<div class="content"><main id="main" tabindex="-1"><p class="breadcrumb">UWSC# ヘルプ / マウス・キーボード入力</p>
+<h1>マウス・キーボード入力</h1><p class="lead">座標の基準、マウス、キー、文字列送信を説明します。</p>
+<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>
+<section class="reference-entry"><h2 id="mouseorg">MOUSEORG</h2>
+<p>座標の基準、直接送信先、PEEKCOLOR・CHKIMGの画面取得元を設定します。</p>
+<h3>書式</h3><pre><code>MOUSEORG(id, [mode, capture])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>基準ウィンドウIDまたはHWND。登録IDを先に解決します。0で画面基準へ戻します。</dd>
+<dt><code>mode</code></dt><dd>省略・EMPTY・0は外枠左上。MORG_CLIENT（1）はクライアント左上、MORG_DIRECT（2）はクライアント座標で直接送信します。</dd>
+<dt><code>capture</code></dt><dd>省略・EMPTY・0・MORG_FORE（1）は可視デスクトップ。MORG_BACK（2）は対象アプリ自身の描画から画像を取得します。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。設定は実行単位で保持します。</p><h3>対応範囲と注意</h3><ul>
+<li>MORG_DIRECTは対応対象へのマウス・キーのメッセージ送信です。物理入力と同じ動作の保証はありません。</li>
+<li>呼出すたびに省略値へ戻します。前のMORG_BACKは引き継ぎません。ID 0は背景取得も解除します。設定は実行sessionごとに独立します。</li>
+<li>座標は物理ピクセルです。外枠は不可視のリサイズ枠も含みます。クライアントの内容にはMORG_CLIENTを使えます。FORE/BACKとも選んだ領域へ取得・探索範囲を制限します。FOREでは可視デスクトップとの共通範囲を使います。</li>
+<li>最小化などでクライアント領域が空なら、PEEKCOLORは-1、CHKIMGは未検出0を返します。非表示・GPU描画・保護画面では、対象が有効な画像を返す保証はありません。</li>
+<li>背景取得は対象の同期描画を待つため、停止要求への応答が遅れる場合があります。任意の描画を途中で強制中断する保証はありません。</li>
+<li>直接送信のDPI認識は送信時に固定します。DPI非対応の受信先ではOSによる座標変換が入るため、受信値は指定値と異なる場合があります。非対応受信先の厳密な物理位置、複雑な子階層・枠付き子、混在DPIは検証を継続しています。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="mmv">MMV</h2>
+<p>マウスポインターを指定位置へ移動します。</p>
+<h3>書式</h3><pre><code>MMV(x, y, [ms])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>x, y</code></dt><dd>現在のMOUSEORG設定を基準にした座標。</dd>
+<dt><code>ms</code></dt><dd>移動前の待機ミリ秒。既定0。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>msは移動にかける時間ではなく、操作前の待ち時間です。0～2147483647を指定できます。負の値は原版と異なり拒否します。</li>
+<li>座標は整数へ変換し、小数は0へ向かって切り捨てます。EMPTYは0です。画面外の指定はOSのカーソル範囲へ制限されます。</li>
+<li>MORG_DIRECTでは対象へ移動通知を1回送り、物理カーソルを動かしません。座標は各16bitへ格納されるため、大きな値は下位16bitになります。</li>
+<li>待機には一時停止と取消を適用します。取消後に未実行の移動は送りません。最小化した対象を暗黙に復元しません。</li>
+<li>座標は物理ピクセルです。通常移動は呼出し元のDPI認識が異なっても同じ物理位置へ移動します。DPI144・単一画面で修正後を確認しました。96/192 DPI・混在倍率・複数画面は今回の受入対象外です。</li>
+<li>外枠原点はGetWindowRectの不可視枠も含みます。DPI144の所有画面では、原版の外枠原点とXが9px異なりました。ウィンドウ内部の操作にはMORG_CLIENTを指定できます。原版の全環境との一致は保証しません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="btn">BTN</h2>
+<p>マウスボタンの押下・解放、ホイール回転、最大2接点のタッチ入力を送ります。</p>
+<h3>書式</h3><pre><code>BTN(button, [state, x, y, ms])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>button</code></dt><dd>LEFT、RIGHT、MIDDLE、XBUTTON1、XBUTTON2、WHEEL、HWHEEL、TOUCH（7）。</dd>
+<dt><code>state</code></dt><dd>通常ボタンはCLICK（既定）、DOWN、UP。ホイールでは回転量。</dd>
+<dt><code>x, y</code></dt><dd>移動先を指定するときは両方を指定します。省略時は現在位置。</dd>
+<dt><code>ms</code></dt><dd>入力前の待機ミリ秒。既定0。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>CLICKは押下と解放を行います。DOWNを使用した場合は対応するUPも記述してください。</li>
+<li>ホイールでは回転量を120倍し、整数への丸めは中間値を0から遠ざけます。XBUTTON1/2、HWHEEL、小数回転量は独自拡張です。</li>
+<li>TOUCHはDOWNを最大2回指定できます。2接点のUPは開始順に移動先を指定し、2回目のUPで両接点を補間して解放します。各DOWNで接点を開始するため、原版のリテラル連続指定による同時開始とはタイミングが異なります。</li>
+<li>TOUCHも座標省略時は現在位置、msは入力前の待機です。原版のタッチ固有の省略値と時間特性は再現しません。画面外の開始座標・UPの移動先は入力前に拒否します。</li>
+<li>通常入力のLEFT/RIGHTは実行開始時のWindowsの左右交換設定を反映します。MORG_DIRECTでは交換せず、TOUCHは入力を送りません。</li>
+<li>操作は入力先の状態と権限に依存します。保持中は一時停止を保留し、停止を優先します。終了時には保持入力の解放を試み、タッチデバイスを破棄します。物理タッチの記録は別機能です。</li>
+<li>通常入力の座標移動はDPI144・単一画面で、入力禁止の有無とも指定した物理位置と一致することを確認しました。96/192 DPI・混在倍率・複数画面は未検証です。</li>
+<li>複数THREADでタッチ接点を同時に保持する条件は受入未確認です。所有画面の検証では片方のデバイスの接点だけを受信したため、不具合記録を残しています。物理タッチ機器の遮断と権限差による動作も未確認です。</li>
+<li>直接入力は選択した子の外周原点からの相対値を通知に使う従来仕様を維持するため、枠付き子ではクライアント原点との差が残ります。DPI144の所有画面では非対応受信側で表現できる最寄りの物理点への通知を確認しました。任意アプリの描画結果は未確認です。</li>
+<li>DPI144の原版比較では、通常入力の外枠原点で原版よりX方向に9px左、非対応DPIの入れ子への直接通知でY座標が1単位小さい結果でした。現行版はGetWindowRectの外枠基準とNative対照を採用しています。この差を原版へ合わせる固定補正は行いません。原版との完全互換は確認していません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="kbd">KBD</h2>
+<p>仮想キーまたはUTF-16単位の押下・解放を送ります。</p>
+<h3>書式</h3><pre><code>KBD(key, [state, ms])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>key</code></dt><dd>仮想キー定数または整数化後の1～65535。正規化後の256以上は物理入力ではUnicodeの1 UTF-16単位。</dd>
+<dt><code>state</code></dt><dd>CLICK（省略・EMPTY・0）は押下して解放。DOWN=1、UP=2。その他はエラー。</dd>
+<dt><code>ms</code></dt><dd>入力前の待機ミリ秒。省略・EMPTYは0。整数化後の0～2147483647。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>数値は0方向に切り捨ててから範囲を検査します。KBDは文字列の貼付けやIME確定文字の送信とは別です。</li>
+<li>修飾キーのDOWN/UPは対で記述します。実行終了時にも保持キーを解放します。押下中はUPまで一時停止を保留し、停止を優先します。</li>
+<li>MORG_DIRECTでは対象へキー通知を送ります。汎用/右の修飾キーは補助状態として保持し、Unicodeの物理入力とは異なる扱いです。</li>
+<li>UWSC# アプリは所有する一致キー/修飾子のホットキーを物理DOWN送信中だけ解除し、送信後に復元します。解除に失敗した場合は入力を送りません。他アプリの登録やOS予約操作は変更しません。</li>
+<li>入力やホットキー復旧の失敗は通知します。送信済みDOWNは復旧失敗後も終了時に解放します。送信APIの成功は、受信先アプリの処理完了を保証しません。</li>
+<li>権限差・セキュアデスクトップ・任意アプリ/IMEの全配信は未確認です。原版差と採用仕様はKBD-COMPLETION.mdを参照してください。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="sendstr">SENDSTR</h2>
+<p>編集欄やセルへ文字列を送り、ID=0ではクリップボードへ書き込みます。</p>
+<h3>書式</h3><pre><code>SENDSTR(ID, text, [number, mode, accessibility])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>ID</code></dt><dd>対象ウィンドウのID。0ならクリップボード。</dd>
+<dt><code>text</code></dt><dd>送信する文字列。</dd>
+<dt><code>number</code></dt><dd>既定0はフォーカス欄。正の番号は有効な候補、負の番号は無効な候補も含めた順番。</dd>
+<dt><code>mode</code></dt><dd>0は追加、1は置換、2はネイティブ欄へのWM_CHAR送信。既定0。</dd>
+<dt><code>accessibility</code></dt><dd>0はAPIまたはUIA、1はMSAA、2は前面化を要求しないMSAA、STR_ACC_CELL（5）はMSAAのセル。既定0。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。</p><h3>対応範囲と注意</h3><ul>
+<li>ネイティブ欄では番号0の追加は選択位置へ挿入し、Undoを保持します。番号指定の追加は末尾へ追加し、全文更新ではUndoを保持しません。空文字のフォーカス追加は選択も変更しません。</li>
+<li>明示したACC経路とUIAの追加は現在値の末尾へ追加します。ACC経路ではモード1と2は値の置換になり、一文字送信は行いません。providerのUndo・選択保持はその実装に依存します。</li>
+<li>既定経路は可視なEDIT系を位置順に選び、見つからない場合はモード2以外で対象内のUIA編集要素を探します。MSAAとUIAの候補順はproviderの列挙に従います。</li>
+<li>ACC1の前面化はOSへの1回の要求です。ACC2は要求しません。原版ACCの正番号で無効欄を数える動作と、物理キー・補助クリックによるcaret移動は再現しません。</li>
+<li>対象や候補がない場合は入力しません。操作・providerの失敗はエラーになります。文字送信の途中で停止・失敗した場合は、一部が反映され得ます。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="getkeystate">GETKEYSTATE</h2>
+<p>通常キー、マウスボタン、トグル、前面IMEの状態を取得します。</p>
+<h3>書式</h3><pre><code>GETKEYSTATE(key)</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>key</code></dt><dd>整数化後の0～255、VK_RRETURN/VK_RENTER=901、またはTGL_*定数。数値は0方向へ切り捨て、数値文字列とEMPTY=0を受理します。NULL・不正値・範囲外はエラーです。</dd>
+</dl><h3>戻り値・結果</h3><p>通常キーは押下中または直近押下のbit、マウスはそれに実行内の保留bitを合成して1/0を返します。トグル/IMEはONなら1、OFFなら0です。</p><h3>対応範囲と注意</h3><ul>
+<li>引数は1個です。省略や過剰指定は引数の評価前にエラーとなります。901は通常Enterへ変換し、テンキーEnterを独立判定しません。</li>
+<li>TGL_NUMLOCK=10000、TGL_CAPSLOCK=10001、TGL_SCROLLLOCK=10002、TGL_KANALOCK=10003、TGL_IME=10004を指定できます。</li>
+<li>通常キーの直近押下bitは他アプリに消費される場合があり、取りこぼしのない履歴ではありません。マウス1/2は実行開始時のボタン入替設定に従います。</li>
+<li>マウス1/2/4は文の実行境界と非同期待機中に約20ms間隔で採取し、押下があれば読取りまで保留します。GETKEYSTATEの読取りで、そのボタンの保留分を消費します。イベント数や時刻は記録しません。</li>
+<li>トグルは呼出しスレッドのキューに対応する状態です。状態照会でキーボード状態のbyte列を書き換えません。</li>
+<li>TGL_IMEは前面ウィンドウの既定IMEを問い合わせます。対象がなければ0、取得失敗や期限超過はエラーです。メッセージ期限1000msに加え、共有workerの枠待ちと実行待ちに各2秒の期限があります。取消後もネイティブ問い合わせの復帰まではworkerを保持します。</li>
+<li>Sandboxで実マウスの押下・解放後の保留と次回消費を確認しています。任意のIME/TSF・全アプリ・全OSは確認対象に含めません。採用仕様はKEY-SEND-STATE-COMPLETION.mdを参照してください。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="getkeystate"><code>PRINT GETKEYSTATE(VK_ESCAPE)
+PRINT GETKEYSTATE(TGL_CAPSLOCK)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="muscur">MUSCUR</h2>
+<p>現在のグローバルカーソルの種類を取得します。</p>
+<h3>書式</h3><pre><code>MUSCUR()</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt>引数なし</dt><dd>引数は指定しません。</dd>
+</dl><h3>戻り値・結果</h3><p>標準カーソルはCUR_*の数値、独自カーソルはハンドルを負にした数値、ハンドルなしは0です。</p><h3>対応範囲と注意</h3><ul>
+<li>CUR_APPSTARTING=1、CUR_ARROW=2、CUR_CROSS=3、CUR_HAND=4、CUR_HELP=5、CUR_IBEAM=6、CUR_NO=8、CUR_SIZEALL=10、CUR_SIZENESW=11、CUR_SIZENS=12、CUR_SIZENWSE=13、CUR_SIZEWE=14、CUR_UPARROW=15、CUR_WAIT=16。</li>
+<li>カーソルの表示・非表示フラグで種類を変更しません。取得失敗はEXCEPTへ通知します。</li>
+<li>独自ハンドルは起動や環境によって変わります。取得した共有カーソルは破棄しません。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="muscur"><code>PRINT MUSCUR()</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="sckey">SCKEY</h2>
+<p>対象ウィンドウへ修飾キーとキー列を送ります。</p>
+<h3>書式</h3><pre><code>SCKEY(id, key, [key, ...])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>id</code></dt><dd>0は前面ウィンドウ、正の値は実行内のウィンドウID。</dd>
+<dt><code>key</code></dt><dd>1個以上の仮想キー定数または整数。カンマ間の単独の英数字1文字はVK_定数として解釈します。変数を使う場合は括弧で囲みます。</dd>
+</dl><h3>戻り値・結果</h3><p>戻り値はEMPTYです。対象が見つからない場合は入力を送りません。</p><h3>対応範囲と注意</h3><ul>
+<li>SHIFT・CTRL・ALT・左右の修飾キーとWindowsキーは列の末尾まで保持し、今回押下したキーを逆順に解放します。通常キーは押下と解放を送ります。</li>
+<li>既にKBDで保持した修飾キーは解放しません。取消・送信失敗でも今回残った入力の解放を試みます。</li>
+<li>数値は0方向に切り捨てて0～65535で検査します。キー引数の省略と不正な値はエラーです。</li>
+<li>明示した対象を前面化し、子ウィンドウならフォーカスを設定します。一時的に表示・復元した対象は処理後に元の表示状態へ戻します。</li>
+<li>MOUSEORGのMORG_DIRECT設定にかかわらず物理キーを送ります。KBDの直接入力の送信先と保持状態は変更しません。</li>
+<li>Sandboxで所有EDITへの実文字配信、取消後の入力解放、非表示復元を確認しています。全アプリ・IME・権限差による配信は保証しません。</li>
+</ul>
+</section>
+<section class="reference-entry"><h2 id="lockhard">LOCKHARD</h2>
+<p>キーボード・マウスからの入力を実行全体で禁止し、解除します。</p>
+<h3>書式</h3><pre><code>LOCKHARD([blocked])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>blocked</code></dt><dd>TRUEで禁止、FALSE・省略・EMPTYで解除。数値変換後に0方向へ切り捨て、0以外をTRUEとして扱います。</dd>
+</dl><h3>戻り値・結果</h3><p>成功時はEMPTYです。OSの禁止・解除に失敗すると、EXCEPTで捕捉できるエラーになります。</p><h3>対応範囲と注意</h3><ul>
+<li>Windowsの通常のコマンドライン版とUWSC# アプリで使用できます。管理者権限など、OSが禁止を許可する実行環境が必要です。</li>
+<li>禁止状態は実行全体で共有します。同じ実行による禁止の再指定は成功とし、THREAD終了だけでは解除しません。実行全体の終了・取消・例外で解除を試みます。</li>
+<li>禁止・SendInputによる送信・解除は専用スレッドで実行します。KBDのDOWN/UPはコマンドライン版とUWSC# アプリの監視付きSandboxで確認しています。</li>
+<li>終了時に解除が失敗した場合はエラーを残し、所有スレッドの終了時にも解除を試みます。OSは所有スレッド終了時にも入力を再び有効にします。</li>
+<li>物理入力の遮断、権限差、任意providerのGETSTR移動・別実行でのタッチ再使用・任意対象への直接入力の禁止中動作、任意アプリとの組合せは未確認です。実装・受入は一部対応です。</li>
+<li>原版 UWSC Free 5.3.0.2 では、禁止、禁止の再指定、FALSE での解除、引数を省略した解除で、空のUTF-16文字列（VARTYPE 258）が返りました。UWSC# のコマンドライン版とUWSC# アプリでは、同じ4条件で EMPTY（VARTYPE 0）を返します。原版の THREAD の寿命と、OS操作が失敗した場合の通知は未確認です。</li>
+<li>停止画面への終了要求を使う取消では、コマンドライン版とUWSC# アプリの終了コード130、保持キーの解放、終了後の禁止再取得をSandboxで確認しました。物理操作やCtrl+Cによる停止は未確認です。</li>
+<li>同じプロセス・Interpreterを再利用するSandbox試験でも、通常終了・EXITEXIT・例外・取消後のキー解放と、次の実行での禁止再取得を確認しました。明示解除を呼ばずに入力禁止を所有する Windows のスレッドを終了した場合も、同じプロセスの別スレッドから入力禁止を取得できることを確認しました。スクリプトの THREAD だけが終了した場合は、実行全体の入力禁止を解除しません。</li>
+<li>MMVと座標付き中央ボタンUPは、DPI144（150%）のSandboxでDPI非対応・PerMonitorV2の両条件を確認しました。禁止中も指定した物理座標へ移動しました。別倍率・複数モニターやクリックの受信はこの試験の対象外です。</li>
+<li>入力禁止中のEDIT・STATICの取得と移動は、DPI144（150%）のSandboxでDPI非対応・PerMonitorV2の両条件を確認しました。DPI非対応での移動位置のずれを修正しました。</li>
+<li>入力禁止中のSTATUS・MSAA・UIAの取得と移動も、所有する検証用ウィンドウとDPI144で確認しました。UIAのDPI非対応時の座標取得を修正しました。任意provider・別倍率・複数モニターは今回未確認です。</li>
+<li>MORG_DIRECTのMMV・中央ボタン・F24は、所有ウィンドウとDPI144で、禁止中の受信と明示UP・明示解除・通常終了・例外・取消時の解放を確認しました。物理入力と同じ動作や、任意アプリでの受信を保証するものではありません。</li>
+<li>座標省略のBTNと単一の子EDITへの指定・省略もDPI144で確認しました。複雑な子階層・枠付き子・混在DPIは未確認です。</li>
+<li>タッチは1・2接点と禁止なし・ありを組み合わせ、補間中の取消・同じ実行内の再使用・単一THREADの通常終了を各4条件含むSandbox36条件で受信と解放を確認しました。途中取消では最後のMOVE位置でのUPと終点未到達を検査しています。別実行での再使用・複数THREAD・子の例外と取消、物理タッチの遮断、任意アプリとの組合せは未確認です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="lockhard"><code>LOCKHARD(TRUE)
+KBD(VK_F24)
+LOCKHARD(FALSE)</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section>
+<section class="reference-entry"><h2 id="lockhardex">LOCKHARDEX</h2>
+<p>指定したウィンドウを含む条件に従って入力を禁止し、解除します。</p>
+<h3>書式</h3><pre><code>LOCKHARDEX([ID[, mode]])</code></pre>
+<h3>引数</h3><dl class="parameters">
+<dt><code>ID</code></dt><dd>引数なしで解除。0は同じ対話デスクトップ全体、正の値はGETID・HNDTOIDなどで登録したウィンドウIDです。raw HWNDは受け付けません。</dd>
+<dt><code>mode</code></dt><dd>省略・省略位置・0はキーボードとマウス、LOCK_KEYBOARD（1）はキーボード、LOCK_MOUSE（2）はマウスです。</dd>
+</dl><h3>戻り値・結果</h3><p>成功時はEMPTYです。不正な引数・無効なID・OS操作失敗はスクリプトエラーになります。</p><h3>対応範囲と注意</h3><ul>
+<li>通常のコマンドライン版とUWSC# アプリで使用できます。機能全体の受入は一部対応です。</li>
+<li>IDと明示モードは数値または数値文字列から変換した有限な整数に限ります。IDは0～2147483647、モードは0～2です。EMPTY・NULL・小数・範囲外は拒否します。FALSEや数値文字列0も、IDの変換結果が0なら全体指定になります。</li>
+<li>引数数と必須IDの省略は式評価前に検査します。受け付けた式は左から1回ずつ評価し、評価済みの副作用は巻き戻しません。不正な引数や無効なIDでは現在の登録を変更しません。</li>
+<li>入力禁止の設定は同じ実行のTHREAD間で共有し、子THREADの終了だけでは解除しません。実行全体の終了・取消・未処理例外では解除を試みます。</li>
+<li>明示解除はそれより前に受け付けた未完了の登録より優先します。追い越された登録はTRYで捕捉できる操作エラーになり、EMPTYは返しません。解除後の新しい登録は処理できます。実際の取消・実行終了・緊急解除は従来どおり扱います。</li>
+<li>異なる設定への変更は旧設定の解除を確認してから行います。新登録が失敗しても旧設定は自動復元しません。解除できない所有者は保持し、自動再試行は1回、協調待機は合計5秒です。コマンドライン版の--input-cleanup=manualとUWSC# アプリの入力フック再回収操作で、終了後の未回収を再試行できます。</li>
+<li>Ctrl+Alt+Shift+F11は専用の緊急操作です。同じプロセスで対象を持つ実行の判定を止め、実行中は協調取消し、未回収の所有者は再回収します。同じ実行からの再有効化は拒否します。注入キーは緊急操作として扱いません。</li>
+<li>緊急解除の監視開始時に Ctrl・Alt・Shift・F11 のいずれかを押していた場合は、これらのキーをすべて離してから Ctrl+Alt+Shift+F11 を押してください。Winを含む組合せでは発火しません。実物理機器の正の操作、セキュアデスクトップ、OSの実障害や無通知解除からの回復は未確認です。</li>
+<li>対象失効や親矩形取得失敗では判定を停止して解除を要求し、エラーを通知します。無効IDを全体指定へ置き換えません。同じPID/TID内の未観測のハンドル再利用まで完全に識別する保証はありません。</li>
+<li>可視一覧は登録前と100ms周期で更新します。100ms以内の反映や性能上限を保証するものではありません。</li>
+<li>通常のコマンドライン版とUWSC# アプリのコマンドライン起動では、登録IDと全体指定・3モード・明示解除/正常終了/例外/停止画面による取消の48条件で、注入したF24と中央ボタンの配送・回復を確認しました。取消の終了コードは130です。明示解除はプロセス生存中に確認し、終了後の回復では明示回収とOS終了時回収を区別していません。</li>
+<li>厳格な引数・ID検証、OS失敗のエラー化、待機上限、実行共有、緊急操作は採用した設計方針です。原版の戻り値の型や全動作を確認したという意味ではありません。通常のコマンドライン版とUWSC# アプリ経由の機能全体・物理入力・配布受入は引き続き検証中です。</li>
+</ul>
+<h3>例</h3><pre data-example="manual" data-name="lockhardex"><code>id=GETID(&quot;対象ウィンドウ&quot;)
+LOCKHARDEX(id,LOCK_MOUSE)
+// 処理後に解除
+LOCKHARDEX()</code></pre>
+<p>対象や環境の準備が必要な使用例です。今回の実操作確認は行っていません。</p>
+</section><nav class="pager" aria-label="前後のページ"><a href="functions-windows.html">← ウィンドウ関連</a> <a href="functions-controls.html">次へ：コントロール・アクセシビリティ</a></nav>
+<footer>確認基準日：2026-10-20 · プレビューの仕様・未確認事項を含みます。</footer></main>
+<nav class="toc" aria-label="このページの目次"><strong>このページ</strong><ul><li><a href="#mouseorg">MOUSEORG</a></li><li><a href="#mmv">MMV</a></li><li><a href="#btn">BTN</a></li><li><a href="#kbd">KBD</a></li><li><a href="#sendstr">SENDSTR</a></li><li><a href="#getkeystate">GETKEYSTATE</a></li><li><a href="#muscur">MUSCUR</a></li><li><a href="#sckey">SCKEY</a></li><li><a href="#lockhard">LOCKHARD</a></li><li><a href="#lockhardex">LOCKHARDEX</a></li></ul></nav>
+</div></div></body></html>

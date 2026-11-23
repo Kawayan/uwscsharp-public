@@ -1,0 +1,71 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+    uuid(11687E5C-5593-4C20-90D1-9E4EAB5E1178),
+    version(1.0)
+]
+library FloatingPointProbeLib
+{
+    importlib("stdole2.tlb");
+
+    [uuid(41D408C1-6277-42B1-9BA6-B372278FF764)]
+    dispinterface ProbeMethods
+    {
+    properties:
+    methods:
+        [id(1)] double ReadControl();
+        [id(2)] double Divide();
+        [id(3), propget] double ControlStamp();
+        [id(3), propput] void ControlStamp([in] double value);
+        [id(4)] double ReadAssignment();
+        [id(5)] double ReadAssignedValue();
+        [id(6), propget] double IndexedStamp([in] double index);
+        [id(6), propput] void IndexedStamp([in] double index, [in] double value);
+        [id(7)] double ReadGetIndex();
+        [id(8)] double ReadPutIndex();
+        [id(9)] long Fire();
+        [id(10)] double ReadEventBefore();
+        [id(11)] double ReadEventAfter();
+        [id(12)] VARIANT ReadCurrency();
+        [id(13)] VARIANT ReadDecimal();
+        [id(14)] VARIANT ReadCurrencyFraction();
+        [id(15)] VARIANT ReadDecimalFraction();
+        [id(16)] VARIANT ReadNegativeCurrencyFraction();
+        [id(17)] VARIANT ReadNegativeDecimalFraction();
+        [id(18)] VARIANT ReadLargeDecimal();
+        [id(19)] VARIANT ReadMaximumCurrency();
+        [id(20)] VARIANT ReadMinimumCurrency();
+        [id(21)] VARIANT ReadMaximumDecimal();
+        [id(22)] VARIANT ReadMinimumDecimal();
+        [id(23)] VARIANT ReadSmallestPositiveDecimal();
+        [id(24)] VARIANT ReadSmallestNegativeDecimal();
+        [id(25)] VARIANT ReadMaximumUnsignedInteger();
+        [id(26)] VARIANT ReadBoundaryUnsignedInteger();
+        [id(27)] VARIANT ReadPositiveSingle();
+        [id(28)] VARIANT ReadNegativeSingle();
+        [id(29)] VARIANT ReadMaximumSingle();
+        [id(30)] VARIANT ReadSmallestSingle();
+        [id(31)] VARIANT ReadSingleNaN();
+        [id(32)] VARIANT ReadSingleInfinity();
+        [id(33)] VARIANT ReadNegativeSingleInfinity();
+        [id(34)] VARIANT ReadDoubleNaN();
+        [id(35)] VARIANT ReadDoubleInfinity();
+        [id(36)] VARIANT ReadNegativeDoubleInfinity();
+    };
+
+    [uuid(7AC1BF69-37B8-4B31-AE66-D21E1B6FA40D)]
+    dispinterface ProbeEvents
+    {
+    properties:
+    methods:
+        [id(1)] void Changed();
+    };
+
+    [uuid(671D0356-3B9A-4BFA-919B-E17253210DC8)]
+    coclass ControlProbe
+    {
+        [default] dispinterface ProbeMethods;
+        [default, source] dispinterface ProbeEvents;
+    };
+};
