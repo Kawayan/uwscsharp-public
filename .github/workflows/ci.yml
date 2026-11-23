@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # mainの各pushを検証し、後続のpushでヘルプの公開を取り消さない。
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -72,3 +73,12 @@ jobs:
         run: |
           node scripts/check_help_search.js
           node scripts/check_help_search.js artifacts/help-site
+
+  publish-help:
+    needs: [windows, help]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/help-pages.yml
