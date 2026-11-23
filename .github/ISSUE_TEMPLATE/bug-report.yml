@@ -1,0 +1,56 @@
+name: 不具合の報告
+description: UWSC# 本体やユーザーヘルプの不具合を報告する
+body:
+  - type: markdown
+    attributes:
+      value: |
+        投稿内容は公開されます。スクリプト、ログ、画像を添える場合は、個人情報やパスワード、API キーなどを取り除いてください。
+
+  - type: input
+    id: version
+    attributes:
+      label: UWSC# のバージョン
+      description: 使用したバージョンや配布ファイル名を記入してください。分からない場合は「不明」と記入してください。
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 実行環境
+      description: Windows のバージョンを記入してください。公開ヘルプの表示や検索に関する不具合なら、ブラウザー名とバージョンも記入してください。
+      placeholder: Windows 11 24H2、x64
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 不具合が起きるまでの操作を順に記入してください。再現手順が分からない場合は、発生時の状況を書いてください。
+      placeholder: |
+        1. UWSC# を起動する
+        2. 対象のスクリプトを開く
+        3. スクリプトを実行する
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の結果
+      description: 何が起きたかと、表示されたエラーメッセージを記入してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待した結果
+      description: どのように動作すると思っていたかを記入してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 関連資料
+      description: 再現に必要な最小限のスクリプト、ヘルプページの URL、ログ、スクリーンショットなどがあれば添えてください。

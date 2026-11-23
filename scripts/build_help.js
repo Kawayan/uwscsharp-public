@@ -6,7 +6,7 @@ const { parseArgs } = require('node:util');
 const ROOT = path.resolve(__dirname, '..');
 const SOURCE = path.join(ROOT, 'docs/user-help');
 const homeExternalLinks = new Set([
-    'https://github.com/Kawayan/uwscsharp-public/issues/new/choose',
+    'https://github.com/Kawayan/uwscsharp-public/issues/new?template=bug-report.yml',
     'https://github.com/sponsors/Kawayan',
 ]);
 const read = file => fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
