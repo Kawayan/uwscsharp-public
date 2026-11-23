@@ -5,10 +5,16 @@ const path = require('node:path');
 const { parseArgs } = require('node:util');
 const ROOT = path.resolve(__dirname, '..');
 const SOURCE = path.join(ROOT, 'docs/user-help');
-const homeExternalLinks = new Set([
-    'https://github.com/Kawayan/uwscsharp-public/issues/new?template=bug-report.yml',
-    'https://github.com/sponsors/Kawayan',
-]);
+const allowedExternalLinks = {
+    'index.html': new Set([
+        'https://github.com/Kawayan/uwscsharp-public/issues/new?template=bug-report.yml',
+        'https://github.com/sponsors/Kawayan',
+    ]),
+    'pages/getting-started.html': new Set([
+        'https://github.com/Kawayan/uwscsharp-public/releases',
+        'https://dotnet.microsoft.com/ja-jp/download/dotnet/10.0',
+    ]),
+};
 const read = file => fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
 const pagePath = slug => slug === 'index' ? 'index.html' : `pages/${slug}.html`;
 const relativePath = (from, to) => path.posix.relative(path.posix.dirname(from), to);
@@ -164,9 +170,8 @@ function validateLinks(outputs, searchLinks = []) {
     const documents = Object.fromEntries(Object.entries(outputs)
         .filter(([name]) => name.endsWith('.html')).map(([name, html]) => [name, document(html)]));
     for (const [name, doc] of Object.entries(documents)) {
-        const links = name === 'index.html'
-            ? [...doc.links.filter(link => !homeExternalLinks.has(link)), ...searchLinks]
-            : doc.links;
+        const links = doc.links.filter(link => !allowedExternalLinks[name]?.has(link));
+        if (name === 'index.html') links.push(...searchLinks);
         for (const link of links) {
             assert(!/^[a-z][a-z\d+.-]*:|^\/\//i.test(link), `${name}: 外部リンク ${link}`);
             const match = /^([^?#]*)(?:\?[^#]*)?(?:#(.*))?$/.exec(link);

@@ -1,10 +1,15 @@
 <p class="lead">最初は、画面への入力を送らないPRINTの例で実行結果を確認します。</p>
 <h2 id="package">UWSC# アプリ配布版を使う</h2>
-<ol><li>入手したUWSC# アプリのZIPを、書込み可能なフォルダーへすべて展開します。</li>
+<ol><li><a href="https://github.com/Kawayan/uwscsharp-public/releases">GitHub Releases</a>からWindows x64向けのZIPを取得し、書込み可能なフォルダーへすべて展開します。</li>
 <li><code>UWSCSharp.Wpf.exe</code>を起動します。ランタイム同梱版では.NETの事前インストールは不要です。初回は通常<code>%TEMP%/.net</code>へ同梱ライブラリが展開されます。</li>
 <li>「読込」で同梱の<code>examples/hello.uws</code>を開き、「再生」を押します。</li>
 <li>「スクリプト編集・実行結果」を展開し、PRINTの出力を確認します。</li></ol>
-<p>配布版番号と発行元コミットは同梱の<code>release.json</code>で確認できます。ライセンス表示と案内も保管してください。ダウンロード先はこのヘルプにはまだ設定していません。</p>
+<p>配布版番号と発行元コミットは同梱の<code>release.json</code>で確認できます。ライセンス表示と案内も保管してください。</p>
+<h2 id="x86-runtime">32ビットDLLを呼び出す</h2>
+<p>ランタイム同梱版でも、<code>DEF_DLL</code>で32ビットDLLを呼び出す場合はx86版の.NET 10 Runtimeが必要です。</p>
+<ol><li><a href="https://dotnet.microsoft.com/ja-jp/download/dotnet/10.0">Microsoftの.NET 10ダウンロードページ</a>を開きます。</li>
+<li>「.NET Runtime」のWindows用インストーラーで「x86」を選び、インストールします。</li>
+<li>インストールが終わったら、DLLを呼び出すスクリプトを再実行します。</li></ol>
 <h2 id="hello">自分で書いて試す</h2>
 <p>次の内容を編集欄へ入力し、「再生」を押してください。</p>
 <pre><code>PRINT "こんにちは、UWSC#"
