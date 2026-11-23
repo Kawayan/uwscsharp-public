@@ -1,0 +1,19 @@
+<Project Sdk="WixToolset.Sdk/7.0.0">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <OutputName>UWSCSharp-$(InstallerVersion)-win-x64</OutputName>
+    <Cultures>ja-JP</Cultures>
+    <DefineConstants>$(DefineConstants);PayloadDirectory=$(PayloadDirectory);InstallerVersion=$(InstallerVersion)</DefineConstants>
+    <!-- ユーザー単位で配布するため、複数ユーザーへの配布を求めるICE91は対象外にします。 -->
+    <SuppressIces>ICE91</SuppressIces>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" />
+  </ItemGroup>
+  <Target Name="ValidateInstallerInputs" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(InstallerVersion)' == ''" Text="InstallerVersionにMSIの数値版を指定してください。" />
+    <Error Condition="'$(PayloadDirectory)' == '' or !Exists('$(PayloadDirectory)/release.json')"
+           Text="scripts/build-wpf-installer.ps1で発行元を準備してください。" />
+  </Target>
+</Project>

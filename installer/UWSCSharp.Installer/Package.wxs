@@ -1,0 +1,145 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="UWSC# WPF Preview" Manufacturer="UWSCSharp"
+           Version="$(var.InstallerVersion)" Language="1041"
+           UpgradeCode="A87F1A67-46FB-46CC-9006-0B08054E450A"
+           Scope="perUser" Compressed="yes">
+    <MajorUpgrade Schedule="afterInstallInitialize"
+                  DowngradeErrorMessage="新しいバージョンのUWSC#が既にインストールされています。" />
+    <Upgrade Id="A87F1A67-46FB-46CC-9006-0B08054E450A">
+      <UpgradeVersion Minimum="$(var.InstallerVersion)" IncludeMinimum="yes"
+                      Maximum="$(var.InstallerVersion)" IncludeMaximum="yes"
+                      OnlyDetect="yes" Property="SAMEVERSIONFOUND" />
+    </Upgrade>
+    <Launch Condition="Installed OR NOT SAMEVERSIONFOUND"
+            Message="同じバージョンが既にインストールされています。修復には導入済みのMSIを使用してください。" />
+    <MediaTemplate EmbedCab="yes" />
+    <Icon Id="AppIcon" SourceFile="../../src/UWSCSharp.Wpf/Assets/UWSCSharp.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="INSTALLLEVEL" Value="1" />
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="UWSCSharp">
+          <Component Id="Application" Guid="5B4657CF-EBA0-4E2B-8B78-EB39187D5DC6">
+            <File Id="ApplicationExe" Source="$(var.PayloadDirectory)/UWSCSharp.Wpf.exe" />
+            <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                           Name="Application" Type="integer" Value="1" KeyPath="yes" />
+            <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
+            <RemoveFolder Id="RemoveProgramsFolder" Directory="ProgramsFolder" On="uninstall" />
+            <Shortcut Id="AppShortcut" Directory="AppMenuFolder" Name="UWSC# WPF Preview"
+                      Target="[#ApplicationExe]" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+            <RemoveFolder Id="RemoveMenuFolder" Directory="AppMenuFolder" On="uninstall" />
+          </Component>
+          <Component Id="AssociationLauncher" Guid="4B941627-891B-4C32-BA33-D7B927AD2A14">
+            <File Id="AssociationExe" Source="$(var.PayloadDirectory)/UWSCSharp.Association.exe" />
+            <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                           Name="AssociationLauncher" Type="integer" Value="1" KeyPath="yes" />
+          </Component>
+          <Component Id="AssociationFeatureMarker" Guid="BFCE6B91-83D4-44B0-9B8E-C1D455A19D8D">
+            <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                           Name="AssociationSelected" Type="integer" Value="1" KeyPath="yes" />
+          </Component>
+          <Component Id="Guides" Guid="704E4474-9A49-4FE4-901C-15A18FEE2201">
+            <File Source="$(var.PayloadDirectory)/LICENSE" />
+            <File Source="$(var.PayloadDirectory)/release.json" />
+            <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                           Name="Guides" Type="integer" Value="1" KeyPath="yes" />
+          </Component>
+          <Directory Id="ExamplesFolder" Name="examples">
+            <Component Id="Examples" Guid="887F4DD3-52DA-4F63-B502-5D4F2AE1ABF5">
+              <File Source="$(var.PayloadDirectory)/examples/hello.uws" />
+              <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                             Name="Examples" Type="integer" Value="1" KeyPath="yes" />
+              <RemoveFolder Id="RemoveExamplesFolder" On="uninstall" />
+            </Component>
+          </Directory>
+          <Directory Id="DllRelayFolder" Name="dll-relay">
+            <Component Id="DllRelay" Guid="2BA97963-D893-40D9-8CB4-BA24FFC539AB">
+              <File Source="$(var.PayloadDirectory)/dll-relay/UWSCSharp.DllRelay.dll" />
+              <File Source="$(var.PayloadDirectory)/dll-relay/UWSCSharp.DllRelay.deps.json" />
+              <File Source="$(var.PayloadDirectory)/dll-relay/UWSCSharp.DllRelay.runtimeconfig.json" />
+              <File Source="$(var.PayloadDirectory)/dll-relay/UWSCSharp.Core.dll" />
+              <File Source="$(var.PayloadDirectory)/dll-relay/UWSCSharp.Windows.dll" />
+              <File Source="$(var.PayloadDirectory)/dll-relay/UWSCSharp.X86Call.Native.dll" />
+              <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                             Name="DllRelay" Type="integer" Value="1" KeyPath="yes" />
+              <RemoveFolder Id="RemoveDllRelayFolder" On="uninstall" />
+            </Component>
+          </Directory>
+          <Directory Id="LicensesFolder" Name="licenses">
+            <Component Id="Licenses" Guid="13431217-F2EB-4B94-BB3D-CCFF685BA7C0">
+              <File Source="$(var.PayloadDirectory)/licenses/DOTNET-RUNTIME-LICENSE.txt" />
+              <File Source="$(var.PayloadDirectory)/licenses/DOTNET-RUNTIME-ThirdPartyNotices.txt" />
+              <File Source="$(var.PayloadDirectory)/licenses/DOTNET-WPF-LICENSE.txt" />
+              <File Source="$(var.PayloadDirectory)/licenses/DOTNET-HOST-LICENSE.txt" />
+              <File Source="$(var.PayloadDirectory)/licenses/DOTNET-HOST-ThirdPartyNotices.txt" />
+              <RegistryValue Root="HKCU" Key="Software\UWSCSharp\Installer"
+                             Name="Licenses" Type="integer" Value="1" KeyPath="yes" />
+              <RemoveFolder Id="RemoveLicensesFolder" On="uninstall" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="UWSCSharp" />
+    </StandardDirectory>
+    <Feature Id="Main" Title="UWSC#" Level="1" Display="expand">
+      <ComponentRef Id="Application" />
+      <ComponentRef Id="AssociationLauncher" />
+      <ComponentRef Id="Guides" />
+      <ComponentRef Id="Examples" />
+      <ComponentRef Id="Licenses" />
+      <ComponentRef Id="DllRelay" />
+      <Feature Id="AssociationOption" Title=".uwsの関連付け候補を登録"
+               Description="現在のユーザー用の候補を登録します。既定の選択はWindowsで行います。"
+               Level="2" AllowAdvertise="no">
+        <ComponentRef Id="AssociationFeatureMarker" />
+      </Feature>
+    </Feature>
+    <CustomAction Id="AssociationInstallRollback" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-rollback [ProductCode] install [UILevel]"
+                  Execute="rollback" Impersonate="yes" Return="ignore" />
+    <CustomAction Id="AssociationInstall" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-install [ProductCode] &quot;[Installed]&quot; [UILevel]"
+                  Execute="deferred" Impersonate="yes" Return="check" />
+    <CustomAction Id="AssociationDisableRollback" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-rollback [ProductCode] disable [UILevel]"
+                  Execute="rollback" Impersonate="yes" Return="ignore" />
+    <CustomAction Id="AssociationDisable" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-disable [ProductCode] &quot;&quot; [UILevel]"
+                  Execute="deferred" Impersonate="yes" Return="check" />
+    <CustomAction Id="AssociationUpgradeDisableRollback" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-rollback [ProductCode] disable [UILevel]"
+                  Execute="rollback" Impersonate="yes" Return="ignore" />
+    <CustomAction Id="AssociationUpgradeDisable" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-disable [ProductCode] &quot;[WIX_UPGRADE_DETECTED]&quot; [UILevel]"
+                  Execute="deferred" Impersonate="yes" Return="check" />
+    <CustomAction Id="AssociationUninstallRollback" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-rollback [ProductCode] uninstall [UILevel]"
+                  Execute="rollback" Impersonate="yes" Return="ignore" />
+    <CustomAction Id="AssociationUninstall" FileRef="AssociationExe"
+                  ExeCommand="--msi-association-uninstall [ProductCode] &quot;&quot; [UILevel]"
+                  Execute="deferred" Impersonate="yes" Return="check" />
+    <InstallExecuteSequence>
+      <Custom Action="AssociationUninstallRollback" Before="AssociationUninstall"
+              Condition="REMOVE = &quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE AND !AssociationOption = 3" />
+      <Custom Action="AssociationUninstall" Before="RemoveFiles"
+              Condition="REMOVE = &quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE AND !AssociationOption = 3" />
+      <Custom Action="AssociationDisableRollback" Before="AssociationDisable"
+              Condition="Installed AND REMOVE &lt;&gt; &quot;ALL&quot; AND !AssociationOption = 3 AND &amp;AssociationOption = 2" />
+      <Custom Action="AssociationDisable" Before="RemoveFiles"
+              Condition="Installed AND REMOVE &lt;&gt; &quot;ALL&quot; AND !AssociationOption = 3 AND &amp;AssociationOption = 2" />
+      <Custom Action="AssociationInstallRollback" After="InstallFiles"
+              Condition="&amp;AssociationOption = 3 AND !AssociationOption &lt;&gt; 3" />
+      <Custom Action="AssociationInstall" After="AssociationInstallRollback"
+              Condition="&amp;AssociationOption = 3 AND !AssociationOption &lt;&gt; 3" />
+      <Custom Action="AssociationUpgradeDisableRollback" After="AssociationInstall"
+              Condition="NOT Installed AND WIX_UPGRADE_DETECTED AND &amp;AssociationOption &lt;&gt; 3" />
+      <Custom Action="AssociationUpgradeDisable" After="AssociationUpgradeDisableRollback"
+              Condition="NOT Installed AND WIX_UPGRADE_DETECTED AND &amp;AssociationOption &lt;&gt; 3" />
+    </InstallExecuteSequence>
+    <ui:WixUI Id="WixUI_FeatureTree" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+  </Package>
+</Wix>

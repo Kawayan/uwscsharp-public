@@ -1,0 +1,6 @@
+<Project>
+  <!-- .NETアプリ用のTargetFrameworkと出力規則をMSIへ適用しません。 -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
