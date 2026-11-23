@@ -99,8 +99,13 @@ jobs:
         shell: bash
         run: |
           sha256sum --check "$FILENAME.sha256"
-          tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/tags/$GITHUB_REF_NAME" --jq .sha)
-          if [[ "$tag_sha" != "$PACKAGE_COMMIT" ]]; then
+          tag_object=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$GITHUB_REF_NAME" --jq '.object | [.type, .sha] | @tsv')
+          read -r tag_type tag_sha <<< "$tag_object"
+          while [[ "$tag_type" == tag ]]; do
+            tag_object=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" --jq '.object | [.type, .sha] | @tsv')
+            read -r tag_type tag_sha <<< "$tag_object"
+          done
+          if [[ "$tag_type" != commit || "$tag_sha" != "$PACKAGE_COMMIT" ]]; then
             echo 'The tag no longer points to the packaged commit.' >&2
             exit 1
           fi
