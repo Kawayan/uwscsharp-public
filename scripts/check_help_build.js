@@ -13,6 +13,13 @@ assert.equal(decode('&lt;&gt;&quot;&apos;&nbsp;&#x1f600;&#10;'), '<>"\'\u00a0�
 assert.throws(() => document('<h2 id="same"></h2><p id="same"></p>'), /IDが重複/);
 assert.throws(() => decode('&unknown;'), /未対応の文字参照/);
 validateLinks({ 'index.html': '<h2 id="a"></h2><a href="#a">節</a>' });
+for (const href of ['https://github.com/Kawayan/uwscsharp-public/issues/new/choose', 'https://github.com/sponsors/Kawayan']) {
+    const link = `<a href="${href}">リンク</a>`;
+    validateLinks({ 'index.html': link });
+    assert.throws(() => validateLinks({ 'pages/test.html': link }), /外部リンク/);
+    assert.throws(() => validateLinks({ 'index.html': '' }, [href]), /外部リンク/);
+    assert.throws(() => validateLinks({ 'index.html': `<a href="${href}/other">リンク</a>` }), /外部リンク/);
+}
 for (const href of ['missing.html', '#missing', 'https://example.com/', '//example.com/', 'javascript:alert(1)']) {
     assert.throws(() => validateLinks({ 'index.html': `<a href="${href}">リンク</a>` }), undefined, href);
 }

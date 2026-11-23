@@ -27,3 +27,20 @@ main { overflow-wrap: anywhere; }
     padding: 8px 10px;
     font-size: 13px;
 }
+
+.help-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.help-actions a {
+    padding: 6px 14px;
+    border: 1px solid #c9c5d3;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.help-actions a:hover {
+    background: var(--side);
+    text-decoration: underline;
+}
