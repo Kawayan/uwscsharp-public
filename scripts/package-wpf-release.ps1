@@ -11,6 +11,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+$revision = git -C $root rev-parse HEAD
+if ($LASTEXITCODE -ne 0) { throw '発行元コミットを取得できません。' }
+$changes = git -C $root status --porcelain --untracked-files=all
+if ($LASTEXITCODE -ne 0) { throw '作業ツリーの状態を取得できません。' }
+if ($changes) { throw '未コミットの変更を含む作業ツリーは発行できません。' }
+
 $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) {
     throw "未作成の出力先を指定してください: $output"
@@ -22,9 +28,6 @@ $publish = Join-Path $output 'publish'
 $package = Join-Path $output 'package'
 $nuget = Join-Path $output 'nuget'
 New-Item -ItemType Directory -Path $output | Out-Null
-
-$revision = git -C $root rev-parse HEAD
-if ($LASTEXITCODE -ne 0) { throw '発行元コミットを取得できません。' }
 
 # 復元したランタイムパックから、実際に同梱する版のライセンスを収録します。
 dotnet publish $project -c Release -r win-x64 -p:PublishProfile=SingleFile-win-x64 -p:DebugType=embedded `
