@@ -20,17 +20,17 @@ pwsh -NoProfile -File scripts/test-headless.ps1 -Configuration Release
 
 ヘルプを更新する場合は、[生成と確認の手順](docs/user-help/README.md)を参照してください。
 
-## WiX インストーラーの作成
+## WiX バンドル EXE の作成
 
-Windows x64 向けの MSI を作成できます。.NET 10 SDK、PowerShell 7、Visual Studio の C++ デスクトップ開発ワークロードと Windows SDK を用意してください。WiX 7 はビルド時に NuGet から復元します。[WiX 7 の利用条件](https://docs.firegiant.com/wix/osmf/)を確認し、同意する場合は次のコマンドを実行してください。
+Windows x64 向けのセットアップ EXE を作成できます。WiX Burn がアプリの MSI を EXE に内蔵します。.NET 10 SDK、PowerShell 7、Visual Studio の C++ デスクトップ開発ワークロードと Windows SDK を用意してください。WiX 7 はビルド時に NuGet から復元します。[WiX 7 の利用条件](https://docs.firegiant.com/wix/osmf/)を確認し、同意する場合は次のコマンドを実行してください。
 
 ```powershell
-pwsh -NoProfile -File scripts/build-wpf-installer.ps1 -Version 0.1.0-preview.1 -InstallerVersion 0.1.0 -OutputDirectory artifacts/wpf-installer -AcceptWixEula
+pwsh -NoProfile -File scripts/build-wpf-bundle.ps1 -Version 0.1.0-preview.1 -InstallerVersion 0.1.0 -OutputDirectory artifacts/wpf-bundle -AcceptWixEula
 ```
 
-変更をコミットしてから、まだ存在しない出力先を指定してください。`-Version` はアプリの版、`-InstallerVersion` は Windows Installer が更新の判定に使う数値版です。MSI を更新する場合は数値版も上げてください。`msi` フォルダーに MSI と SHA-256 ファイルを出力します。
+変更をコミットしてから、まだ存在しない出力先を指定してください。`-Version` はアプリの版、`-InstallerVersion` はセットアップ EXE と内蔵 MSI が更新の判定に使う数値版です。セットアップを更新する場合は数値版も上げてください。`bundle` フォルダーにセットアップ EXE と SHA-256 ファイルを出力します。
 
-MSI は現在のユーザーの `%LOCALAPPDATA%\Programs\UWSCSharp` にアプリをインストールし、スタートメニューにショートカットを追加します。`.uws` の関連付け候補の登録は任意です。32ビット DLL を呼び出す場合の x86 版 .NET は別途導入してください。
+セットアップ EXE は現在のユーザーの `%LOCALAPPDATA%\Programs\UWSCSharp` にアプリをインストールし、スタートメニューにショートカットを追加します。`.uws` の関連付け候補の登録は任意です。32ビット DLL を呼び出す場合の x86 版 .NET は別途導入してください。
 
 ## ライセンス
 

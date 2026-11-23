@@ -1,0 +1,17 @@
+<Project Sdk="WixToolset.Sdk/7.0.0">
+  <PropertyGroup>
+    <OutputType>Bundle</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <OutputName>UWSCSharp-$(InstallerVersion)-win-x64-setup</OutputName>
+    <SuppressPdbOutput>true</SuppressPdbOutput>
+    <DefineConstants>$(DefineConstants);InstallerMsi=$(InstallerMsi);InstallerVersion=$(InstallerVersion)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.BootstrapperApplications.wixext" />
+  </ItemGroup>
+  <Target Name="ValidateBundleInputs" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(InstallerVersion)' == ''" Text="InstallerVersionにインストーラーの数値版を指定してください。" />
+    <Error Condition="'$(InstallerMsi)' == '' or !Exists('$(InstallerMsi)')"
+           Text="scripts/build-wpf-bundle.ps1で内蔵するMSIを準備してください。" />
+  </Target>
+</Project>

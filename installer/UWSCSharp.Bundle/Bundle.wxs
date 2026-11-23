@@ -1,0 +1,15 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle Id="UWSCSharp.Desktop" Name="UWSC# WPF Preview" Manufacturer="UWSCSharp"
+          Version="$(var.InstallerVersion)" Compressed="yes"
+          IconSourceFile="../../src/UWSCSharp.Wpf/Assets/UWSCSharp.ico">
+    <BootstrapperApplication>
+      <!-- MSIの日本語画面と関連付け候補の選択を引き継ぎます。 -->
+      <bal:WixInternalUIBootstrapperApplication />
+    </BootstrapperApplication>
+    <Chain>
+      <MsiPackage Id="UWSCSharpDesktopMsi" SourceFile="$(var.InstallerMsi)"
+                  Compressed="yes" Visible="no" Vital="yes" />
+    </Chain>
+  </Bundle>
+</Wix>

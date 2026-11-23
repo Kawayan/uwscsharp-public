@@ -1,0 +1,6 @@
+<Project>
+  <!-- .NETアプリ用の出力規則をバンドルへ適用しません。 -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
