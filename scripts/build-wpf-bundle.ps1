@@ -37,7 +37,9 @@ if ($LASTEXITCODE -ne 0 -or -not $wixBin) { throw 'ビルドに使用したWiX�
 
 # バンドルを起動せず、内蔵MSIを取り出して梱包元と照合します。
 $extracted = Join-Path $output 'extracted'
-dotnet (Join-Path $wixBin 'wix.dll') -acceptEula wix7 burn extract $bundle -out $extracted
+$metadata = Join-Path $output 'bootstrapper'
+# ブートストラッパーのマニフェストも取り出すと、内蔵ファイルが元の名前で展開されます。
+dotnet (Join-Path $wixBin 'wix.dll') -acceptEula wix7 burn extract $bundle -out $extracted -outba $metadata
 if ($LASTEXITCODE -ne 0) { throw 'バンドルEXEから収録ファイルを取り出せません。' }
 $embedded = @(Get-ChildItem -LiteralPath $extracted -Filter '*.msi' -File -Recurse)
 if ($embedded.Count -ne 1 -or $embedded[0].Name -cne $msiName -or
