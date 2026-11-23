@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <!-- 中継は呼出し元とは別のx86ランタイムで起動します。 -->
+    <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../UWSCSharp.Windows/UWSCSharp.Windows.csproj" />
