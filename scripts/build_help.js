@@ -83,7 +83,7 @@ function referenceBody(catalog, category) {
     const group = catalog.categories.find(group => group.id === category);
     assert(group, `不明な分類: ${category}`);
     const body = [`<p class="lead">${escape(group.description)}</p>`];
-    body.push('<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。機能全体の完成や原版互換を示すものではありません。</div>');
+    body.push('<div class="notice">コマンドライン版とUWSC# アプリで実装のある範囲を説明します。角括弧内は省略可能です。</div>');
     if (category === 'windows') body.push('<p>対象IDはGETIDで取得します。実行ごとに管理され、別の実行へ持ち越せません。</p>');
     if (category === 'display') body.push('<p>PRINTは制御文です。以下の関数・文は、それぞれ掲載した採用範囲で利用できます。</p>');
     for (const entry of catalog.entries.filter(entry => entry.category === category)) {
