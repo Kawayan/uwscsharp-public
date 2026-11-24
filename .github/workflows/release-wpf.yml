@@ -6,6 +6,10 @@ on:
   pull_request:
     paths:
       - .github/workflows/release-wpf.yml
+      - 'installer/**'
+      - scripts/build-wpf-bundle.ps1
+      - scripts/build-wpf-installer.ps1
+      - scripts/check-wpf-installer.ps1
       - scripts/package-wpf-release.ps1
       - src/UWSCSharp.DllRelay/UWSCSharp.DllRelay.csproj
   workflow_dispatch:
@@ -23,7 +27,8 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 35
     outputs:
-      filename: ${{ steps.version.outputs.filename }}
+      zip: ${{ steps.version.outputs.zip }}
+      setup: ${{ steps.version.outputs.setup }}
       prerelease: ${{ steps.version.outputs.prerelease }}
       commit: ${{ steps.version.outputs.commit }}
     defaults:
@@ -49,8 +54,11 @@ jobs:
             git merge-base --is-ancestor $commit refs/remotes/origin/main
             if ($LASTEXITCODE -ne 0) { throw 'タグは main のコミットを指定してください。' }
           }
+          $installerVersion = $version.Split('-')[0]
           "version=$version" >> $env:GITHUB_OUTPUT
-          "filename=UWSCSharp-$version-win-x64.zip" >> $env:GITHUB_OUTPUT
+          "installer-version=$installerVersion" >> $env:GITHUB_OUTPUT
+          "zip=UWSCSharp-$version-win-x64.zip" >> $env:GITHUB_OUTPUT
+          "setup=UWSCSharp-$installerVersion-win-x64-setup.exe" >> $env:GITHUB_OUTPUT
           "prerelease=$($version.Contains('-').ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           "commit=$commit" >> $env:GITHUB_OUTPUT
 
@@ -65,17 +73,34 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pwsh -NoProfile -File scripts/test-headless.ps1 -Configuration Release
 
-      - name: Build and verify the self-contained ZIP
+      - name: Build and verify the self-contained ZIP and setup EXE
         env:
           VERSION: ${{ steps.version.outputs.version }}
-        run: ./scripts/package-wpf-release.ps1 -Version $env:VERSION -OutputDirectory artifacts/wpf-package
+          INSTALLER_VERSION: ${{ steps.version.outputs.installer-version }}
+          WIX_EULA: ${{ vars.WIX_ACCEPT_EULA }}
+        run: |
+          if ($env:WIX_EULA -cne 'wix7') {
+            throw 'WiX 7 の利用条件に同意済みの場合は、リポジトリ変数 WIX_ACCEPT_EULA に wix7 を設定してください。'
+          }
+          ./scripts/build-wpf-bundle.ps1 -Version $env:VERSION -InstallerVersion $env:INSTALLER_VERSION -OutputDirectory artifacts/wpf-release -AcceptWixEula
+
+      - name: Stage all four release assets
+        env:
+          ZIP: ${{ steps.version.outputs.zip }}
+          SETUP: ${{ steps.version.outputs.setup }}
+        run: |
+          New-Item -ItemType Directory -Path artifacts/release-assets | Out-Null
+          foreach ($file in @("package/app/$env:ZIP", "bundle/$env:SETUP")) {
+            foreach ($asset in @($file, "$file.sha256")) {
+              Copy-Item -LiteralPath "artifacts/wpf-release/$asset" -Destination artifacts/release-assets
+            }
+          }
 
       - uses: actions/upload-artifact@v4
         with:
           name: wpf-win-x64
-          path: |
-            artifacts/wpf-package/${{ steps.version.outputs.filename }}
-            artifacts/wpf-package/${{ steps.version.outputs.filename }}.sha256
+          path: artifacts/release-assets
+          compression-level: 0
           if-no-files-found: error
 
   release:
@@ -90,15 +115,25 @@ jobs:
         with:
           name: wpf-win-x64
 
-      - name: Publish the verified ZIP to GitHub Releases
+      - name: Publish verified assets to GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
-          FILENAME: ${{ needs.package.outputs.filename }}
+          ZIP: ${{ needs.package.outputs.zip }}
+          SETUP: ${{ needs.package.outputs.setup }}
           PRERELEASE: ${{ needs.package.outputs.prerelease }}
           PACKAGE_COMMIT: ${{ needs.package.outputs.commit }}
         shell: bash
         run: |
-          sha256sum --check "$FILENAME.sha256"
+          assets=()
+          for file in "$ZIP" "$SETUP"; do
+            hash=$(sha256sum -- "$file")
+            expected=$(<"$file.sha256")
+            if [[ ${expected%$'\r'} != "$hash" ]]; then
+              echo "SHA-256 or filename does not match: $file" >&2
+              exit 1
+            fi
+            assets+=("$file" "$file.sha256")
+          done
           tag_object=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$GITHUB_REF_NAME" --jq '.object | [.type, .sha] | @tsv')
           read -r tag_type tag_sha <<< "$tag_object"
           while [[ "$tag_type" == tag ]]; do
@@ -113,4 +148,4 @@ jobs:
           if [[ "$PRERELEASE" == true ]]; then
             options+=(--prerelease)
           fi
-          gh release create "$GITHUB_REF_NAME" "$FILENAME" "$FILENAME.sha256" "${options[@]}"
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" "${options[@]}"
