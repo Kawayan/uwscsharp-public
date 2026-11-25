@@ -28,7 +28,7 @@ internal static class PublicInputCleanupVerification
         string? failure = null;
         try
         {
-            Require(Environment.UserName == "WDAGUtilityAccount", "Sandbox内の検証");
+            Require(SandboxEnvironment.IsCurrent, "Sandbox内の検証");
             foreach (int mode in new[] { 0, 1, 2 })
             {
                 await VerifyModeAsync(mode, receipt + ".uws", checks,

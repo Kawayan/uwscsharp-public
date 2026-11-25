@@ -15,7 +15,7 @@ internal static class LogSettingsVerification
     internal static async Task<int> RunAsync(string receipt)
     {
         // ゲストの既存INIを退避し、個人設定のあるホストで実行しません。
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("ログ設定の検証はSandbox専用です。");
         }

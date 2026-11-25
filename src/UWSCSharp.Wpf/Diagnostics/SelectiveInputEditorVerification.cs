@@ -13,7 +13,7 @@ internal static class SelectiveInputEditorVerification
     // 表示した同一編集画面で、実フックの終了回収と次の実行を検査します。
     internal static async Task<int> RunAsync(string directory)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("編集画面の入力検証はSandbox専用です。");
         }

@@ -9,7 +9,7 @@ internal static class TrayVerification
 {
     internal static Task<int> SaveExitStateAsync(string receipt)
     {
-        Require(Environment.UserName == "WDAGUtilityAccount", "Sandbox 内の検証");
+        Require(SandboxEnvironment.IsCurrent, "Sandbox 内の検証");
         string state = ApplicationInfo.SettingsPath("start-in-tray");
         Require(!File.Exists(state), "既存の起動状態がない");
         var window = new MainWindow(false, reportError: error =>

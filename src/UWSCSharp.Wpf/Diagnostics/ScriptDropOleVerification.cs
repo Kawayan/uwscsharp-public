@@ -182,7 +182,7 @@ internal static class ScriptDropOleVerification
 
     internal static async Task<int> RunAsync(string receipt, bool separateProcess = false)
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase)
+        if (!SandboxEnvironment.IsCurrent
             || IntPtr.Size != 8)
         {
             throw new InvalidOperationException("OLEドロップ検証は64bitのWindows Sandbox内で実行してください。");

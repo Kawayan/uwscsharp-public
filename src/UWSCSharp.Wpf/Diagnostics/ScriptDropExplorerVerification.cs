@@ -201,7 +201,7 @@ internal static class ScriptDropExplorerVerification
 
     internal static async Task<int> RunAsync(string receipt, bool shortcuts = false)
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase)
+        if (!SandboxEnvironment.IsCurrent
             || IntPtr.Size != 8)
         {
             throw new InvalidOperationException("Explorerのドロップ検証は64bitのWindows Sandbox内で実行してください。");

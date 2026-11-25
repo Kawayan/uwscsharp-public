@@ -14,7 +14,7 @@ internal static class WindowPositionVerification
 {
     internal static async Task<int> RunAsync(string receipt)
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase))
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("画面配置の検証はWindows Sandbox内で実行してください。");
         }

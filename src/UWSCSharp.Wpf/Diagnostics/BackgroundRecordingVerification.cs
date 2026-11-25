@@ -15,7 +15,7 @@ internal static class BackgroundRecordingVerification
 {
     internal static async Task<int> RunAsync(string receipt, bool background = true)
     {
-        Require(Environment.UserName == "WDAGUtilityAccount", "Sandbox専用です。");
+        Require(SandboxEnvironment.IsCurrent, "Sandbox専用です。");
         string settings = MainWindow.RecordingVerificationAccess.SettingsPath;
         byte[]? saved = File.Exists(settings)
             ? await File.ReadAllBytesAsync(settings) : null;
@@ -153,7 +153,7 @@ internal static class BackgroundRecordingVerification
     internal static async Task<int> RunAfterRestartAsync(
         string targetJson, string receipt)
     {
-        Require(Environment.UserName == "WDAGUtilityAccount", "Sandbox専用です。");
+        Require(SandboxEnvironment.IsCurrent, "Sandbox専用です。");
         try
         {
             ButtonTarget target = JsonSerializer.Deserialize<ButtonTarget>(targetJson);

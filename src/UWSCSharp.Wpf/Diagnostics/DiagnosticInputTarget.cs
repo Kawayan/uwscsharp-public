@@ -19,7 +19,7 @@ internal static class DiagnosticInputTarget
     internal static async Task PrepareAsync(
         nint expected, uint process, Window? window = null)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("入力先の準備はSandbox専用です。");
         }

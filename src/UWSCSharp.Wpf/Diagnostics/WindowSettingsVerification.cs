@@ -14,7 +14,7 @@ internal static class WindowSettingsVerification
 {
     internal static async Task<int> RunAsync(string receipt)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("本体設定の検証はSandbox専用です。");
         }

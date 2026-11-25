@@ -11,7 +11,7 @@ internal static class LauncherHotkeyRegistrationVerification
 {
     internal static async Task<int> RunAsync(string directory, string receipt)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("この検証はSandbox内だけで実行します。");
         }

@@ -12,7 +12,7 @@ internal static class TrayShellLayoutVerification
     internal static async Task<int> RunAsync(string directory, string receipt,
         bool restartExplorer = false)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("通知領域の配置調査はSandbox内だけで実行します。");
         }

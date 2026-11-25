@@ -8,7 +8,7 @@ internal static class PowerCommandVerification
 {
     internal static async Task<int> RunAsync(string directory, string receipt)
     {
-        Require(Environment.UserName == "WDAGUtilityAccount", "Sandbox内の検証");
+        Require(SandboxEnvironment.IsCurrent, "Sandbox内の検証");
         var requests = new List<PowerCommandRequest>();
         var errors = new List<Exception>();
         var window = new MainWindow(false, reportError: errors.Add,

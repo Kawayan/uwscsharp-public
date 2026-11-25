@@ -338,7 +338,7 @@ internal static class ScriptDropVerification
 
     internal static async Task<int> RunAsync(string receipt)
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase))
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("ドロップ再生の検証はWindows Sandbox内で実行してください。");
         }

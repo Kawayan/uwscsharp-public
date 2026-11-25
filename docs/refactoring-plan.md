@@ -90,3 +90,8 @@
 ## 実施記録
 
 各フェーズを終えたら、ここに結果を追記します。
+
+### フェーズ1（完了）
+- `src/UWSCSharp.Wpf/Diagnostics/SandboxEnvironment.cs` を追加し、src の判定25か所（24ファイル）をすべて `SandboxEnvironment.IsCurrent` に置き換えました。src から `"WDAGUtilityAccount"` の直接比較はなくなりました。
+- `AssociationRegistrationVerification.Run` に判定を追加しました。通常の PC で `--verify-association-registration` を実行すると、レジストリを変更せずに終了コード1で終わることを確認しました。
+- 確認: WPF プロジェクトのビルド（エラー・警告なし）、`RecordingUiRuntimeTests`（Sandbox 専用を除く3件）すべて成功。

@@ -11,7 +11,7 @@ internal static class ScriptHotkeyVerification
 {
     internal static async Task<int> RunAsync(string path, bool verifyPause = false)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("ホットキーのGUI検証はWindows Sandbox内で実行してください。");
         }
