@@ -78,9 +78,9 @@ public sealed class RecorderTests
     {
         string source = BasicRecorder.Serialize(
         [
-            new(1, 0, 1, -20, 30, 100),
-            new(2, 1, 1, -20, 30, 110),
-            new(0, 65, 1, 0, 0, 120)
+            new(RecordedInputKind.MouseMove, 0, 1, -20, 30, 100),
+            new(RecordedInputKind.MouseButton, 1, 1, -20, 30, 110),
+            new(RecordedInputKind.Key, 65, 1, 0, 0, 120)
         ]);
         var target = new Target();
         await new Interpreter(windows: target).RunAsync(source, _ => { });
@@ -97,8 +97,8 @@ public sealed class RecorderTests
     {
         string source = BasicRecorder.Serialize(
         [
-            new(0, 65, 1, 0, 0, 10),
-            new(0, 65, 2, 0, 0, 10)
+            new(RecordedInputKind.Key, 65, 1, 0, 0, 10),
+            new(RecordedInputKind.Key, 65, 2, 0, 0, 10)
         ]);
         Assert.Equal("KBD(65,1)" + Environment.NewLine
             + "KBD(65,2)" + Environment.NewLine, source);

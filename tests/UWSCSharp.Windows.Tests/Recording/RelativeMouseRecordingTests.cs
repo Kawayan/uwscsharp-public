@@ -93,9 +93,9 @@ public sealed class RelativeMouseRecordingTests
         };
         string source = BasicRecorder.Serialize(
         [
-            new(1, 0, 1, -90, 30, 1, Window: Window),
-            new(1, 0, 1, 900, 800, 1),
-            new(4, 6, 120, 210, 30, 1, Window: other)
+            new(RecordedInputKind.MouseMove, 0, 1, -90, 30, 1, Window: Window),
+            new(RecordedInputKind.MouseMove, 0, 1, 900, 800, 1),
+            new(RecordedInputKind.Wheel, 6, 120, 210, 30, 1, Window: other)
         ], relativeMouseCoordinates: true);
         Assert.Contains("MMV(900,800)", source);
         Assert.DoesNotContain("MOUSEORG", source);
@@ -147,11 +147,11 @@ public sealed class RelativeMouseRecordingTests
 
         string source = BasicRecorder.Serialize(
         [
-            new(1, 0, 1, captured.X + 30, captured.Y + 30, 1,
+            new(RecordedInputKind.MouseMove, 0, 1, captured.X + 30, captured.Y + 30, 1,
                 Window: captured),
-            new(2, 0, 1, captured.X + 30, captured.Y + 30, 2,
+            new(RecordedInputKind.MouseButton, 0, 1, captured.X + 30, captured.Y + 30, 2,
                 Window: captured),
-            new(2, 0, 2, captured.X + 30, captured.Y + 30, 3,
+            new(RecordedInputKind.MouseButton, 0, 2, captured.X + 30, captured.Y + 30, 3,
                 Window: captured)
         ], compact, relativeMouseCoordinates: true);
         Assert.Contains("BTN(", source);
@@ -199,11 +199,11 @@ public sealed class RelativeMouseRecordingTests
         Assert.NotNull(origin);
         bool buttonHeld = button >= 0;
         BasicRecorder.InputEvent[] events = buttonHeld
-            ? [new(2, button, 1, center.X, center.Y, 1, Window: origin),
-                new(1, 0, 1, center.X + 8, center.Y, 1, Window: origin),
-                new(2, button, 2, center.X + 8, center.Y, 1, Window: origin)]
-            : [new(1, 0, 1, center.X, center.Y, 1, Window: origin),
-                new(1, 0, 1, center.X + 8, center.Y, 1, Window: origin)];
+            ? [new(RecordedInputKind.MouseButton, button, 1, center.X, center.Y, 1, Window: origin),
+                new(RecordedInputKind.MouseMove, 0, 1, center.X + 8, center.Y, 1, Window: origin),
+                new(RecordedInputKind.MouseButton, button, 2, center.X + 8, center.Y, 1, Window: origin)]
+            : [new(RecordedInputKind.MouseMove, 0, 1, center.X, center.Y, 1, Window: origin),
+                new(RecordedInputKind.MouseMove, 0, 1, center.X + 8, center.Y, 1, Window: origin)];
         string source = BasicRecorder.Serialize(events,
             relativeMouseCoordinates: true);
         int firstMove = source.IndexOf(buttonHeld ? "BTN(" : "MMV(",

@@ -34,13 +34,13 @@ internal sealed partial class WindowMovementMonitor : IDisposable
 
     internal void Start()
     {
-        movementHook = SetWinEventHook(0x000a, 0x000b, 0, callback, 0, 0, 2);
+        movementHook = SetWinEventHook(Native.EventSystemMoveSizeStart, Native.EventSystemMoveSizeEnd, 0, callback, 0, 0, 2);
         if (movementHook == 0)
         {
             throw new Win32Exception("ウインドウ移動の監視を開始できません。");
         }
 
-        locationHook = SetWinEventHook(0x800b, 0x800b, 0, callback, 0, 0, 2);
+        locationHook = SetWinEventHook(Native.EventObjectLocationChange, Native.EventObjectLocationChange, 0, callback, 0, 0, 2);
         if (locationHook == 0)
         {
             throw new Win32Exception("ウインドウ位置の監視を開始できません。");
@@ -48,7 +48,7 @@ internal sealed partial class WindowMovementMonitor : IDisposable
 
         if (buffer.BackgroundPlayback || buffer.RecordButtonClicks)
         {
-            stateHook = SetWinEventHook(0x800a, 0x800a, 0, callback, 0, 0, 0);
+            stateHook = SetWinEventHook(Native.EventObjectStateChange, Native.EventObjectStateChange, 0, callback, 0, 0, 0);
             if (stateHook == 0)
             {
                 throw new Win32Exception("チェック状態の監視を開始できません。");
@@ -61,7 +61,7 @@ internal sealed partial class WindowMovementMonitor : IDisposable
     {
         try
         {
-            if (eventId == 0x800a)
+            if (eventId == Native.EventObjectStateChange)
             {
                 if (objectId == -4 && childId == 0)
                 {
@@ -87,7 +87,7 @@ internal sealed partial class WindowMovementMonitor : IDisposable
             return;
         }
 
-        if (eventId == 0x000a)
+        if (eventId == Native.EventSystemMoveSizeStart)
         {
             if (window != foreground() || buffer.WaitingForInitialRelease)
             {
@@ -98,40 +98,40 @@ internal sealed partial class WindowMovementMonitor : IDisposable
             lastMovedWindow = window;
             lastSnapshot = null;
         }
-        else if (eventId == 0x000b)
+        else if (eventId == Native.EventSystemMoveSizeEnd)
         {
             if (window != movingWindow)
             {
                 return;
             }
         }
-        else if (eventId != 0x800b
+        else if (eventId != Native.EventObjectLocationChange
             || window != movingWindow && (window != lastMovedWindow || window != foreground()))
         {
             return;
         }
 
         RecordedWindow? snapshot = capture(window);
-        if (snapshot is null && eventId == 0x000a)
+        if (snapshot is null && eventId == Native.EventSystemMoveSizeStart)
         {
             movingWindow = 0;
             lastMovedWindow = 0;
             return;
         }
-        if (snapshot is null && eventId == 0x000b)
+        if (snapshot is null && eventId == Native.EventSystemMoveSizeEnd)
         {
             snapshot = lastSnapshot;
         }
         if (snapshot is not null)
         {
-            int phase = eventId == 0x000a ? 1 : eventId == 0x000b ? 2 : 0;
+            int phase = eventId == Native.EventSystemMoveSizeStart ? 1 : eventId == Native.EventSystemMoveSizeEnd ? 2 : 0;
             if (phase != 0 || snapshot != lastSnapshot)
             {
                 buffer.WindowMovement(snapshot, phase, time);
                 lastSnapshot = snapshot;
             }
         }
-        if (eventId == 0x000b)
+        if (eventId == Native.EventSystemMoveSizeEnd)
         {
             movingWindow = 0;
         }

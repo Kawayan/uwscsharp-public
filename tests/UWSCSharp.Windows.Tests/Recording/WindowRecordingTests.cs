@@ -222,7 +222,7 @@ public sealed class WindowRecordingTests(Xunit.Abstractions.ITestOutputHelper di
         var target = new Target();
         await new Interpreter(windows: target).RunAsync(
             BasicRecorder.Serialize(
-                [new(2, 0, 1, 123, 456, 0, ButtonClick: click)]), _ => { });
+                [new(RecordedInputKind.MouseButton, 0, 1, 123, 456, 0, ButtonClick: click)]), _ => { });
 
         Assert.Equal(
             ["GETID:文書,Editor", "CLKITEM:7,実行\"<#CR>,1,1,2"],
@@ -538,9 +538,9 @@ public sealed class WindowRecordingTests(Xunit.Abstractions.ITestOutputHelper di
         var uncheckedButton = new RecordedButtonClick(First, "選択", 2, State: 0);
         var target = new Target();
         string source = BasicRecorder.Serialize(
-            [new(0, 65, 1, 0, 0, 0), new(2, 0, 1, 10, 10, 1),
-                new(2, 0, 1, 20, 20, 2, ButtonClick: click),
-                new(2, 0, 1, 20, 20, 2, ButtonClick: uncheckedButton)],
+            [new(RecordedInputKind.Key, 65, 1, 0, 0, 0), new(RecordedInputKind.MouseButton, 0, 1, 10, 10, 1),
+                new(RecordedInputKind.MouseButton, 0, 1, 20, 20, 2, ButtonClick: click),
+                new(RecordedInputKind.MouseButton, 0, 1, 20, 20, 2, ButtonClick: uncheckedButton)],
             backgroundPlayback: true);
         await new Interpreter(windows: target).RunAsync(source, _ => { });
 

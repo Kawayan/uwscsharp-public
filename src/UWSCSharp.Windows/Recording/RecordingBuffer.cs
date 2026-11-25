@@ -103,7 +103,7 @@ internal sealed class RecordingBuffer(
                 for (int i = events.Count - 1; i >= 0
                     && events[i].Sequence >= mouseGestureStart; i--)
                 {
-                    if (events[i].Kind is 1 or 2)
+                    if (events[i].Kind is RecordedInputKind.MouseMove or RecordedInputKind.MouseButton)
                     {
                         events[i] = events[i] with
                         {
@@ -114,7 +114,7 @@ internal sealed class RecordingBuffer(
             }
         }
 
-        Add(new(5, 0, phase, 0, 0, time, ++nextSequence, window, true));
+        Add(new(RecordedInputKind.WindowMovement, 0, phase, 0, 0, time, ++nextSequence, window, true));
         if (phase == 2)
         {
             windowMoving = false;
@@ -169,11 +169,12 @@ internal sealed class RecordingBuffer(
         Complete();
         foreach (int key in recordedKeys.Order())
         {
-            Add(new BasicRecorder.InputEvent(0, key, 2, 0, 0, time, ++nextSequence));
+            Add(new BasicRecorder.InputEvent(RecordedInputKind.Key, key, 2, 0, 0, time, ++nextSequence));
         }
         foreach (int button in recordedButtons.Order())
         {
-            Add(new BasicRecorder.InputEvent(3, button, 2, 0, 0, time, ++nextSequence));
+            Add(new BasicRecorder.InputEvent(RecordedInputKind.ButtonRelease,
+                button, 2, 0, 0, time, ++nextSequence));
         }
         // 欠落区間の押下状態は推測せず、復旧時に保持中の入力の解放を待ちます。
         recordedKeys.Clear();
@@ -256,13 +257,13 @@ internal sealed class RecordingBuffer(
                 {
                     FlushModifiers();
                     recordedKeys.Remove(key);
-                    Add(new(0, key, 2, 0, 0, time, sequence));
+                    Add(new(RecordedInputKind.Key, key, 2, 0, 0, time, sequence));
                 }
             }
             else if (recordedKeys.Remove(key))
             {
                 // 外で押したキーは自画面へ移ってもUPを保持します。
-                Add(new(0, key, 2, 0, 0, time, sequence));
+                Add(new(RecordedInputKind.Key, key, 2, 0, 0, time, sequence));
             }
 
             return;
@@ -283,13 +284,13 @@ internal sealed class RecordingBuffer(
 
         if (Modifier(key) != 0 && !recordedKeys.Contains(key))
         {
-            pendingModifiers.TryAdd(key, new(0, key, 1, 0, 0, time, sequence, window));
+            pendingModifiers.TryAdd(key, new(RecordedInputKind.Key, key, 1, 0, 0, time, sequence, window));
             return;
         }
 
         FlushModifiers();
         recordedKeys.Add(key);
-        Add(new(0, key, 1, 0, 0, time, sequence, window));
+        Add(new(RecordedInputKind.Key, key, 1, 0, 0, time, sequence, window));
     }
 
     internal void Mouse(int button, int state, int x, int y,
@@ -330,7 +331,8 @@ internal sealed class RecordingBuffer(
             if (!excluded && (!OmitIdleTimeAndMouseMoves
                 || !windowMovementGesture && recordedButtons.Count != 0))
             {
-                Add(new(1, 0, 1, x, y, time, sequence, window, windowMovementGesture));
+                Add(new(RecordedInputKind.MouseMove, 0, 1, x, y, time, sequence,
+                    window, windowMovementGesture));
             }
 
             return;
@@ -348,7 +350,7 @@ internal sealed class RecordingBuffer(
                     && recordedButtons.Count == 0 && events.Count > 0
                     && events[^1] is
                     {
-                        Kind: 2, Code: 0, State: 1,
+                        Kind: RecordedInputKind.MouseButton, Code: 0, State: 1,
                         WindowMovement: false
                     } down
                     && down.ButtonTarget == buttonTarget
@@ -362,7 +364,7 @@ internal sealed class RecordingBuffer(
                     if (!BackgroundPlayback && checkboxBefore is int highLevelBefore)
                     {
                         int count = events.Count;
-                        Add(new(2, button, 2, x, y, time, sequence, window));
+                        Add(new(RecordedInputKind.MouseButton, button, 2, x, y, time, sequence, window));
                         if (events.Count != count)
                         {
                             checkboxIndex = count;
@@ -389,7 +391,7 @@ internal sealed class RecordingBuffer(
                 }
                 else
                 {
-                    Add(new(2, button, 2, x, y, time, sequence, window,
+                    Add(new(RecordedInputKind.MouseButton, button, 2, x, y, time, sequence, window,
                         windowMovementGesture));
                 }
                 if (recordedButtons.Count == 0 && !windowMoving)
@@ -420,7 +422,7 @@ internal sealed class RecordingBuffer(
         {
             checkboxBefore = CheckboxRecordingCandidate.ReadState(buttonTarget);
         }
-        Add(new(2, button, 1, x, y, time, sequence, window,
+        Add(new(RecordedInputKind.MouseButton, button, 1, x, y, time, sequence, window,
             windowMovementGesture, ButtonTarget: recordedKeys.Count == 0
                 && recordedButtons.Count == 1 ? buttonTarget : 0,
             MenuCandidate: button == 0 && recordedKeys.Count == 0
@@ -462,7 +464,7 @@ internal sealed class RecordingBuffer(
         }
 
         FlushModifiers();
-        Add(new(4, button, delta, x, y, time, sequence, window));
+        Add(new(RecordedInputKind.Wheel, button, delta, x, y, time, sequence, window));
     }
 
     private uint Modifiers()
