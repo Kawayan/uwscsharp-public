@@ -871,11 +871,16 @@ public sealed class RecordingUiRuntimeTests(ITestOutputHelper output)
     [Theory]
     [InlineData("--verify-runtime", 16, false)]
     [InlineData("--verify-recording-os", 4, true)]
-    [InlineData("--verify-stop-options", 4, true)]
     [InlineData("--verify-tray", 10, true)]
     public async Task WpfRuntimeVerifiesRecordingFailureAndRecovery(
         string mode, int expectedChecks, bool windowShown)
         => await VerifyAsync(mode, expectedChecks, windowShown, false);
+
+    // 停止設定の検証はホットキー登録を変更するため、Windows Sandbox内でだけ実行します。
+    [Fact]
+    [Trait("Category", "SandboxOnly")]
+    public Task StopOptionsRestoreAfterCancellationAndCompletion()
+        => VerifyAsync("--verify-stop-options", 4, true, false);
 
     [Fact]
     [Trait("Category", "SandboxOnly")]
