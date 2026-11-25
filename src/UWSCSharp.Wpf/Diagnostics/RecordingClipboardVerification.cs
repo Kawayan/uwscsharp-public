@@ -500,7 +500,7 @@ internal static class RecordingClipboardVerification
 
     internal static bool IsLockedBy(nint handle, int pid)
     {
-        GetWindowThreadProcessId(handle, out uint actual);
+        Native.GetWindowThreadProcessId(handle, out uint actual);
         return GetOpenClipboardWindow() == handle && actual == (uint)pid;
     }
 
@@ -514,7 +514,4 @@ internal static class RecordingClipboardVerification
 
     [DllImport("user32.dll")]
     private static extern nint GetOpenClipboardWindow();
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint window, out uint pid);
 }

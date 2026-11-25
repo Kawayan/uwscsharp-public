@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using UWSCSharp.Core;
 using UWSCSharp.IO;
+using UWSCSharp.Windows;
 
 namespace UWSCSharp.Wpf;
 
@@ -130,7 +131,7 @@ public partial class LogWindow : Window
     private static void SetBounds(nint handle,
         int x, int y, int width, int height)
     {
-        if (!SetWindowPos(handle, 0, x, y, width, height,
+        if (!Native.SetWindowPos(handle, 0, x, y, width, height,
             0x0004 | 0x0010))
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -168,9 +169,4 @@ public partial class LogWindow : Window
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetWindowRect(nint window, out NativeRect rect);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool SetWindowPos(nint window, nint after,
-        int x, int y, int width, int height, uint flags);
 }

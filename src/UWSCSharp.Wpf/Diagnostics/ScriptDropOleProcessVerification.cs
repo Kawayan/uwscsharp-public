@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using UWSCSharp.Windows;
 
 namespace UWSCSharp.Wpf;
 
@@ -125,7 +126,7 @@ internal static class ScriptDropOleProcessVerification
                 new Point(sender.ActualWidth / 2, sender.ActualHeight / 2));
             nint targetWindow = WindowFromPhysicalPoint(new NativePoint(
                 checked((int)request.TargetX), checked((int)request.TargetY)));
-            GetWindowThreadProcessId(targetWindow, out uint targetProcessId);
+            Native.GetWindowThreadProcessId(targetWindow, out uint targetProcessId);
             Console.WriteLine(JsonSerializer.Serialize(new
             {
                 phase = "process-source-ready",
@@ -185,7 +186,4 @@ internal static class ScriptDropOleProcessVerification
 
     [DllImport("user32.dll")]
     private static extern nint WindowFromPhysicalPoint(NativePoint point);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint window, out uint processId);
 }

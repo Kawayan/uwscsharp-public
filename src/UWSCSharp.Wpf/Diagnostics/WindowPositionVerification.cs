@@ -74,7 +74,7 @@ internal static class WindowPositionVerification
                     StopWindow stop = access.StopWindow!;
                     stop.Hide();
                     await Task.Delay(100);
-                    nint foreground = PositionGetForegroundWindow();
+                    nint foreground = Native.GetForegroundWindow();
                     nint stopHandle = new WindowInteropHelper(stop).EnsureHandle();
                     nint logHandle = new WindowInteropHelper(log).EnsureHandle();
                     await File.WriteAllTextAsync(gate, "go");
@@ -82,7 +82,7 @@ internal static class WindowPositionVerification
                     Require(!stop.IsVisible, "POSITIONが非表示の停止画面を表示しました。");
                     Require(log.IsVisible == visible && log.WindowState == state,
                         "POSITIONがログ画面の表示状態を変更しました。");
-                    Require(PositionGetForegroundWindow() == foreground,
+                    Require(Native.GetForegroundWindow() == foreground,
                         "POSITIONが入力先を変更しました。");
                     (int x, int y, int width, int height) = WindowsScriptWindowLayout.ReadBounds(stopHandle);
                     Require(x == 200 && y == 500, "停止画面の指定座標が反映されません。");
@@ -100,9 +100,9 @@ internal static class WindowPositionVerification
                         await File.WriteAllTextAsync(gate + ".show", "go");
                         await WaitPositionAsync(() => access.Output.Contains("shown"));
                         Require(log.IsVisible && log.WindowState == WindowState.Maximized
-                            && PositionIsZoomed(logHandle),
+                            && Native.IsZoomed(logHandle),
                             "LOGPRINT(TRUE)が最大化したログ画面を再表示できません。");
-                        Require(PositionGetForegroundWindow() == foreground,
+                        Require(Native.GetForegroundWindow() == foreground,
                             "LOGPRINT(TRUE)が入力先を変更しました。");
                         await File.WriteAllTextAsync(gate + ".hide", "go");
                         await WaitPositionAsync(() => access.Output.Contains("hidden-again"));
@@ -111,8 +111,8 @@ internal static class WindowPositionVerification
                         await File.WriteAllTextAsync(gate + ".repeat", "go");
                         await WaitPositionAsync(() => access.Output.Contains("shown-again"));
                         Require(log.IsVisible && log.WindowState == WindowState.Maximized
-                            && PositionIsZoomed(logHandle)
-                            && PositionGetForegroundWindow() == foreground,
+                            && Native.IsZoomed(logHandle)
+                            && Native.GetForegroundWindow() == foreground,
                             "2回目の再表示で最大化状態または入力先が変わりました。");
                         checks.Add("logprint-show-maximized-without-activation");
                     }
@@ -123,11 +123,11 @@ internal static class WindowPositionVerification
                         // 非表示中のWPF状態変更だけでは、OSの最大化が残る場合があります。
                         // 配置要求の状態保持を確認した後、所有する画面を明示的に復元します。
                         const int showNoActivate = 4;
-                        PositionShowWindow(logHandle, showNoActivate);
+                        Native.ShowWindow(logHandle, showNoActivate);
                         await WaitPositionAsync(() =>
                             log.WindowState == WindowState.Normal
-                            && !PositionIsIconic(logHandle)
-                            && !PositionIsZoomed(logHandle),
+                            && !Native.IsIconic(logHandle)
+                            && !Native.IsZoomed(logHandle),
                             () => PositionState(log, logHandle));
                     }
 
@@ -139,8 +139,8 @@ internal static class WindowPositionVerification
                     {
                         (int lx, int ly, int lw, int lh) = WindowsScriptWindowLayout.ReadBounds(logHandle);
                         return log.WindowState == WindowState.Normal
-                            && !PositionIsIconic(logHandle)
-                            && !PositionIsZoomed(logHandle)
+                            && !Native.IsIconic(logHandle)
+                            && !Native.IsZoomed(logHandle)
                             && lx == expectedX && ly == expectedY
                             && lw == expectedWidth && lh == expectedHeight;
                     }, () => PositionState(log, logHandle));
@@ -219,18 +219,11 @@ internal static class WindowPositionVerification
         }
     }
 
-    [DllImport("user32.dll", EntryPoint = "GetForegroundWindow")]
-    private static extern nint PositionGetForegroundWindow();
-
-    [DllImport("user32.dll", EntryPoint = "ShowWindow")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PositionShowWindow(nint window, int command);
-
     private static string PositionState(LogWindow window, nint handle)
     {
         bool read = PositionGetWindowRect(handle, out PositionRect rect);
         return $"WPF={window.WindowState}; visible={window.IsVisible}; "
-            + $"iconic={PositionIsIconic(handle)}; zoomed={PositionIsZoomed(handle)}; "
+            + $"iconic={Native.IsIconic(handle)}; zoomed={Native.IsZoomed(handle)}; "
             + $"normal-bounds={WindowsScriptWindowLayout.ReadBounds(handle)}; "
             + $"actual-read={read}; actual={rect.Left},{rect.Top},{rect.Right},{rect.Bottom}";
     }
@@ -248,11 +241,4 @@ internal static class WindowPositionVerification
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool PositionGetWindowRect(nint window, out PositionRect rect);
 
-    [DllImport("user32.dll", EntryPoint = "IsIconic")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PositionIsIconic(nint window);
-
-    [DllImport("user32.dll", EntryPoint = "IsZoomed")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PositionIsZoomed(nint window);
 }

@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using UWSCSharp.Core;
+using UWSCSharp.Windows;
 
 namespace UWSCSharp.Wpf;
 
@@ -29,7 +30,7 @@ internal static class ScriptHotkeyPauseVerification
             {
                 await WaitAsync(() => playback.Output.Contains("pause-hotkey-ready", StringComparison.Ordinal));
                 window.Activate();
-                if (PauseProbeForeground() != new WindowInteropHelper(window).Handle)
+                if (Native.GetForegroundWindow() != new WindowInteropHelper(window).Handle)
                 {
                     throw new InvalidOperationException("検証画面を入力先にできません。");
                 }
@@ -123,7 +124,4 @@ internal static class ScriptHotkeyPauseVerification
 
     [DllImport("user32.dll", EntryPoint = "SendInput")]
     private static extern uint PauseProbeSendInput(uint count, PauseProbeInput[] inputs, int size);
-
-    [DllImport("user32.dll", EntryPoint = "GetForegroundWindow")]
-    private static extern nint PauseProbeForeground();
 }

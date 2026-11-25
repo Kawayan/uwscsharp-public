@@ -101,3 +101,12 @@
 - `InputEvent.Kind` を `RecordedInputKind` enum に変更しました。テストの中で `InputEvent` を作っている17か所も、enum の名前に置き換えています。リテラルの `0` は enum に暗黙変換されてエラーにならないため、残っていた3か所も確認して揃えました。
 - キー状態の判定に使う `0x8000`（`GetAsyncKeyState` の押下ビット）は、よく知られた慣用表現なので残しました。
 - 確認: ソリューション全体のビルド（エラー・警告なし）、記録関連のテスト（Sandbox 専用を除く96件）すべて成功。
+
+### フェーズ3（完了）
+- `Native` と戻り値・引数の型が完全に一致する WPF 側の宣言33か所（13ファイル）を削除し、呼び出し側を `Native.…` に置き換えました。別名で宣言していたもの（`StopOptionsPostMessage`、`PauseProbeForeground`、`PositionIsIconic` など）も、元の API 名で呼ぶようにしています。
+- 対象: `GetForegroundWindow`、`GetWindowThreadProcessId`、`IsWindow`、`IsWindowVisible`、`IsIconic`、`IsZoomed`、`ShowWindow`、`SetWindowPos`、`SetForegroundWindow`、`PostMessageW`、`GetAncestor`、`MonitorFromWindow`、`GetWindowLongW`、`IsWindowEnabled`、`SetPhysicalCursorPos`、`GetAsyncKeyState`
+- 製品コードでは `LogWindow`（`LogWindow.Placement.cs`、`LogWindow.xaml.cs`）と `MainWindow`（`MainWindow.Hotkeys.cs`）が対象です。partial クラスの別ファイル（`MainWindow.xaml.cs`、`MainWindow.Launcher.cs`）からの呼び出しも置き換えました。
+- 対象外としたもの:
+  - 引数の構造体が違うもの: `SendInput`（3か所）、`GetWindowRect`（3か所）、`GetPhysicalCursorPos` と `WindowFromPoint`（`TrayShellInteractionVerification`）。それぞれ独自の構造体で定義しており、`Native` の構造体へ移すと構造体のレイアウトを照合し直す必要があるため、今回は残しました。
+  - `Native` クラスにまだ宣言がないもの: `RegisterHotKey` / `UnregisterHotKey`（`MainWindow.Hotkeys.cs`、`SchedulerWorkerPlaybackHost.cs`、`ScriptHotkeyVerification.cs`、`StopOptionsVerification.cs`）、`GetDpiForWindow` など。`Native` への追加は、引数の型（`key` が `int` か `uint` か）を揃える判断が必要なため、別の作業にします。
+- 確認: ソリューション全体のビルド（エラー・警告なし）、ヘッドレステスト（`scripts/test-headless.ps1`: Core 2385件、IO 290件、Windows 2698件）と `RecordingUiRuntimeTests`（Sandbox 専用を除く3件）すべて成功。変更した検証コードの多くは Sandbox 専用なので、Sandbox 内での実行は確認していません。

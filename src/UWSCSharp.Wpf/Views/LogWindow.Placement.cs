@@ -54,11 +54,11 @@ public partial class LogWindow
 
         NativeRect current = placement.NormalPosition;
         bool workspaceCoordinates =
-            (GetWindowLong(handle, ExtendedStyleIndex) & ToolWindowStyle) == 0;
+            (Native.GetWindowLongW(handle, ExtendedStyleIndex) & ToolWindowStyle) == 0;
         if (workspaceCoordinates)
         {
             NativePoint offset = WorkspaceOffset(
-                MonitorFromWindow(handle, NearestMonitor));
+                Native.MonitorFromWindow(handle, NearestMonitor));
             current = Offset(current, offset.X, offset.Y);
         }
 
@@ -116,7 +116,7 @@ public partial class LogWindow
         }
 
         nint handle = new WindowInteropHelper(this).EnsureHandle();
-        if (IsIconic(handle) || IsZoomed(handle))
+        if (Native.IsIconic(handle) || Native.IsZoomed(handle))
         {
             return;
         }
@@ -208,19 +208,6 @@ public partial class LogWindow
         ref NativeMonitorInfo information);
 
     [DllImport("user32.dll")]
-    private static extern nint MonitorFromWindow(nint window, uint flags);
-
-    [DllImport("user32.dll")]
     private static extern nint MonitorFromRect(ref NativeRect rect, uint flags);
 
-    [DllImport("user32.dll", EntryPoint = "GetWindowLongW")]
-    private static extern int GetWindowLong(nint window, int index);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool IsIconic(nint window);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool IsZoomed(nint window);
 }
