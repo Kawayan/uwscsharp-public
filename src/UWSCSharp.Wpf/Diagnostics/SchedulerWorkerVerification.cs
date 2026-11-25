@@ -92,7 +92,7 @@ internal static class SchedulerWorkerVerification
                 "three-independent-window-handles");
             foreach (nint handle in handles)
             {
-                GetWindowThreadProcessId(handle, out uint pid);
+                Native.GetWindowThreadProcessId(handle, out uint pid);
                 Require(pid == (uint)firstPid, "window-owned-by-worker-" + checks.Count);
             }
             Require(values[4] == "2" && values[5] == "" && values[6] == "日本語 \"quote\" \\",
@@ -212,7 +212,7 @@ internal static class SchedulerWorkerVerification
                 await WaitFor(() => File.Exists(Path.Combine(targets, "ui-blocked.ready")));
                 nint window = (nint)long.Parse((await File.ReadAllLinesAsync(
                     Path.Combine(targets, "ui-blocked.data")))[0], CultureInfo.InvariantCulture);
-                uint thread = GetWindowThreadProcessId(window, out uint ownerPid);
+                uint thread = Native.GetWindowThreadProcessId(window, out uint ownerPid);
                 Require(ownerPid == (uint)pid, "suspend-owned-worker-only");
                 using SafeFileHandle handle = OpenThread(0x802, false, thread);
                 if (handle.IsInvalid || GetProcessIdOfThread(handle) != (uint)pid)
@@ -233,11 +233,11 @@ internal static class SchedulerWorkerVerification
                         && result.Result.Forced && !result.Result.ResourcesRecovered
                         && !result.ResourcesRecovered && result.Completion is null,
                         "unresponsive-ui-forced-after-grace");
-                    Require(!IsWindow(window), "forced-worker-window-reclaimed");
+                    Require(!Native.IsWindow(window), "forced-worker-window-reclaimed");
                 }
                 finally
                 {
-                    if (IsWindow(window))
+                    if (Native.IsWindow(window))
                     {
                         ResumeThread(handle);
                     }
@@ -384,9 +384,6 @@ internal static class SchedulerWorkerVerification
         }
     }
 
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint window, out uint processId);
-
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern SafeFileHandle OpenThread(uint access, bool inherit, uint threadId);
 
@@ -398,7 +395,4 @@ internal static class SchedulerWorkerVerification
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern uint GetProcessIdOfThread(SafeFileHandle thread);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindow(nint window);
 }

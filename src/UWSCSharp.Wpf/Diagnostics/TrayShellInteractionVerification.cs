@@ -255,7 +255,7 @@ internal sealed partial class TrayIcon
             Y = rectangle.Top + (rectangle.Bottom - rectangle.Top) / 2
         };
         nint hit = TrayShellInput.WindowFromPoint(point);
-        TrayShellInput.GetWindowThreadProcessId(hit, out uint processId);
+        Native.GetWindowThreadProcessId(hit, out uint processId);
         VerificationAssert.Require(processId != 0, $"アイコン中心の入力先（{point.X},{point.Y}）");
         using var process = Process.GetProcessById(checked((int)processId));
         VerificationAssert.Require(process.ProcessName.Equals("explorer", StringComparison.OrdinalIgnoreCase),
@@ -293,7 +293,4 @@ internal static class TrayShellInput
 
     [DllImport("user32.dll")]
     internal static extern nint WindowFromPoint(PhysicalPoint point);
-
-    [DllImport("user32.dll")]
-    internal static extern uint GetWindowThreadProcessId(nint window, out uint processId);
 }

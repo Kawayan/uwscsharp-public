@@ -137,7 +137,7 @@ public partial class MainWindow : Window
         recordTimer.Tick += async (_, _) =>
         {
             if (!recording.HasRecorder || recording.IsStarting || recording.IsStopping
-                || !IsWindowEnabled(windowHandle))
+                || !Native.IsWindowEnabled(windowHandle))
             {
                 return;
             }

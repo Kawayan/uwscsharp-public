@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using UWSCSharp.Core;
 using UWSCSharp.IO;
+using UWSCSharp.Windows;
 
 namespace UWSCSharp.Wpf;
 
@@ -193,7 +194,7 @@ public partial class MainWindow
             ApplicationLauncherSettings position =
                 await ApplicationLauncherSettings.LoadAsync(launcherPositionSettingsPath);
             // 読込み待機中のキー変更・モーダル表示・終了を反映します。
-            if (!launcherClosed && IsWindowEnabled(windowHandle)
+            if (!launcherClosed && Native.IsWindowEnabled(windowHandle)
                 && launcherHotkeys?.Accepts(id) == true)
             {
                 OpenLauncher(atPointer: true, position);

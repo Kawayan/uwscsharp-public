@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using UWSCSharp.Windows;
 using static UWSCSharp.Wpf.VerificationAssert;
 
 namespace UWSCSharp.Wpf;
@@ -178,7 +179,7 @@ internal static class ScriptDropOleVerification
         }
     }
 
-    internal static bool LeftButtonReleased => (GetAsyncKeyState(1) & 0x8000) == 0;
+    internal static bool LeftButtonReleased => (Native.GetAsyncKeyState(1) & 0x8000) == 0;
 
     internal static async Task<int> RunAsync(string receipt, bool separateProcess = false)
     {
@@ -285,7 +286,7 @@ internal static class ScriptDropOleVerification
 
     internal static void Move(Point point)
     {
-        if (!SetPhysicalCursorPos(checked((int)point.X), checked((int)point.Y)))
+        if (!Native.SetPhysicalCursorPos(checked((int)point.X), checked((int)point.Y)))
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
@@ -319,11 +320,5 @@ internal static class ScriptDropOleVerification
     }
 
     [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool SetPhysicalCursorPos(int x, int y);
-
-    [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, MouseInput[] inputs, int size);
-
-    [DllImport("user32.dll")]
-    private static extern short GetAsyncKeyState(int key);
 }

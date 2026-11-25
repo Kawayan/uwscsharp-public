@@ -63,7 +63,7 @@ internal static partial class RecordingOsVerification
     {
         await using var screen = new Screen(context);
         nint window = new WindowInteropHelper(screen.Window).Handle;
-        Require(screen.Window.Activate() && GetForegroundWindow() == window,
+        Require(screen.Window.Activate() && Native.GetForegroundWindow() == window,
             "Sandbox内の所有画面への入力先限定");
         screen.Editor.Focus();
         int delivered = 0;
@@ -84,7 +84,7 @@ internal static partial class RecordingOsVerification
             context.Observations["seed_callback_count"] = context.Hooks.KeyCount(134);
             context.Observations["seed_delivered"] = delivered;
             await WaitAsync(() => delivered >= 1);
-            Require(GetForegroundWindow() == window, "記録開始後の入力先保持");
+            Require(Native.GetForegroundWindow() == window, "記録開始後の入力先保持");
             await WaitAsync(() => context.Hooks.KeyCount(134) >= 2);
             int pulses = screen.Pulses;
             Task trigger = SendKeyAsync(135);
@@ -280,7 +280,4 @@ internal static partial class RecordingOsVerification
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, TestInput[] inputs, int size);
-
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
 }

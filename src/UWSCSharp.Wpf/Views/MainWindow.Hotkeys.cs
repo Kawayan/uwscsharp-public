@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Interop;
+using UWSCSharp.Windows;
 
 namespace UWSCSharp.Wpf;
 
@@ -147,11 +148,11 @@ public partial class MainWindow
             if (launcherHotkeys?.Accepts((int)wParam) == true)
             {
                 int id = (int)wParam;
-                if (IsWindowEnabled(hwnd) && !launcherClosed)
+                if (Native.IsWindowEnabled(hwnd) && !launcherClosed)
                 {
                     _ = Dispatcher.BeginInvoke(new Action(async () =>
                     {
-                        if (!launcherClosed && IsWindowEnabled(hwnd)
+                        if (!launcherClosed && Native.IsWindowEnabled(hwnd)
                             && launcherHotkeys?.Accepts(id) == true)
                         {
                             await OpenLauncherFromHotkeyAsync(id);
@@ -168,7 +169,7 @@ public partial class MainWindow
             }
 
             // 確認画面中の所有ウィンドウへ処理を再入させません。
-            if (!IsWindowEnabled(hwnd))
+            if (!Native.IsWindowEnabled(hwnd))
             {
                 return 0;
             }
@@ -197,9 +198,6 @@ public partial class MainWindow
 
         return 0;
     }
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindowEnabled(nint hwnd);
 
     [DllImport("user32.dll")]
     private static extern bool RegisterHotKey(nint hwnd,

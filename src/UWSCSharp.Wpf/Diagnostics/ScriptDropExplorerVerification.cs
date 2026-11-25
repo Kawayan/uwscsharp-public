@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Interop;
+using UWSCSharp.Windows;
 using static UWSCSharp.Wpf.VerificationAssert;
 
 namespace UWSCSharp.Wpf;
@@ -238,9 +239,9 @@ internal static class ScriptDropExplorerVerification
         while (deadline.Elapsed < TimeSpan.FromSeconds(20))
         {
             nint handle = FindFolder(folder);
-            if (handle != 0 && IsWindowVisible(handle))
+            if (handle != 0 && Native.IsWindowVisible(handle))
             {
-                GetWindowThreadProcessId(handle, out uint processId);
+                Native.GetWindowThreadProcessId(handle, out uint processId);
                 using var process = Process.GetProcessById(checked((int)processId));
                 if (!string.Equals(process.MainModule?.FileName, start.FileName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -306,8 +307,8 @@ internal static class ScriptDropExplorerVerification
 
     internal static void Position(nint handle, Point corner)
     {
-        ShowWindow(handle, 9);
-        if (!SetWindowPos(handle, 0, checked((int)corner.X), checked((int)corner.Y), 700, 650, 0x40))
+        Native.ShowWindow(handle, 9);
+        if (!Native.SetWindowPos(handle, 0, checked((int)corner.X), checked((int)corner.Y), 700, 650, 0x40))
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
@@ -316,8 +317,8 @@ internal static class ScriptDropExplorerVerification
         Console.WriteLine(JsonSerializer.Serialize(new
         {
             phase = "explorer-position",
-            visible = IsWindowVisible(handle),
-            iconic = IsIconic(handle),
+            visible = Native.IsWindowVisible(handle),
+            iconic = Native.IsIconic(handle),
             rect.Left,
             rect.Top,
             rect.Right,
@@ -360,18 +361,18 @@ internal static class ScriptDropExplorerVerification
             items.Add(item);
         }
 
-        if (GetForegroundWindow() != handle && !SetForegroundWindow(handle))
+        if (Native.GetForegroundWindow() != handle && !Native.SetForegroundWindow(handle))
         {
             ActivateView(handle, items[0]);
         }
 
         var foregroundDeadline = Stopwatch.StartNew();
-        while (GetForegroundWindow() != handle && foregroundDeadline.Elapsed < TimeSpan.FromSeconds(2))
+        while (Native.GetForegroundWindow() != handle && foregroundDeadline.Elapsed < TimeSpan.FromSeconds(2))
         {
             Thread.Sleep(50);
         }
 
-        if (GetForegroundWindow() != handle)
+        if (Native.GetForegroundWindow() != handle)
         {
             throw new InvalidOperationException("専用Explorerの前面状態を確認できませんでした。");
         }
@@ -391,7 +392,7 @@ internal static class ScriptDropExplorerVerification
 
         int draggedIndex = dragged is null ? 0 : Array.IndexOf(paths, dragged);
         if (items.Count == 0 || draggedIndex < 0 || !items[draggedIndex].TryGetClickablePoint(out Point point)
-            || GetAncestor(ScriptDropOleProcessVerification.WindowAtPoint(point), 2) != handle)
+            || Native.GetAncestor(ScriptDropOleProcessVerification.WindowAtPoint(point), 2) != handle)
         {
             throw new InvalidOperationException("選択したファイルのクリック地点を確認できませんでした。");
         }
@@ -408,7 +409,7 @@ internal static class ScriptDropExplorerVerification
         Console.WriteLine(JsonSerializer.Serialize(new
         {
             phase = "explorer-selection-ready",
-            foreground = GetForegroundWindow().ToInt64(),
+            foreground = Native.GetForegroundWindow().ToInt64(),
             expected_window = handle.ToInt64(),
             selected_count = items.Count,
             point
@@ -444,7 +445,7 @@ internal static class ScriptDropExplorerVerification
                 }
 
                 var point = new Point(x, y);
-                if (GetAncestor(ScriptDropOleProcessVerification.WindowAtPoint(point), 2) != handle
+                if (Native.GetAncestor(ScriptDropOleProcessVerification.WindowAtPoint(point), 2) != handle
                     || !Automation.Compare(AutomationElement.FromPoint(point), view))
                 {
                     continue;
@@ -490,7 +491,7 @@ internal static class ScriptDropExplorerVerification
             Console.WriteLine(JsonSerializer.Serialize(new
             {
                 phase = "explorer-drag-threshold",
-                foreground = GetForegroundWindow().ToInt64(),
+                foreground = Native.GetForegroundWindow().ToInt64(),
                 left_button_down = !ScriptDropOleVerification.LeftButtonReleased,
                 threshold
             }));
@@ -527,18 +528,18 @@ internal static class ScriptDropExplorerVerification
             throw new InvalidOperationException("終了対象のExplorer画面を専用フォルダーと照合できませんでした。");
         }
 
-        if (!PostMessageW(handle, 0x10, 0, 0))
+        if (!Native.PostMessageW(handle, 0x10, 0, 0))
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
         var deadline = Stopwatch.StartNew();
-        while (IsWindow(handle) && deadline.Elapsed < TimeSpan.FromSeconds(10))
+        while (Native.IsWindow(handle) && deadline.Elapsed < TimeSpan.FromSeconds(10))
         {
             Thread.Sleep(100);
         }
 
-        if (IsWindow(handle))
+        if (Native.IsWindow(handle))
         {
             throw new TimeoutException("専用のExplorer画面が終了しませんでした。");
         }
@@ -552,36 +553,6 @@ internal static class ScriptDropExplorerVerification
         }
     }
 
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool SetWindowPos(nint handle, nint after, int x, int y, int width, int height, uint flags);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint window, out uint processId);
-
-    [DllImport("user32.dll")]
-    private static extern nint GetAncestor(nint window, uint flags);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool PostMessageW(nint window, uint message, nint wParam, nint lParam);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindow(nint window);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(nint window);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsIconic(nint window);
-
-    [DllImport("user32.dll")]
-    private static extern bool ShowWindow(nint window, int command);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint window);
-
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
-
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeRect
     {
@@ -593,5 +564,4 @@ internal static class ScriptDropExplorerVerification
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool GetWindowRect(nint handle, out NativeRect rect);
-
 }

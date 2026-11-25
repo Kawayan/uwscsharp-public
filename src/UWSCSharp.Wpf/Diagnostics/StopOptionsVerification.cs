@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Interop;
 using UWSCSharp.Core;
+using UWSCSharp.Windows;
 using static UWSCSharp.Wpf.VerificationAssert;
 
 namespace UWSCSharp.Wpf;
@@ -30,7 +31,7 @@ internal static class StopOptionsVerification
         Require(access.IsHotkeyRegistered(1) && access.IsHotkeyRegistered(2) && access.IsHotkeyRegistered(4),
             "停止以外の登録が解除されました。");
         Require(ProbeStopKey(), "解除した停止キーを別の登録で使用できません。");
-        Require(StopOptionsPostMessage(new WindowInteropHelper(owner).Handle,
+        Require(Native.PostMessageW(new WindowInteropHelper(owner).Handle,
             0x312, HotkeyRegistration.StopHotkeyId, 0), "無効中の停止メッセージを送れません。");
         await Task.Delay(50);
         Require(!first.IsCompleted, "解除済み登録の停止メッセージが実行へ配送されました。");
@@ -56,7 +57,7 @@ internal static class StopOptionsVerification
 
         Require(rejected && !window.IsTopMost(), "終了済みセッションが次の実行へ反映されました。");
         // OS登録の確認とは分け、所有する画面への停止メッセージ配送を検査します。
-        Require(StopOptionsPostMessage(new WindowInteropHelper(owner).Handle,
+        Require(Native.PostMessageW(new WindowInteropHelper(owner).Handle,
             0x312, HotkeyRegistration.StopHotkeyId, 0), "停止メッセージを送れません。");
         Require(await second.WaitAsync(TimeSpan.FromSeconds(10)) == 130, "再実行を停止できません。");
         checks.Add("same-window-rerun-rejects-stale-session-and-accepts-stop-message");
@@ -96,8 +97,6 @@ internal static class StopOptionsVerification
     private static extern bool StopOptionsRegisterHotKey(nint window, int id, uint modifiers, int key);
     [DllImport("user32.dll", EntryPoint = "UnregisterHotKey")]
     private static extern bool StopOptionsUnregisterHotKey(nint window, int id);
-    [DllImport("user32.dll", EntryPoint = "PostMessageW")]
-    private static extern bool StopOptionsPostMessage(nint window, uint message, nint wParam, nint lParam);
 
     internal static async Task<int> RunAsync(string path)
     {
