@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
@@ -1019,7 +1020,7 @@ public sealed class RecordingUiRuntimeTests(ITestOutputHelper output)
             using var document = JsonDocument.Parse(json);
             JsonElement result = document.RootElement;
             Assert.True(process.ExitCode == 0,
-                $"終了コード {process.ExitCode}: {json}");
+                $"終了コード {process.ExitCode}: {json}{DisconnectedSessionNote()}");
             Assert.Equal("PASS", result.GetProperty("result").GetString());
             string?[] checks =
             [
@@ -1088,4 +1089,33 @@ public sealed class RecordingUiRuntimeTests(ITestOutputHelper output)
             Directory.Delete(directory, recursive: true);
         }
     }
+
+    // リモートデスクトップ切断中はWPFの描画結果が空になるため、失敗理由を判別できるようにします。
+    private static string DisconnectedSessionNote()
+    {
+        const int Disconnected = 4;
+        if (!WTSQuerySessionInformationW(0, -1, 8, out nint buffer, out int bytes))
+        {
+            return "";
+        }
+
+        try
+        {
+            return bytes >= sizeof(int) && Marshal.ReadInt32(buffer) == Disconnected
+                ? Environment.NewLine + "現在のセッションはリモートデスクトップ切断中です。"
+                    + "切断中はWPFの描画結果が空になるため、接続した状態で再実行してください。"
+                : "";
+        }
+        finally
+        {
+            WTSFreeMemory(buffer);
+        }
+    }
+
+    [DllImport("wtsapi32.dll", SetLastError = true)]
+    private static extern bool WTSQuerySessionInformationW(
+        nint server, int session, int infoClass, out nint buffer, out int bytes);
+
+    [DllImport("wtsapi32.dll")]
+    private static extern void WTSFreeMemory(nint memory);
 }
