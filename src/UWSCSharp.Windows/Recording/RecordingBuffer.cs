@@ -146,11 +146,16 @@ internal sealed class RecordingBuffer(
 
     internal void Begin(IEnumerable<int> keys, IEnumerable<int> buttons)
     {
-        initialKeys.UnionWith(keys);
+        int[] held = [.. keys.Where(key => !LatchedImeKey(key))];
+        initialKeys.UnionWith(held);
         initialButtons.UnionWith(buttons);
-        physicalKeys.UnionWith(keys);
+        physicalKeys.UnionWith(held);
         UpdateWaiting();
     }
+
+    // IMEの切替用仮想キーはUPが届かず押下状態のまま残ることがあるため、解放待ちに含めません。
+    internal static bool LatchedImeKey(int key) => key is
+        (>= 0x15 and <= 0x1A) or 0xE5 or (>= 0xF0 and <= 0xF6);
 
     internal void Recover(long time, IEnumerable<int> keys, IEnumerable<int> buttons)
     {
@@ -224,7 +229,7 @@ internal sealed class RecordingBuffer(
 
         if (initial)
         {
-            if (state == 1)
+            if (state == 1 && !LatchedImeKey(key))
             {
                 initialKeys.Add(key);
                 ignoredKeys.Add(key);
