@@ -94,7 +94,7 @@ public partial class MainWindow : Window
             ?? ApplicationInfo.SettingsPath("launcher.json"));
         launchCommandOverride = launchCommand;
         this.confirmLauncherReset = confirmLauncherReset;
-        if (verifyRecordingInput && Environment.UserName != "WDAGUtilityAccount")
+        if (verifyRecordingInput && !SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("記録入力の検証はSandbox専用です。");
         }

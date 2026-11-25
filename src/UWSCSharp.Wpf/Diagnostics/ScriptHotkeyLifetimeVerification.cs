@@ -15,7 +15,7 @@ internal static class ScriptHotkeyLifetimeVerification
     // 同じ表示画面から実行し、修飾子フックの解除と次の通知まで確認します。
     internal static async Task<int> RunAsync(string receipt)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("ホットキーの寿命検証はSandbox専用です。");
         }

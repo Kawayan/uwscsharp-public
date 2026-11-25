@@ -15,6 +15,12 @@ internal static class AssociationRegistrationVerification
 
     internal static int Run(string receipt)
     {
+        // 利用者の関連付けを書き換えるため、Sandbox外では何も変更せずに終了します。
+        if (!SandboxEnvironment.IsCurrent)
+        {
+            throw new InvalidOperationException("関連付け登録の検証はSandbox専用です。");
+        }
+
         var checks = new List<string>();
         string directory = Path.GetDirectoryName(Path.GetFullPath(receipt))!;
         string first = Path.Combine(directory, "association-first.exe");

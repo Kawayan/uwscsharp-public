@@ -9,7 +9,7 @@ internal static class ComEventPlaybackVerification
 {
     internal static Task<int> RunAsync(string handle, string mode, string receipt)
     {
-        Require(Environment.UserName == "WDAGUtilityAccount", "Sandbox内の検証");
+        Require(SandboxEnvironment.IsCurrent, "Sandbox内の検証");
         return Task.Run(async () =>
         {
             nint owner = (nint)long.Parse(handle, CultureInfo.InvariantCulture);

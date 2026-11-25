@@ -165,7 +165,7 @@ internal static class ScriptDropOleProcessVerification
 
     private static void RequireSandbox()
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase)
+        if (!SandboxEnvironment.IsCurrent
             || IntPtr.Size != 8)
         {
             throw new InvalidOperationException("別プロセスのOLE検証は64bitのWindows Sandbox内で実行してください。");

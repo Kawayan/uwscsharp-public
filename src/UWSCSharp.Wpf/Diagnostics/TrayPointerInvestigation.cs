@@ -10,7 +10,7 @@ internal static class TrayPointerInvestigation
 {
     internal static async Task<int> RunAsync(string directory, string receipt)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("トレイの追加調査はSandbox内だけで実行します。");
         }

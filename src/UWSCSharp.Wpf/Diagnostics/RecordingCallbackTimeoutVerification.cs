@@ -14,7 +14,7 @@ internal static partial class RecordingOsVerification
     // 入力を送る検査は、環境変数による自己申告だけでは許可しません。
     internal static async Task<int> RunTimeoutAsync(string receiptPath)
     {
-        Require(Environment.UserName == "WDAGUtilityAccount"
+        Require(SandboxEnvironment.IsCurrent
             && Process.GetCurrentProcess().SessionId > 0
             && File.Exists(@"C:\ui-input\initialize_ui_isolation_sandbox.ps1"),
             "callback期限検査はWindows Sandbox専用です。");

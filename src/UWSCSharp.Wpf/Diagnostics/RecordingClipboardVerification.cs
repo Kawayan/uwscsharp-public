@@ -506,7 +506,7 @@ internal static class RecordingClipboardVerification
 
     private static void RequireSandbox()
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase))
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("記録後コピーのGUI検証はWindows Sandbox内で実行してください。");
         }

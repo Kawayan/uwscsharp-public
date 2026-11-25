@@ -14,7 +14,7 @@ internal static class TrayShellInteractionVerification
 {
     internal static async Task<int> RunAsync(string directory, string receipt)
     {
-        if (Environment.UserName != "WDAGUtilityAccount")
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("通知領域への入力検証はSandbox内だけで実行します。");
         }

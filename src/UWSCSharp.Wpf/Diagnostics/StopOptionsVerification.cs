@@ -101,7 +101,7 @@ internal static class StopOptionsVerification
 
     internal static async Task<int> RunAsync(string path)
     {
-        if (!Environment.UserName.Equals("WDAGUtilityAccount", StringComparison.OrdinalIgnoreCase))
+        if (!SandboxEnvironment.IsCurrent)
         {
             throw new InvalidOperationException("停止設定のGUI検証はWindows Sandbox内で実行してください。");
         }
