@@ -56,7 +56,7 @@
 | 4 | `Wheel` | ホイール |
 | 5 | `WindowMovement` | ウィンドウの移動・サイズ変更 |
 
-- 押下・解放の状態（1 / 2）は、生成するスクリプトの `KBD(…,1)` / `BTN(…,2)` の引数とそのまま対応しているので、名前付き定数にとどめます。
+- 押下・解放の状態（1 / 2）は、生成するスクリプトの `KBD(…,1)` / `BTN(…,2)` の引数とそのまま対応しています。ホイールでは回転量、ウインドウ移動では段階と、種類ごとに意味も違うため、数値のまま残し、`InputEvent` のコメントで意味を説明します。
 
 ### 確認方法
 - Windows プロジェクトのビルド
@@ -95,3 +95,9 @@
 - `src/UWSCSharp.Wpf/Diagnostics/SandboxEnvironment.cs` を追加し、src の判定25か所（24ファイル）をすべて `SandboxEnvironment.IsCurrent` に置き換えました。src から `"WDAGUtilityAccount"` の直接比較はなくなりました。
 - `AssociationRegistrationVerification.Run` に判定を追加しました。通常の PC で `--verify-association-registration` を実行すると、レジストリを変更せずに終了コード1で終わることを確認しました。
 - 確認: WPF プロジェクトのビルド（エラー・警告なし）、`RecordingUiRuntimeTests`（Sandbox 専用を除く3件）すべて成功。
+
+### フェーズ2（完了）
+- `Native.LowLevelInput.cs` を追加し、低レベル入力のメッセージ、フックの種類、注入フラグ、右 Shift のスキャンコード、WinEvent の ID を名前付き定数にしました。`BasicRecorder` と `WindowMovementMonitor` の数値リテラルを置き換えています。フックの `wParam` は `nint` で届き、`uint` の定数ではパターン照合できないため、メッセージの定数は `int` にしました。
+- `InputEvent.Kind` を `RecordedInputKind` enum に変更しました。テストの中で `InputEvent` を作っている17か所も、enum の名前に置き換えています。リテラルの `0` は enum に暗黙変換されてエラーにならないため、残っていた3か所も確認して揃えました。
+- キー状態の判定に使う `0x8000`（`GetAsyncKeyState` の押下ビット）は、よく知られた慣用表現なので残しました。
+- 確認: ソリューション全体のビルド（エラー・警告なし）、記録関連のテスト（Sandbox 専用を除く96件）すべて成功。

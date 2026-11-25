@@ -211,13 +211,13 @@ public sealed partial class BasicRecorder : IDisposable
             mouseCallback = Mouse;
             health = healthFactory?.Invoke();
             health?.Start();
-            keyboard = hooks.Register(13, keyboardCallback);
+            keyboard = hooks.Register(Native.WhKeyboardLl, keyboardCallback);
             if (keyboard == 0)
             {
                 throw new Win32Exception(hooks.LastError);
             }
 
-            mouse = hooks.Register(14, mouseCallback);
+            mouse = hooks.Register(Native.WhMouseLl, mouseCallback);
             if (mouse == 0)
             {
                 throw new Win32Exception(hooks.LastError);
@@ -356,11 +356,11 @@ public sealed partial class BasicRecorder : IDisposable
         Interlocked.Increment(ref recoveryCount);
         if ((missing & 2) != 0)
         {
-            ReplaceHook(ref keyboard, 13, keyboardCallback!);
+            ReplaceHook(ref keyboard, Native.WhKeyboardLl, keyboardCallback!);
         }
         if ((missing & 1) != 0)
         {
-            ReplaceHook(ref mouse, 14, mouseCallback!);
+            ReplaceHook(ref mouse, Native.WhMouseLl, mouseCallback!);
         }
         health?.Reset();
     }
@@ -402,27 +402,27 @@ public sealed partial class BasicRecorder : IDisposable
             if (code >= 0 && failure is null)
             {
                 KeyboardData key = Marshal.PtrToStructure<KeyboardData>(data);
-                if ((key.Flags & 0x10) == 0)
+                if ((key.Flags & Native.LlkhfInjected) == 0)
                 {
                     health?.Hook(1, key.Time);
                 }
                 int virtualKey = key.Key switch
                 {
-                    16 => key.Scan == 0x36 ? 161 : 160,
-                    17 => (key.Flags & 1) != 0 ? 163 : 162,
-                    18 => (key.Flags & 1) != 0 ? 165 : 164,
+                    16 => key.Scan == Native.RightShiftScanCode ? 161 : 160,
+                    17 => (key.Flags & Native.LlkhfExtended) != 0 ? 163 : 162,
+                    18 => (key.Flags & Native.LlkhfExtended) != 0 ? 165 : 164,
                     _ => (int)key.Key
                 };
-                if (includeInjected || (key.Flags & 0x10) == 0)
+                if (includeInjected || (key.Flags & Native.LlkhfInjected) == 0)
                 {
                     nint window = Native.GetForegroundWindow();
                     bool excluded = IsExcluded(window);
-                    buffer.Key(virtualKey, message is 0x101 or 0x105 ? 2 : 1,
+                    buffer.Key(virtualKey, message is Native.WmKeyUp or Native.WmSysKeyUp ? 2 : 1,
                         Environment.TickCount64, excluded,
-                        !excluded && message is 0x100 or 0x104
+                        !excluded && message is Native.WmKeyDown or Native.WmSysKeyDown
                             ? RecordedWindow.Capture(window) : null);
                 }
-                else if (message is 0x101 or 0x105)
+                else if (message is Native.WmKeyUp or Native.WmSysKeyUp)
                 {
                     // 注入UPは記録せず、開始時の押下待ちだけ解除します。
                     buffer.ReleaseInitialKey(virtualKey);
@@ -444,24 +444,25 @@ public sealed partial class BasicRecorder : IDisposable
             if (code >= 0 && failure is null)
             {
                 MouseData mouse = Marshal.PtrToStructure<MouseData>(data);
-                if ((mouse.Flags & 1) == 0)
+                if ((mouse.Flags & Native.LlmhfInjected) == 0)
                 {
                     health?.Hook(0, mouse.Time);
                 }
                 int button = message switch
                 {
-                    0x201 or 0x202 => 0,
-                    0x204 or 0x205 => 1,
-                    0x207 or 0x208 => 2,
-                    0x20b or 0x20c when (mouse.Data >> 16) is >= 1 and <= 3 =>
+                    Native.WmLButtonDown or Native.WmLButtonUp => 0,
+                    Native.WmRButtonDown or Native.WmRButtonUp => 1,
+                    Native.WmMButtonDown or Native.WmMButtonUp => 2,
+                    Native.WmXButtonDown or Native.WmXButtonUp when (mouse.Data >> 16) is >= 1 and <= 3 =>
                         (mouse.Data >> 16 & 1) != 0 ? 3 : 4,
                     _ => -1
                 };
-                if ((includeInjected || (mouse.Flags & 1) == 0)
-                    && (message == 0x200 || button >= 0 || message is 0x20a or 0x20e))
+                if ((includeInjected || (mouse.Flags & Native.LlmhfInjected) == 0)
+                    && (message == Native.WmMouseMove || button >= 0
+                        || message is Native.WmMouseWheel or Native.WmMouseHWheel))
                 {
                     using PhysicalDpiScope? dpi = (RecordButtonClicks || BackgroundPlayback)
-                        && message is 0x201 or 0x202
+                        && message is Native.WmLButtonDown or Native.WmLButtonUp
                         ? new PhysicalDpiScope() : null;
                     nint window = Native.WindowFromPoint(mouse.Point);
                     bool excluded = IsExcluded(window);
@@ -472,17 +473,20 @@ public sealed partial class BasicRecorder : IDisposable
                         (!excluded || RelativeMouseCoordinates)
                             && !IsExcluded(originWindow)
                             && (RelativeMouseCoordinates
-                                || message is 0x201 or 0x204 or 0x207 or 0x20b or 0x20a or 0x20e)
+                                || message is Native.WmLButtonDown or Native.WmRButtonDown
+                                    or Native.WmMButtonDown or Native.WmXButtonDown
+                                    or Native.WmMouseWheel or Native.WmMouseHWheel)
                             ? RecordedWindow.Capture(originWindow) : null,
                         (RecordButtonClicks || BackgroundPlayback) && !excluded
-                            && message is 0x201 or 0x202
+                            && message is Native.WmLButtonDown or Native.WmLButtonUp
                             ? RecordingClickTarget(window, mouse.Point, BackgroundPlayback)
                             : 0, mouse.Time);
                 }
-                else if (button >= 0 && (message is 0x202 or 0x205 or 0x208 or 0x20c))
+                else if (button >= 0 && (message is Native.WmLButtonUp or Native.WmRButtonUp
+                    or Native.WmMButtonUp or Native.WmXButtonUp))
                 {
                     buffer.ReleaseInitialButton(button);
-                    if (message == 0x20c && (mouse.Data >> 16) == 3)
+                    if (message == Native.WmXButtonUp && (mouse.Data >> 16) == 3)
                     {
                         buffer.ReleaseInitialButton(4);
                     }
@@ -516,7 +520,7 @@ public sealed partial class BasicRecorder : IDisposable
     {
         // コールバックから例外をネイティブ側へ伝播させません。
         failure ??= error;
-        Native.PostThreadMessageW(threadId, 0x12, 0, 0);
+        Native.PostThreadMessageW(threadId, Native.WmQuit, 0, 0);
     }
 
     /// <summary>
@@ -537,7 +541,8 @@ public sealed partial class BasicRecorder : IDisposable
                 // 停止要求が重なっても末尾確定と生成を一度だけ行います。
                 buffer.Complete();
                 Volatile.Write(ref omittedBackgroundInput, BackgroundPlayback
-                    && buffer.Events.Any(input => input.Kind != 1 && input.ButtonClick is null));
+                    && buffer.Events.Any(input => input.Kind != RecordedInputKind.MouseMove
+                        && input.ButtonClick is null));
                 recordedSource = Serialize(
                     buffer.Events.OrderBy(input => input.Sequence),
                     OmitIdleTimeAndMouseMoves, RelativeMouseCoordinates,
@@ -558,18 +563,19 @@ public sealed partial class BasicRecorder : IDisposable
         uint data, int x, int y, long time, bool excluded,
         RecordedWindow? window = null, nint buttonTarget = 0, uint? inputTime = null)
     {
-        if (message is 0x20a or 0x20e)
+        if (message is Native.WmMouseWheel or Native.WmMouseHWheel)
         {
-            buffer.Wheel(message == 0x20a ? 5 : 6, unchecked((short)(data >> 16)),
+            buffer.Wheel(message == Native.WmMouseWheel ? 5 : 6, unchecked((short)(data >> 16)),
                 x, y, time, excluded, window);
         }
-        else if (message is 0x20b or 0x20c)
+        else if (message is Native.WmXButtonDown or Native.WmXButtonUp)
         {
             for (int button = 3; button <= 4; button++)
             {
                 if (((data >> 16) & (1u << (button - 3))) != 0)
                 {
-                    buffer.Mouse(button, message == 0x20c ? 2 : 1, x, y, time, excluded, window);
+                    buffer.Mouse(button, message == Native.WmXButtonUp ? 2 : 1,
+                        x, y, time, excluded, window);
                 }
             }
         }
@@ -577,12 +583,14 @@ public sealed partial class BasicRecorder : IDisposable
         {
             int button = message switch
             {
-                0x201 or 0x202 => 0,
-                0x204 or 0x205 => 1,
-                0x207 or 0x208 => 2,
+                Native.WmLButtonDown or Native.WmLButtonUp => 0,
+                Native.WmRButtonDown or Native.WmRButtonUp => 1,
+                Native.WmMButtonDown or Native.WmMButtonUp => 2,
                 _ => -1
             };
-            buffer.Mouse(button, message is 0x202 or 0x205 or 0x208 ? 2 : 1,
+            bool released = message is Native.WmLButtonUp or Native.WmRButtonUp
+                or Native.WmMButtonUp;
+            buffer.Mouse(button, released ? 2 : 1,
                 x, y, time, excluded, window, buttonTarget, inputTime);
         }
     }
@@ -606,7 +614,7 @@ public sealed partial class BasicRecorder : IDisposable
                 continue;
             }
 
-            if (omitIdleTimeAndMouseMoves && input.Kind == 1
+            if (omitIdleTimeAndMouseMoves && input.Kind == RecordedInputKind.MouseMove
                 && (buttons.Count == 0 || input.WindowMovement))
             {
                 continue;
@@ -637,7 +645,7 @@ public sealed partial class BasicRecorder : IDisposable
                 continue;
             }
 
-            if (input.Kind == 5 && input.Window is RecordedWindow moved)
+            if (input.Kind == RecordedInputKind.WindowMovement && input.Window is RecordedWindow moved)
             {
                 if (previousWindow?.Handle != moved.Handle || !previousWindowPositioned)
                 {
@@ -670,7 +678,9 @@ public sealed partial class BasicRecorder : IDisposable
                 }
             }
 
-            if (windowId is not null && input.Kind is 1 or 2 or 4)
+            bool pointerInput = input.Kind is RecordedInputKind.MouseMove
+                or RecordedInputKind.MouseButton or RecordedInputKind.Wheel;
+            if (windowId is not null && pointerInput)
             {
                 text.AppendLine(
                     $"{Keywords.If} !{BuiltinFunctionNames.Status}({windowId},ST_ISID) "
@@ -681,9 +691,9 @@ public sealed partial class BasicRecorder : IDisposable
             if (input.Window is RecordedWindow window
                 && (window != previousWindow || input.WindowMovement) && keys.Count == 0
                 && buttons.Count == 0
-                && (input.Kind == 0 || input.Kind == 4
-                    || relativeMouseCoordinates && input.Kind == 1
-                    || input.Kind == 2 && input.State == 1))
+                && (input.Kind == RecordedInputKind.Key || input.Kind == RecordedInputKind.Wheel
+                    || relativeMouseCoordinates && input.Kind == RecordedInputKind.MouseMove
+                    || input.Kind == RecordedInputKind.MouseButton && input.State == 1))
             {
                 text.AppendLine(input.WindowMovement ? window.MovementCommand()
                     : relativeMouseCoordinates
@@ -695,7 +705,7 @@ public sealed partial class BasicRecorder : IDisposable
 
             string x = input.X.ToString(CultureInfo.InvariantCulture);
             string y = input.Y.ToString(CultureInfo.InvariantCulture);
-            if (relativeMouseCoordinates && !input.WindowMovement && input.Kind is 1 or 2 or 4
+            if (relativeMouseCoordinates && !input.WindowMovement && pointerInput
                 && input.Window is RecordedWindow origin)
             {
                 string offsetX = checked(input.X - origin.X).ToString(CultureInfo.InvariantCulture);
@@ -703,7 +713,7 @@ public sealed partial class BasicRecorder : IDisposable
                 x = $"{BuiltinFunctionNames.Status}({windowId},ST_X)+({offsetX})";
                 y = $"{BuiltinFunctionNames.Status}({windowId},ST_Y)+({offsetY})";
             }
-            if (input.Kind == 0)
+            if (input.Kind == RecordedInputKind.Key)
             {
                 text.AppendLine($"{BuiltinFunctionNames.Kbd}({input.Code},{input.State})");
                 if (input.State == 1)
@@ -715,18 +725,18 @@ public sealed partial class BasicRecorder : IDisposable
                     keys.Remove(input.Code);
                 }
             }
-            else if (input.Kind == 1)
+            else if (input.Kind == RecordedInputKind.MouseMove)
             {
                 text.AppendLine($"{BuiltinFunctionNames.Mmv}({x},{y})");
             }
-            else if (input.Kind == 4)
+            else if (input.Kind == RecordedInputKind.Wheel)
             {
                 string notches = (input.State / 120d).ToString("R", CultureInfo.InvariantCulture);
                 text.AppendLine($"{BuiltinFunctionNames.Btn}({input.Code},{notches},{x},{y})");
             }
             else
             {
-                text.AppendLine(input.Kind == 3
+                text.AppendLine(input.Kind == RecordedInputKind.ButtonRelease
                     ? $"{BuiltinFunctionNames.Btn}({input.Code},{input.State})"
                     : $"{BuiltinFunctionNames.Btn}({input.Code},{input.State},{x},{y})");
                 if (input.State == 1)
@@ -770,7 +780,7 @@ public sealed partial class BasicRecorder : IDisposable
             {
                 if (threadId != 0)
                 {
-                    Native.PostThreadMessageW(threadId, 0x12, 0, 0);
+                    Native.PostThreadMessageW(threadId, Native.WmQuit, 0, 0);
                 }
 
                 if (!worker.Join(WorkerJoinTimeout))
@@ -783,8 +793,10 @@ public sealed partial class BasicRecorder : IDisposable
         }
     }
 
+    // Stateはキー・ボタンでは生成するKBD/BTNの引数（1=押下、2=解放）、
+    // ホイールでは回転量、ウインドウ移動では段階（1=開始、2=終了、0=途中）です。
     internal readonly record struct InputEvent(
-        int Kind, int Code, int State, int X, int Y, long Time, long Sequence = 0,
+        RecordedInputKind Kind, int Code, int State, int X, int Y, long Time, long Sequence = 0,
         RecordedWindow? Window = null, bool WindowMovement = false,
         RecordedButtonClick? ButtonClick = null, nint ButtonTarget = 0,
         RecordedMenuClick? MenuCandidate = null, RecordedMenuClick? MenuClick = null);
