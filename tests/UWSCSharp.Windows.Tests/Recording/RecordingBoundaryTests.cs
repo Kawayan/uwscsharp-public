@@ -121,6 +121,27 @@ public sealed class RecordingBoundaryTests
         Assert.Equal([65, 65], buffer.Events.Select(input => input.Code));
     }
 
+    [Theory]
+    [InlineData(0x16)]
+    [InlineData(0x19)]
+    [InlineData(0x1A)]
+    [InlineData(0xE5)]
+    [InlineData(0xF3)]
+    public void LatchedImeKeysDoNotBlockRecordingStart(int imeKey)
+    {
+        var buffer = new RecordingBuffer([], 0);
+        buffer.Begin([imeKey, 0x1A], []);
+        Assert.False(buffer.WaitingForInitialRelease);
+
+        buffer.Begin([160], []);
+        buffer.Key(imeKey, 1, 1, false);
+        buffer.Key(160, 2, 2, false);
+        Assert.False(buffer.WaitingForInitialRelease);
+        buffer.Key(65, 1, 3, false);
+        buffer.Key(65, 2, 4, false);
+        Assert.Equal([65, 65], buffer.Events.Select(input => input.Code));
+    }
+
     [Fact]
     public void InputsPressedWhileArmingMustAlsoBeReleased()
     {
