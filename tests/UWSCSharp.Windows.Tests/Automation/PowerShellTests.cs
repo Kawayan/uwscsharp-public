@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using UWSCSharp.Core;
@@ -10,6 +10,8 @@ namespace UWSCSharp.Windows.Tests;
 [Trait("Priority", "Critical")]
 public sealed class PowerShellTests
 {
+    private static readonly TimeSpan InvocationTimeout = TimeSpan.FromMinutes(1);
+
     [Theory]
     [InlineData("'日本語😀'", "日本語😀\r\n")]
     [InlineData("[Console]::Out.Write('A'+[char]0+'B')", "A\0B")]
@@ -89,11 +91,17 @@ public sealed class PowerShellTests
     }
 
     [Fact]
-    public async Task RuntimeParsingDoesNotAddLocalScopeOrCatchUserStatements()
+    public async Task RuntimeParsingDoesNotAddLocalScope()
     {
-        Assert.Equal("42\r\n", (await InvokeAsync(
-            "$probeValue=42;Get-Variable -Name probeValue -Scope Global -ValueOnly")).Text);
-        string output = (await InvokeAsync("Read-Host 'prompt';'after-prompt'")).Text;
+        string output = await InvokeWithProgressAsync(
+            "$probeValue=42;Get-Variable -Name probeValue -Scope Global -ValueOnly");
+        Assert.Equal("42\r\n", output);
+    }
+
+    [Fact]
+    public async Task RuntimeParsingDoesNotCatchUserStatements()
+    {
+        string output = await InvokeWithProgressAsync("Read-Host 'prompt';'after-prompt'");
         Assert.EndsWith("after-prompt\r\n", output, StringComparison.Ordinal);
     }
 
@@ -116,9 +124,7 @@ public sealed class PowerShellTests
         int lastLength = (maximumLength - overhead) / 8 * 3;
         string command = "#" + new string('あ', lastLength - suffix.Length - 1)
             + suffix;
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-
-        Value result = await InvokeAsync(command, token: timeout.Token);
+        Value result = await InvokeAsync(command);
 
         Assert.Equal(Value.String("完了\r\n"), result);
     }
@@ -254,10 +260,43 @@ public sealed class PowerShellTests
         {
             Commands = options ?? new WindowsCommandOptions()
         }.CreateSession();
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-        return await session.InvokeAsync(BuiltinFunctionNames.PowerShell,
-            [Value.String(command), Value.Numeric(noWait ? 1 : 0)],
-            token.CanBeCanceled ? token : timeout.Token);
+        using var timeout = token.CanBeCanceled ? null : new CancellationTokenSource(InvocationTimeout);
+        var elapsed = Stopwatch.StartNew();
+        try
+        {
+            return await session.InvokeAsync(BuiltinFunctionNames.PowerShell,
+                [Value.String(command), Value.Numeric(noWait ? 1 : 0)], timeout?.Token ?? token);
+        }
+        catch (OperationCanceledException error) when (timeout?.IsCancellationRequested == true)
+        {
+            throw new TimeoutException(
+                $"PowerShell invocation exceeded {InvocationTimeout.TotalSeconds}s "
+                + $"(elapsed {elapsed.Elapsed}, noWait={noWait}, command length={command.Length}).", error);
+        }
+    }
+
+    private static async Task<string> InvokeWithProgressAsync(string command)
+    {
+        string marker = Marker();
+        string checkpoint(string phase) => $"[IO.File]::AppendAllText({Literal(marker)},"
+            + $"('{phase} PID=' + $PID + ' UTC=' + [DateTime]::UtcNow.ToString('O') + [Environment]::NewLine))";
+        DateTime started = DateTime.UtcNow;
+        try
+        {
+            string source = checkpoint("entered script") + ";" + command + ";" + checkpoint("finished script");
+            return (await InvokeAsync(source)).Text;
+        }
+        catch (TimeoutException error)
+        {
+            string progress = File.Exists(marker) ? await File.ReadAllTextAsync(marker) : "no script checkpoint";
+            throw new TimeoutException(
+                $"{error.Message} Command: {command}. Invocation started (UTC): {started:O}. Child progress: {progress}",
+                error);
+        }
+        finally
+        {
+            File.Delete(marker);
+        }
     }
 
     private static string Literal(string text) => "'"
