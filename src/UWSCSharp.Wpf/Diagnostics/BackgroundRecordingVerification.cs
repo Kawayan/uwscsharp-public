@@ -4,10 +4,12 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using UWSCSharp.Core;
 using UWSCSharp.Windows;
 using static UWSCSharp.Wpf.VerificationAssert;
+using static UWSCSharp.Wpf.SettingsVerification;
 
 namespace UWSCSharp.Wpf;
 
@@ -35,18 +37,19 @@ internal static class BackgroundRecordingVerification
             {
                 main.Show();
                 var access = new MainWindow.RecordingVerificationAccess(main);
-                Require(!access.OmitIdleOptionChecked, "保存前の省略設定");
-                access.ClickOmitIdleOption();
-                Require(!access.RelativeMouseOptionChecked, "保存前の相対座標設定");
-                access.ClickRelativeMouseOption();
-                if (background)
+                await access.EditRecordingSettingsAsync(async dialog =>
                 {
-                    access.ClickBackgroundOption(true);
-                }
-                else
-                {
-                    access.ClickHighLevelOption();
-                }
+                    var omitIdle = (CheckBox)dialog.FindName("OmitIdleRecordingCheckBox");
+                    var relativeMouse = (CheckBox)dialog.FindName("RelativeMouseRecordingCheckBox");
+                    Require(omitIdle.IsChecked == false, "保存前の省略設定");
+                    Require(relativeMouse.IsChecked == false, "保存前の相対座標設定");
+                    omitIdle.IsChecked = true;
+                    relativeMouse.IsChecked = true;
+                    ((CheckBox)dialog.FindName("BackgroundRecordingCheckBox")).IsChecked = background;
+                    ((CheckBox)dialog.FindName("HighLevelRecordingCheckBox")).IsChecked = !background;
+                    ClickSave(dialog);
+                    await WaitUntilAsync(() => !dialog.IsVisible, "記録設定の保存が完了しませんでした。");
+                });
 
                 var configured = RecordingSettings.Load(settings);
                 Require(configured.BackgroundPlayback == background
@@ -197,11 +200,11 @@ internal static class BackgroundRecordingVerification
         try
         {
             main.Show();
-            Require(access.BackgroundOptionChecked == target.Background
-                && access.HighLevelOptionChecked == !target.Background,
+            Require(access.Settings.BackgroundPlayback == target.Background
+                && access.Settings.RecordButtonClicks == !target.Background,
                 "再起動後の記録方式");
-            Require(access.OmitIdleOptionChecked, "再起動後の省略設定表示");
-            Require(access.RelativeMouseOptionChecked, "再起動後の相対座標設定表示");
+            Require(access.Settings.OmitIdleTimeAndMouseMoves, "再起動後の省略設定");
+            Require(access.Settings.RelativeMouseCoordinates, "再起動後の相対座標設定");
 
             nint root = (nint)target.Window;
             nint button = (nint)target.Button;

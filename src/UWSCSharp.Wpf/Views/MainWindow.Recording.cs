@@ -79,7 +79,7 @@ public partial class MainWindow
             EditorPanel.IsExpanded = true;
             Editor.Text = completed.Source;
             scriptPath = null;
-            FileLabel.Text = RelativeMouseRecordingCheckBox.IsChecked == true
+            FileLabel.Text = recordingSettings.RelativeMouseCoordinates
                 ? "新規記録（相対座標・仮想キー）"
                 : "新規記録（絶対座標・仮想キー）";
             StatusLabel.Text = completed.Overflowed
@@ -135,11 +135,6 @@ public partial class MainWindow
         WindowSettingsButton.IsEnabled = state.CanEdit;
         AssociationButton.IsEnabled = state.CanEdit;
         HelpButton.IsEnabled = state.CanEdit;
-        OmitIdleRecordingCheckBox.IsEnabled = state.CanEdit;
-        RelativeMouseRecordingCheckBox.IsEnabled = state.CanEdit;
-        HighLevelRecordingCheckBox.IsEnabled = state.CanEdit;
-        BackgroundRecordingCheckBox.IsEnabled = state.CanEdit;
-        CopyRecordingCheckBox.IsEnabled = state.CanEdit;
         LoadButton.IsEnabled = state.CanEdit;
         SaveButton.IsEnabled = state.CanEdit;
         PlayButton.IsEnabled = state.CanEdit;
@@ -158,36 +153,6 @@ public partial class MainWindow
             or UnauthorizedAccessException or JsonException or InvalidDataException)
         {
             StatusLabel.Text = "記録設定を読めないため既定値を使用します。";
-        }
-
-        OmitIdleRecordingCheckBox.IsChecked = recordingSettings.OmitIdleTimeAndMouseMoves;
-        RelativeMouseRecordingCheckBox.IsChecked = recordingSettings.RelativeMouseCoordinates;
-        HighLevelRecordingCheckBox.IsChecked = recordingSettings.RecordButtonClicks;
-        BackgroundRecordingCheckBox.IsChecked = recordingSettings.BackgroundPlayback;
-        CopyRecordingCheckBox.IsChecked = recordingSettings.CopyAfterRecording;
-    }
-
-    private void RecordingSettingsClick(object sender, RoutedEventArgs e)
-    {
-        var candidate = new RecordingSettings(
-            OmitIdleRecordingCheckBox.IsChecked == true,
-            RelativeMouseRecordingCheckBox.IsChecked == true,
-            CopyRecordingCheckBox.IsChecked == true,
-            HighLevelRecordingCheckBox.IsChecked == true,
-            BackgroundRecordingCheckBox.IsChecked == true);
-        try
-        {
-            candidate.Save(RecordingSettingsPath);
-            recordingSettings = candidate;
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            OmitIdleRecordingCheckBox.IsChecked = recordingSettings.OmitIdleTimeAndMouseMoves;
-            RelativeMouseRecordingCheckBox.IsChecked = recordingSettings.RelativeMouseCoordinates;
-            HighLevelRecordingCheckBox.IsChecked = recordingSettings.RecordButtonClicks;
-            BackgroundRecordingCheckBox.IsChecked = recordingSettings.BackgroundPlayback;
-            CopyRecordingCheckBox.IsChecked = recordingSettings.CopyAfterRecording;
-            ShowError(error);
         }
     }
 }

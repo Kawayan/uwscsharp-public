@@ -212,11 +212,6 @@ public partial class MainWindow
         WindowSettingsButton.IsEnabled = state.CanEditRecordingSettings;
         AssociationButton.IsEnabled = state.CanEdit;
         HelpButton.IsEnabled = state.CanEdit;
-        OmitIdleRecordingCheckBox.IsEnabled = state.CanEditRecordingSettings;
-        RelativeMouseRecordingCheckBox.IsEnabled = state.CanEditRecordingSettings;
-        HighLevelRecordingCheckBox.IsEnabled = state.CanEditRecordingSettings;
-        BackgroundRecordingCheckBox.IsEnabled = state.CanEditRecordingSettings;
-        CopyRecordingCheckBox.IsEnabled = state.CanEditRecordingSettings;
         PauseButton.IsEnabled = state.CanPause;
         LoadButton.IsEnabled = state.CanEdit;
         SaveButton.IsEnabled = state.CanEdit;
