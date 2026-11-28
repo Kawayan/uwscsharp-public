@@ -5,6 +5,31 @@ if ($env:USERNAME -ne 'WDAGUtilityAccount') { throw 'Windows Sandbox でのみ�
 $inputDir = 'C:\UwscDemoInput'
 $output = 'C:\UwscDemoOutput'
 try {
+    Add-Type -TypeDefinition @'
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+
+public static class CaptureWallpaper
+{
+    private const uint SPI_SETDESKWALLPAPER = 0x0014;
+    private const uint SPIF_UPDATEINIFILE = 0x01;
+    private const uint SPIF_SENDCHANGE = 0x02;
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SystemParametersInfo(uint action, uint parameter, string path, uint flags);
+
+    public static void Set(string path)
+    {
+        if (!SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE))
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+    }
+}
+'@
+    [CaptureWallpaper]::Set((Join-Path $inputDir 'img0.jpg'))
+
     $app = Join-Path $env:TEMP 'UwscReadmeCapture'
     Copy-Item -LiteralPath (Join-Path $inputDir 'app') -Destination $app -Recurse
     $env:DOTNET_ROOT = Join-Path $inputDir 'dotnet'
