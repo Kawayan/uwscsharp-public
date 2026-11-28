@@ -20,7 +20,9 @@ $notepad = Get-Item -LiteralPath $NotepadPath
 $dotnet = (Get-Command dotnet -CommandType Application | Select-Object -First 1).Source
 $wsb = (Get-Command wsb -CommandType Application | Select-Object -First 1).Source
 $font = Join-Path $env:SystemRoot 'Fonts/YuGothM.ttc'
+$wallpaper = Join-Path $env:SystemRoot 'Web/Wallpaper/Windows/img0.jpg'
 if (!(Test-Path -LiteralPath $font -PathType Leaf)) { throw '字幕の描画に Yu Gothic Medium が必要です。' }
+if (!(Test-Path -LiteralPath $wallpaper -PathType Leaf)) { throw "撮影用の壁紙が見つかりません: $wallpaper" }
 if ($notepad.PSIsContainer) { throw 'クラシック版メモ帳の実行ファイルを指定してください。' }
 
 $existing = & $wsb list --raw
@@ -40,6 +42,7 @@ New-Item -ItemType Directory -Path $app,$note,$capture -Force | Out-Null
 Write-Host "撮影ログの保存先 $work"
 
 Copy-Item -LiteralPath $ffmpeg -Destination (Join-Path $inputDir 'ffmpeg.exe')
+Copy-Item -LiteralPath $wallpaper -Destination (Join-Path $inputDir 'img0.jpg')
 Copy-Item -LiteralPath $notepad.FullName -Destination (Join-Path $note 'notepad.exe')
 foreach ($directory in Get-ChildItem -LiteralPath $notepad.DirectoryName -Directory) {
     $mui = Join-Path $directory.FullName ($notepad.Name + '.mui')
