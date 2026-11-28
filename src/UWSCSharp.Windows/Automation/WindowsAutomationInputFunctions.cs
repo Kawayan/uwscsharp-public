@@ -8,11 +8,6 @@ public sealed partial class WindowsAutomation
     private sealed partial class Session
     {
         private const int MouseClickHoldMilliseconds = 20;
-        private const uint MouseMove = 0x0001;
-        private const uint MouseMoveNoCoalesce = 0x2000;
-        private const uint MouseVirtualDesk = 0x4000;
-        private const uint MouseAbsolute = 0x8000;
-        private const int MouseAbsoluteRange = 65_536;
 
         private Value InvokeMouseOrg(CallArguments args)
         {
@@ -59,31 +54,12 @@ public sealed partial class WindowsAutomation
 
         private bool TrySendDragMove(Native.Point target)
         {
-            long x = (long)target.X - Native.GetSystemMetrics(76);
-            long y = (long)target.Y - Native.GetSystemMetrics(77);
-            int width = Native.GetSystemMetrics(78);
-            int height = Native.GetSystemMetrics(79);
-            if (x < 0 || x >= width || y < 0 || y >= height
-                || width > MouseAbsoluteRange || height > MouseAbsoluteRange)
+            if (!NativeInputSender.TryCreateAbsoluteMouseMove(target, out Native.Input move))
             {
                 return false;
             }
 
-            // ピクセルの左端を切り上げ、絶対入力の丸めで隣の座標へずれないようにします。
-            Send(new Native.Input
-            {
-                Data = new Native.InputUnion
-                {
-                    Mouse = new Native.MouseInput
-                    {
-                        X = (int)((x * MouseAbsoluteRange + width - 1) / width),
-                        Y = (int)((y * MouseAbsoluteRange + height - 1) / height),
-                        Flags = MouseMove | MouseMoveNoCoalesce
-                            | MouseVirtualDesk | MouseAbsolute,
-                        Extra = 1
-                    }
-                }
-            });
+            Send(move);
             return true;
         }
 
