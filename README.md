@@ -71,7 +71,7 @@ UWSC# を気に入ってもらえたら、GitHub Sponsors で応援していた�
 Windows x64 向けのセットアップ EXE を作成できます。WiX Burn がアプリの MSI を EXE に内蔵します。.NET 11 SDK、PowerShell 7、Visual Studio の C++ デスクトップ開発ワークロードと Windows SDK を用意してください。WiX 7 はビルド時に NuGet から復元します。[WiX 7 の利用条件](https://docs.firegiant.com/wix/osmf/)を確認し、同意する場合は次のコマンドを実行してください。
 
 ```powershell
-pwsh -NoProfile -File scripts/build-wpf-bundle.ps1 -Version 0.1.0-preview.1 -InstallerVersion 0.1.0 -OutputDirectory artifacts/wpf-bundle -AcceptWixEula
+pwsh -NoProfile -File scripts/build-wpf-bundle.ps1 -Version 0.1.2 -InstallerVersion 0.1.2 -OutputDirectory artifacts/wpf-bundle -AcceptWixEula
 ```
 
 変更をコミットしてから、まだ存在しない出力先を指定してください。`-Version` はアプリの版、`-InstallerVersion` はセットアップ EXE と内蔵 MSI が更新の判定に使う数値版です。セットアップを更新する場合は数値版も上げてください。`bundle` フォルダーにセットアップ EXE と SHA-256 ファイルを出力します。
