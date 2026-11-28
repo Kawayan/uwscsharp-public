@@ -12,6 +12,7 @@ on:
       - scripts/check-wpf-installer.ps1
       - scripts/package-wpf-release.ps1
       - src/UWSCSharp.DllRelay/UWSCSharp.DllRelay.csproj
+      - src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj
   workflow_dispatch:
 
 permissions:
@@ -40,31 +41,31 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
       - name: Resolve release version
         id: version
         run: |
-          $version = "0.0.0-ci.$env:GITHUB_RUN_NUMBER"
+          $version = dotnet msbuild src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj -nologo -getProperty:UwscWpfVersion
+          if ($LASTEXITCODE -ne 0 -or $version -cnotmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
+            throw 'WPFプロジェクトのバージョンを取得できません。'
+          }
           $commit = git rev-parse HEAD
           if ($LASTEXITCODE -ne 0) { throw 'ビルド対象のコミットを取得できません。' }
           if ($env:GITHUB_EVENT_NAME -eq 'push') {
-            if ($env:GITHUB_REF_NAME -cnotmatch '^v(?<version>(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$') {
-              throw 'タグは v1.2.3 または v1.2.3-preview.1 の形式で指定してください。'
+            if ($env:GITHUB_REF_NAME -cne "v$version") {
+              throw "リリースタグ $env:GITHUB_REF_NAME がWPFプロジェクトの版 v$version と一致しません。"
             }
-            $version = $Matches.version
             git merge-base --is-ancestor $commit refs/remotes/origin/main
             if ($LASTEXITCODE -ne 0) { throw 'タグは main のコミットを指定してください。' }
           }
           $installerVersion = $version.Split('-')[0]
-          "version=$version" >> $env:GITHUB_OUTPUT
-          "installer-version=$installerVersion" >> $env:GITHUB_OUTPUT
           "zip=UWSCSharp-$version-win-x64.zip" >> $env:GITHUB_OUTPUT
           "setup=UWSCSharp-$installerVersion-win-x64-setup.exe" >> $env:GITHUB_OUTPUT
           "prerelease=$($version.Contains('-').ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           "commit=$commit" >> $env:GITHUB_OUTPUT
-
-      - uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
 
       - name: Build and run headless tests for the tag
         if: github.event_name == 'push'
@@ -75,14 +76,12 @@ jobs:
 
       - name: Build and verify the self-contained ZIP and setup EXE
         env:
-          VERSION: ${{ steps.version.outputs.version }}
-          INSTALLER_VERSION: ${{ steps.version.outputs.installer-version }}
           WIX_EULA: ${{ vars.WIX_ACCEPT_EULA }}
         run: |
           if ($env:WIX_EULA -cne 'wix7') {
             throw 'WiX 7 の利用条件に同意済みの場合は、リポジトリ変数 WIX_ACCEPT_EULA に wix7 を設定してください。'
           }
-          ./scripts/build-wpf-bundle.ps1 -Version $env:VERSION -InstallerVersion $env:INSTALLER_VERSION -OutputDirectory artifacts/wpf-release -AcceptWixEula
+          ./scripts/build-wpf-bundle.ps1 -OutputDirectory artifacts/wpf-release -AcceptWixEula
 
       - name: Stage all four release assets
         env:

@@ -37,6 +37,7 @@ node scripts/check_help_search.js
 ```
 
 生成時にこのフォルダーの閲覧用HTMLと検索索引も更新します。
+トップページに載せるWPFのバージョンは、`src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj` の `UwscWpfVersion` から取得します。
 原稿の更新後は生成を実行し、閲覧用ファイルも一緒に保存してください。
 公開出力は `artifacts/help-site/` の28ファイル（24ページと共通資産）です。
 生成時に内部リンク・アンカー・公開ファイル一覧を検査します。
