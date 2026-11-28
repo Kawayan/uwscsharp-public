@@ -5,6 +5,7 @@ const path = require('node:path');
 const { parseArgs } = require('node:util');
 const ROOT = path.resolve(__dirname, '..');
 const SOURCE = path.join(ROOT, 'docs/user-help');
+const WPF_PROJECT = path.join(ROOT, 'src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj');
 const allowedExternalLinks = {
     'index.html': new Set([
         'https://github.com/Kawayan/uwscsharp-public/issues/new?template=bug-report.yml',
@@ -135,6 +136,11 @@ function navigation(pages, current) {
 function build() {
     const pages = readJson(path.join(SOURCE, 'pages.json'));
     const catalog = readJson(path.join(SOURCE, 'reference.json'));
+    const versions = [...read(WPF_PROJECT).matchAll(/<UwscWpfVersion>\s*([^<]+?)\s*<\/UwscWpfVersion>/g)];
+    assert.equal(versions.length, 1, 'WPFプロジェクトに UwscWpfVersion を一つ設定してください');
+    const version = versions[0][1];
+    const components = /^(\d+\.\d+\.\d+)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.exec(version);
+    assert(components, `WPFプロジェクトのバージョンが不正です: ${version}`);
     const outputs = {};
     const entries = [];
     for (const [index, page] of pages.entries()) {
@@ -143,7 +149,9 @@ function build() {
         const file = pagePath(slug);
         assert(!Object.hasOwn(outputs, file), `ページが重複しています: ${slug}`);
         const body = page.catalog ? referenceBody(catalog, page.catalog)
-            : read(path.join(SOURCE, 'content', `${slug}.html`));
+            : read(path.join(SOURCE, 'content', `${slug}.html`))
+                .replaceAll('{{WPF_PRODUCT_VERSION}}', escape(version))
+                .replaceAll('{{WPF_FILE_VERSION}}', `${components[1]}.0`);
         entries.push({ url: file, title, text: Array.from(document(body).text.join(' ')).slice(0, 600).join('') });
         for (const section of (' ' + body).split(/(?=<h2 id=")/).slice(1)) {
             const match = /^<h2 id="([^"]+)">(.*?)<\/h2>/.exec(section);

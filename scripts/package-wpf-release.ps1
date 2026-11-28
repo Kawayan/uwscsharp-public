@@ -1,7 +1,6 @@
 #requires -Version 7.0
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)]
     [ValidatePattern('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$')]
     [string]$Version,
 
@@ -30,15 +29,22 @@ $nuget = Join-Path $output 'nuget'
 New-Item -ItemType Directory -Path $output | Out-Null
 
 # 復元したランタイムパックから、実際に同梱する版のライセンスを収録します。
+$versionArguments = @()
+if ($Version) { $versionArguments += "-p:Version=$Version" }
 dotnet publish $project -c Release -r win-x64 -p:PublishProfile=SingleFile-win-x64 -p:DebugType=embedded `
-    "-p:Version=$Version" "-p:ArtifactsPath=$build" `
+    @versionArguments "-p:ArtifactsPath=$build" `
     "-p:RestorePackagesPath=$nuget" -o $publish
 if ($LASTEXITCODE -ne 0) { throw 'WPF版の発行に失敗しました。' }
 
 $exe = Get-Item -LiteralPath (Join-Path $publish 'UWSCSharp.Wpf.exe')
-if (($exe.VersionInfo.ProductVersion -split '\+', 2)[0] -ne $Version) {
+$exeVersion = ($exe.VersionInfo.ProductVersion -split '\+', 2)[0]
+if ($exeVersion -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
+    throw "WPF EXEの製品バージョンをパッケージに使用できません: $exeVersion"
+}
+if ($Version -and $exeVersion -ne $Version) {
     throw 'EXEと配布版番号が一致しません。'
 }
+$Version = $exeVersion
 
 $runtimeConfig = Join-Path $build 'bin/UWSCSharp.Wpf/release_win-x64/UWSCSharp.Wpf.runtimeconfig.json'
 $runtime = Get-Content -LiteralPath $runtimeConfig -Raw | ConvertFrom-Json
