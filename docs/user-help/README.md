@@ -52,7 +52,7 @@ node scripts/check_help_search.js
 根拠のパスは公開HTMLに出力しません。
 ページ追加時は `pages.json` も更新してください。見出しは一意なIDを持つh2にすると、
 ページ内目次にも追加されます。外部リンクは、トップページの不具合報告とGitHub Sponsors、
-導入ページのGitHub ReleasesとMicrosoftの.NET 10ダウンロードページを許可します。
+導入ページのGitHub ReleasesとMicrosoftの.NET 11ダウンロードページを許可します。
 内部リンクは、公開対象のファイルとリンク先の見出しを生成時に検査します。
 CSSと検索スクリプトは `assets/` にあります。`assets/search-index.js` は生成物です。
 検索結果はページだけでなく、関数名・節見出しへの直接リンクも表示します。

@@ -127,7 +127,7 @@ internal sealed partial class TrayIcon
 {
     private const BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
 
-    // .NET 10の実NotifyIconへ、シェルと同じコールバックを送る診断専用の入口です。
+    // .NET 11の実NotifyIconへ、シェルと同じコールバックを送る診断専用の入口です。
     internal void SendMouseMessage(int mouseMessage)
     {
         (nint handle, uint id) = VerificationIdentity();

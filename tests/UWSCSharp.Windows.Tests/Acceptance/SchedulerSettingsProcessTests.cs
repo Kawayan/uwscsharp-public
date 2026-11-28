@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using UWSCSharp.Wpf;
 using Xunit;
 
@@ -19,17 +18,8 @@ public sealed class SchedulerSettingsProcessTests
         {
             SchedulerSettingsSnapshot first = SchedulerSettingsStore.Save(path,
                 new SchedulerSettings(), null);
-            const string script = """
-                $ErrorActionPreference='Stop'
-                $assembly=[Reflection.Assembly]::LoadFrom($env:UWSC_SCHEDULE_PROBE_ASSEMBLY)
-                $type=$assembly.GetType('UWSCSharp.Wpf.SchedulerSettingsStore',$true)
-                $flags=[Reflection.BindingFlags]'Static,NonPublic'
-                $snapshot=$type.GetMethod('Load',$flags).Invoke($null,@($env:UWSC_SCHEDULE_PROBE_PATH))
-                $values=[object[]]@($env:UWSC_SCHEDULE_PROBE_PATH,$snapshot.Settings,$snapshot.Revision,$null)
-                $next=$type.GetMethod('Save',$flags).Invoke($null,$values)
-                [Console]::WriteLine($next.Revision)
-                """;
-            var start = new ProcessStartInfo("pwsh")
+            string executable = FixturePaths.Get("UWSCSharp.ControlFixture", "UWSCSharp.ControlFixture.exe");
+            var start = new ProcessStartInfo(executable)
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -37,12 +27,8 @@ public sealed class SchedulerSettingsProcessTests
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            start.ArgumentList.Add("-NoProfile");
-            start.ArgumentList.Add("-NonInteractive");
-            start.ArgumentList.Add("-EncodedCommand");
-            start.ArgumentList.Add(Convert.ToBase64String(Encoding.Unicode.GetBytes(script)));
-            start.Environment["UWSC_SCHEDULE_PROBE_ASSEMBLY"] = typeof(SchedulerSettingsStore).Assembly.Location;
-            start.Environment["UWSC_SCHEDULE_PROBE_PATH"] = path;
+            start.ArgumentList.Add("--scheduler-settings-probe");
+            start.ArgumentList.Add(path);
             using Process process = Process.Start(start)!;
             try
             {

@@ -379,6 +379,18 @@ internal static class Program
             return;
         }
 
+        if (args is ["--scheduler-monitor-lease-probe", string leasePath])
+        {
+            SchedulerStorageProbe.CheckMonitorLease(leasePath);
+            return;
+        }
+
+        if (args is ["--scheduler-settings-probe", string settingsPath])
+        {
+            SchedulerStorageProbe.ResaveSettings(settingsPath);
+            return;
+        }
+
         if (args is ["--launcher-child-probe", string launcherReceipt,
             string launcherRelease, .. string[] launcherArguments])
         {

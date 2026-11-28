@@ -8,6 +8,12 @@ namespace UWSCSharp.Core;
 /// </summary>
 public static class NumericOperations
 {
+    private static ReadOnlySpan<double> DecimalRoundScales =>
+    [
+        1d, 10d, 100d, 1e3, 1e4, 1e5, 1e6, 1e7,
+        1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15
+    ];
+
     /// <summary>
     /// 採用済みの数値関数の仕様に従い、値を有限doubleへ変換します。
     /// </summary>
@@ -144,8 +150,14 @@ public static class NumericOperations
 
         if (digits is >= -15 and <= 0)
         {
-            return Math.Round(value, -digits,
-                MidpointRounding.ToEven);
+            if (Math.Abs(value) >= 1e16)
+            {
+                return value;
+            }
+
+            // .NET 11でも、桁を移動してから偶数丸めする従来のROUNDの結果を保ちます。
+            double decimalScale = DecimalRoundScales[-digits];
+            return Math.Round(value * decimalScale, MidpointRounding.ToEven) / decimalScale;
         }
 
         double scale = Math.Pow(10, digits);

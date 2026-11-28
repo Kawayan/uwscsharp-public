@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <Version Condition="'$(Version)' == ''">0.1.0</Version>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(Version)' == '0.1.0'">false</IncludeSourceRevisionInInformationalVersion>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net11.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <!-- DPI認識はWPFの既存マニフェストで設定します。 -->

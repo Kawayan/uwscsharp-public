@@ -20,7 +20,7 @@
 <p>コマンドライン版のプレビューのサポート範囲は、通常の<code>.uws</code>の実行、引数の受け渡し、標準出力・標準エラー、終了コード、ローカルのファイル処理、取消と再実行です。Windowsの画面・入力操作やCOMなどは、各機能の説明に記載した対応状況を確認してください。</p>
 <p>ソースから実行する場合は、リポジトリのルートで次の形式を使います。</p>
 <pre><code>dotnet run --project src/UWSCSharp.Cli -- examples/parameters.uws "日本語" "a b"</code></pre>
-<p>ランタイム依存のコマンドライン版配布物では.NET 10 Runtimeが必要です。展開先で次の形式を使います。</p>
+<p>ランタイム依存のコマンドライン版配布物では.NET 11 Runtimeが必要です。展開先で次の形式を使います。</p>
 <pre><code>dotnet UWSCSharp.Cli.dll script.uws "日本語" "a b"</code></pre>
 <p>原版UWSCやUWSC#で作成した<code>UWS05</code>形式の.uwsファイルは、通常のスクリプトと同じ指定で実行でき、<code>CALL</code>の呼出し先にも使えます。ファイル形式が不正な場合や、検査値が本文と一致しない場合は、読込み時にエラーを表示します。</p>
 <h2 id="scramble">スクリプトをUWS05へ変換する</h2>
