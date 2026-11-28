@@ -32,19 +32,13 @@ public partial class MainWindow
 
         internal bool RecoveryPending => window.recording.RecoveryPending;
 
-        internal bool? CopyOptionChecked =>
-            window.CopyRecordingCheckBox.IsChecked;
+        internal bool CanEditRecordingSettings => window.WindowSettingsButton.IsEnabled;
 
-        internal bool CopyOptionEnabled =>
-            window.CopyRecordingCheckBox.IsEnabled;
-
-        internal bool CopyAfterRecording =>
-            window.recordingSettings.CopyAfterRecording;
+        internal RecordingSettings Settings => window.recordingSettings;
 
         internal void SetCopyOption(bool enabled)
         {
-            window.recordingSettings = new(CopyAfterRecording: enabled);
-            window.CopyRecordingCheckBox.IsChecked = enabled;
+            window.recordingSettings = window.recordingSettings with { CopyAfterRecording = enabled };
         }
 
         internal void DisableCopyAfterRecording() =>
@@ -53,55 +47,10 @@ public partial class MainWindow
                 CopyAfterRecording = false
             };
 
-        internal bool HighLevelOptionChecked =>
-            window.HighLevelRecordingCheckBox.IsChecked == true;
-
-        internal void ClickHighLevelOption()
-        {
-            window.HighLevelRecordingCheckBox.IsChecked = true;
-            window.HighLevelRecordingCheckBox.RaiseEvent(
-                new RoutedEventArgs(CheckBox.ClickEvent));
-        }
-
-        internal bool BackgroundOptionChecked =>
-            window.BackgroundRecordingCheckBox.IsChecked == true;
-
-        internal bool OmitIdleOptionChecked =>
-            window.OmitIdleRecordingCheckBox.IsChecked == true;
-
-        internal void ClickOmitIdleOption()
-        {
-            window.OmitIdleRecordingCheckBox.IsChecked = true;
-            window.OmitIdleRecordingCheckBox.RaiseEvent(
-                new RoutedEventArgs(CheckBox.ClickEvent));
-        }
-
-        internal bool RelativeMouseOptionChecked =>
-            window.RelativeMouseRecordingCheckBox.IsChecked == true;
-
-        internal void ClickRelativeMouseOption()
-        {
-            window.RelativeMouseRecordingCheckBox.IsChecked = true;
-            window.RelativeMouseRecordingCheckBox.RaiseEvent(
-                new RoutedEventArgs(CheckBox.ClickEvent));
-        }
-
-        internal bool BackgroundOptionEnabled =>
-            window.BackgroundRecordingCheckBox.IsEnabled;
-
-        internal void ClickBackgroundOption(bool enabled)
-        {
-            window.BackgroundRecordingCheckBox.IsChecked = enabled;
-            window.BackgroundRecordingCheckBox.RaiseEvent(
-                new RoutedEventArgs(CheckBox.ClickEvent));
-        }
-
-        internal void ClickCopyOption(bool enabled)
-        {
-            window.CopyRecordingCheckBox.IsChecked = enabled;
-            window.CopyRecordingCheckBox.RaiseEvent(
-                new RoutedEventArgs(CheckBox.ClickEvent));
-        }
+        internal Task EditRecordingSettingsAsync(Func<WindowSettingsWindow, Task> edit) =>
+            SettingsVerification.RunSettingsModalAsync(window.Dispatcher,
+                new SettingsVerificationAccess(window).ClickWindowSettings, edit,
+                allowLoadError: false, "本体設定の読込み", "本体設定の処理が完了しませんでした。");
 
         internal void SaveScript(string path) => window.SaveScriptFile(path);
 

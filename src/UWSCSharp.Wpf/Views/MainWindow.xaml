@@ -36,26 +36,6 @@
             <TextBlock x:Name="SchedulerStatus" Margin="4" VerticalAlignment="Center" TextWrapping="Wrap"
                 AutomationProperties.LiveSetting="Polite" />
         </WrapPanel>
-        <CheckBox x:Name="OmitIdleRecordingCheckBox"
-            Click="RecordingSettingsClick"
-            Content="余分な時間、マウス移動は記録しない" Margin="4,6"
-            ToolTip="SLEEPと、ボタンを押していない間のMMVを省略します。クリックの座標とドラッグ中の移動は記録します。記録開始時の設定を使用します。" />
-        <CheckBox x:Name="RelativeMouseRecordingCheckBox"
-            Content="マウス座標を相対座標で記録する" Margin="4,6"
-            Click="RecordingSettingsClick"
-            ToolTip="アクティブウインドウの左上（枠を含む）を基準に、ACWとSTATUSの座標式で記録します。記録開始時の設定を使用します。" />
-        <CheckBox x:Name="HighLevelRecordingCheckBox"
-            Content="高レベル記録（Win32ボタン）" Margin="4,6"
-            Click="RecordingSettingsClick"
-            ToolTip="対象の左クリックをCLKITEMで記録します。記録開始時の設定を使用します。" />
-        <CheckBox x:Name="BackgroundRecordingCheckBox"
-            Content="背景再生用に記録する（Win32ボタン）" Margin="4,6"
-            Click="RecordingSettingsClick"
-            ToolTip="対象を前面に出さずに再生できるCLKITEMを生成します。" />
-        <CheckBox x:Name="CopyRecordingCheckBox"
-            Content="記録後クリップボードへコピーする" Margin="4,6"
-            Click="RecordingSettingsClick"
-            ToolTip="正常に開始した記録を停止操作で終了した場合だけコピーします。警告・上限超過・画面終了時の回収は除外します。" />
         <TextBlock x:Name="FileLabel" Text="新規スクリプト（保存はUTF-8 BOM付き）" Margin="4" TextTrimming="CharacterEllipsis" />
         <TextBlock x:Name="StatusLabel" Text="待機中" Margin="4" AutomationProperties.LiveSetting="Polite" />
         <TextBlock x:Name="InputCleanupLabel" Margin="4" TextWrapping="Wrap" Visibility="Collapsed"

@@ -2,9 +2,11 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Windows.Controls;
 using UWSCSharp.Core;
 using UWSCSharp.Windows;
 using static UWSCSharp.Wpf.VerificationAssert;
+using static UWSCSharp.Wpf.SettingsVerification;
 
 namespace UWSCSharp.Wpf;
 
@@ -47,19 +49,37 @@ internal static class RecordingClipboardVerification
             Require(clipboard.ReadText(default) == "元の内容", "既定無効時は旧内容保持");
             checks.Add("copy-default-off-preserves-clipboard");
 
-            access.ClickCopyOption(true);
+            await SaveOptionAsync("CopyRecordingCheckBox", true);
             Require(RecordingSettings.Load(settingsPath).CopyAfterRecording, "設定保存");
-            int previousErrors = errors.Count;
+            await access.EditRecordingSettingsAsync(dialog =>
+            {
+                var option = (CheckBox)dialog.FindName("CopyRecordingCheckBox");
+                Require(option.IsChecked == true, "保存値を設定画面に表示");
+                option.IsChecked = false;
+                dialog.Close();
+                return Task.CompletedTask;
+            });
+            Require(access.Settings.CopyAfterRecording
+                && RecordingSettings.Load(settingsPath).CopyAfterRecording, "取消で保存値を保持");
             using (var locked = new FileStream(settingsPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                access.ClickCopyOption(false);
-                Require(access.CopyOptionChecked == true && access.CopyAfterRecording
-                    && errors.Count == previousErrors + 1, "保存失敗時はコピー設定も復元");
+                await access.EditRecordingSettingsAsync(dialog =>
+                {
+                    var option = (CheckBox)dialog.FindName("CopyRecordingCheckBox");
+                    option.IsChecked = false;
+                    ClickSave(dialog);
+                    Require(dialog.IsVisible && Error(dialog).Text.Contains("記録設定を保存できませんでした")
+                        && option.IsChecked == false, "保存失敗時に設定画面と編集内容を保持");
+                    dialog.Close();
+                    return Task.CompletedTask;
+                });
+                Require(access.Settings.CopyAfterRecording
+                    && RecordingSettings.Load(settingsPath).CopyAfterRecording, "保存失敗時は適用済みの設定を保持");
             }
             checks.Add("copy-setting-save-and-failure-rollback");
 
-            access.ClickBackgroundOption(true);
-            Require(access.BackgroundOptionChecked
+            await SaveOptionAsync("BackgroundRecordingCheckBox", true);
+            Require(access.Settings.BackgroundPlayback
                 && RecordingSettings.Load(settingsPath).BackgroundPlayback,
                 "背景再生用記録の設定を保存");
             var reopened = new MainWindow(false);
@@ -67,7 +87,7 @@ internal static class RecordingClipboardVerification
             {
                 reopened.Show();
                 var reopenedAccess = new MainWindow.RecordingVerificationAccess(reopened);
-                Require(reopenedAccess.BackgroundOptionChecked,
+                Require(reopenedAccess.Settings.BackgroundPlayback,
                     "背景再生用記録の保存値を読み込む");
             }
             finally
@@ -76,10 +96,10 @@ internal static class RecordingClipboardVerification
             }
 
             await StartAsync();
-            Require(!access.BackgroundOptionEnabled, "記録中は背景再生用設定を変更不可");
+            Require(!access.CanEditRecordingSettings, "記録中は背景再生用設定を変更不可");
             await FinishAsync(true);
-            Require(access.BackgroundOptionEnabled, "停止後に背景再生用設定を変更可能");
-            access.ClickBackgroundOption(false);
+            Require(access.CanEditRecordingSettings, "停止後に背景再生用設定を変更可能");
+            await SaveOptionAsync("BackgroundRecordingCheckBox", false);
             Require(!RecordingSettings.Load(settingsPath).BackgroundPlayback,
                 "背景再生用記録の無効化を保存");
             checks.Add("background-recording-setting-save-and-reload");
@@ -89,7 +109,7 @@ internal static class RecordingClipboardVerification
                 Source = "PRINT \"日本語😀\"\r\n"
             };
             await StartAsync();
-            Require(!access.CopyOptionEnabled, "記録中は設定変更不可");
+            Require(!access.CanEditRecordingSettings, "記録中は設定変更不可");
             await FinishAsync(true);
             Require(clipboard.ReadText(default) == device.Source, "Unicodeと末尾の保持");
             checks.Add("copy-manual-stop-exact-unicode-source");
@@ -155,7 +175,7 @@ internal static class RecordingClipboardVerification
                 StartError = new IOException("開始失敗"),
                 DisposeError = new IOException("回収失敗")
             };
-            previousErrors = errors.Count;
+            int previousErrors = errors.Count;
             access.ToggleRecording();
             await RecordingClipboardVerification.WaitAsync(() => errors.Count == previousErrors + 1 && !controller.IsStarting);
             Require(controller.RecoveryPending, "失敗した開始の回収待ち");
@@ -271,7 +291,7 @@ internal static class RecordingClipboardVerification
             Task<int> playing = access.PlayAsync();
             try
             {
-                Require(!access.CopyOptionEnabled, "再生中も設定変更不可");
+                Require(!access.CanEditRecordingSettings, "再生中も設定変更不可");
             }
             finally
             {
@@ -314,6 +334,14 @@ internal static class RecordingClipboardVerification
             }
         }
 
+        Task SaveOptionAsync(string name, bool enabled) =>
+            access.EditRecordingSettingsAsync(async dialog =>
+            {
+                ((CheckBox)dialog.FindName(name)).IsChecked = enabled;
+                ClickSave(dialog);
+                await WaitAsync(() => !dialog.IsVisible);
+            });
+
         async Task StartAsync()
         {
             access.ToggleRecording();
@@ -333,7 +361,7 @@ internal static class RecordingClipboardVerification
             access.ClickStop();
             await FinishedAsync();
             Require(writes == before + (copyAttempted ? 1 : 0), "コピー試行の件数");
-            Require(access.CopyOptionEnabled, "停止後に設定編集へ戻る");
+            Require(access.CanEditRecordingSettings, "停止後に設定編集へ戻る");
         }
     }
 

@@ -43,11 +43,20 @@ public partial class MainWindow
             return;
         }
 
-        var dialog = new WindowSettingsWindow { Owner = this };
-        if (dialog.ShowDialog() == true && dialog.Result is { } settings)
+        var dialog = new WindowSettingsWindow(recordingSettings, RecordingSettingsPath)
+        {
+            Owner = this
+        };
+        dialog.ShowDialog();
+        if (dialog.Result is { } settings)
         {
             Topmost = settings.StayOnTop;
             ApplyMainSize(settings.MainSize);
+        }
+
+        if (dialog.RecordingResult is { } savedRecordingSettings)
+        {
+            recordingSettings = savedRecordingSettings;
         }
     }
 

@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -107,8 +106,8 @@ public partial class MainWindow : Window
                 monitorHookHealth: true,
                 additionalControls: launcherHotkeys?.RegisteredShortcuts ?? [])
             {
-                OmitIdleTimeAndMouseMoves = OmitIdleRecordingCheckBox.IsChecked == true,
-                RelativeMouseCoordinates = RelativeMouseRecordingCheckBox.IsChecked == true,
+                OmitIdleTimeAndMouseMoves = recordingSettings.OmitIdleTimeAndMouseMoves,
+                RelativeMouseCoordinates = recordingSettings.RelativeMouseCoordinates,
                 RecordButtonClicks = recordingSettings.RecordButtonClicks,
                 BackgroundPlayback = recordingSettings.BackgroundPlayback
             }), RecordingStopTimeout);

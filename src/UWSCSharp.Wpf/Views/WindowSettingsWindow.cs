@@ -26,10 +26,22 @@ internal sealed class WindowSettingsWindow : Window
     private readonly TextBox size = new() { IsEnabled = false };
     private readonly TextBox widthPixels = new() { IsEnabled = false };
     private readonly TextBox heightPixels = new() { IsEnabled = false };
-    private ApplicationWindowSize? previousMainSize;
     private readonly TextBox stopWidthPixels = new() { IsEnabled = false };
     private readonly TextBox stopHeightPixels = new() { IsEnabled = false };
-    private ApplicationWindowSize? previousStopSize;
+    private readonly GroupBox recordingOptions = new()
+    {
+        Header = "記録設定",
+        IsEnabled = false,
+        Margin = new Thickness(0, 0, 0, 8)
+    };
+    private readonly CheckBox omitIdle;
+    private readonly CheckBox relativeMouse;
+    private readonly CheckBox highLevel;
+    private readonly CheckBox background;
+    private readonly CheckBox copyRecording;
+    private readonly RecordingSettings initialRecordingSettings;
+    private readonly string recordingSettingsPath;
+    private ApplicationWindowSettings? savedWindowSettings;
     private bool saving;
 
     internal ApplicationWindowSettings? Result
@@ -37,8 +49,12 @@ internal sealed class WindowSettingsWindow : Window
         get; private set;
     }
 
-    internal WindowSettingsWindow()
+    internal RecordingSettings? RecordingResult { get; private set; }
+
+    internal WindowSettingsWindow(RecordingSettings recordingSettings, string recordingSettingsPath)
     {
+        initialRecordingSettings = recordingSettings;
+        this.recordingSettingsPath = recordingSettingsPath;
         Title = "本体設定";
         Width = 420;
         SizeToContent = SizeToContent.Height;
@@ -84,6 +100,24 @@ internal sealed class WindowSettingsWindow : Window
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 8)
         });
+        var recordingPanel = new StackPanel { Margin = new Thickness(8, 4, 8, 4) };
+        omitIdle = AddRecordingOption(recordingPanel, "OmitIdleRecordingCheckBox",
+            "余分な時間、マウス移動は記録しない", recordingSettings.OmitIdleTimeAndMouseMoves,
+            "SLEEPと、ボタンを押していない間のMMVを省略します。クリックの座標とドラッグ中の移動は記録します。記録開始時の設定を使用します。");
+        relativeMouse = AddRecordingOption(recordingPanel, "RelativeMouseRecordingCheckBox",
+            "マウス座標を相対座標で記録する", recordingSettings.RelativeMouseCoordinates,
+            "アクティブウインドウの左上（枠を含む）を基準に、ACWとSTATUSの座標式で記録します。記録開始時の設定を使用します。");
+        highLevel = AddRecordingOption(recordingPanel, "HighLevelRecordingCheckBox",
+            "高レベル記録（Win32ボタン）", recordingSettings.RecordButtonClicks,
+            "対象の左クリックをCLKITEMで記録します。記録開始時の設定を使用します。");
+        background = AddRecordingOption(recordingPanel, "BackgroundRecordingCheckBox",
+            "背景再生用に記録する（Win32ボタン）", recordingSettings.BackgroundPlayback,
+            "対象を前面に出さずに再生できるCLKITEMを生成します。");
+        copyRecording = AddRecordingOption(recordingPanel, "CopyRecordingCheckBox",
+            "記録後クリップボードへコピーする", recordingSettings.CopyAfterRecording,
+            "正常に開始した記録を停止操作で終了した場合だけコピーします。警告・上限超過・画面終了時の回収は除外します。");
+        recordingOptions.Content = recordingPanel;
+        panel.Children.Add(recordingOptions);
         RegisterName("SettingsError", error);
         AutomationProperties.SetName(error, "本体設定のエラー");
         panel.Children.Add(error);
@@ -110,6 +144,21 @@ internal sealed class WindowSettingsWindow : Window
         panel.Children.Add(box);
     }
 
+    private CheckBox AddRecordingOption(Panel panel, string name, string label,
+        bool isChecked, string toolTip)
+    {
+        var option = new CheckBox
+        {
+            Content = label,
+            IsChecked = isChecked,
+            ToolTip = toolTip,
+            Margin = new Thickness(0, 3, 0, 3)
+        };
+        RegisterName(name, option);
+        panel.Children.Add(option);
+        return option;
+    }
+
     private async Task LoadAsync()
     {
         try
@@ -117,12 +166,11 @@ internal sealed class WindowSettingsWindow : Window
             ApplicationWindowSettings settings = await ApplicationWindowSettings.LoadAsync();
             stayOnTop.IsChecked = settings.StayOnTop;
             ScriptDialogFont font = settings.DialogFont ?? new ScriptDialogFont();
+            savedWindowSettings = new(settings.StayOnTop, font, settings.MainSize, settings.StopSize);
             family.Text = font.Family;
             size.Text = font.SizePoints.ToString(CultureInfo.InvariantCulture);
-            previousMainSize = settings.MainSize;
             widthPixels.Text = settings.MainSize?.WidthPixels.ToString(CultureInfo.InvariantCulture) ?? "";
             heightPixels.Text = settings.MainSize?.HeightPixels.ToString(CultureInfo.InvariantCulture) ?? "";
-            previousStopSize = settings.StopSize;
             stopWidthPixels.Text = settings.StopSize?.WidthPixels.ToString(CultureInfo.InvariantCulture) ?? "";
             stopHeightPixels.Text = settings.StopSize?.HeightPixels.ToString(CultureInfo.InvariantCulture) ?? "";
             SetEditorEnabled(true);
@@ -136,11 +184,13 @@ internal sealed class WindowSettingsWindow : Window
 
     private async Task SaveAsync()
     {
-        if (saving)
+        if (saving || savedWindowSettings is not { } previous)
         {
             return;
         }
 
+        error.Text = "";
+        bool savingRecording = false;
         try
         {
             if (!int.TryParse(size.Text, NumberStyles.Integer,
@@ -150,16 +200,38 @@ internal sealed class WindowSettingsWindow : Window
             }
 
             ApplicationWindowSize? mainSize = ReadSize(widthPixels, heightPixels,
-                previousMainSize, "本体");
+                previous.MainSize, "本体");
             ApplicationWindowSize? stopSize = ReadSize(stopWidthPixels, stopHeightPixels,
-                previousStopSize, "停止画面");
-            var settings = new ApplicationWindowSettings(stayOnTop.IsChecked == true,
-                new ScriptDialogFont(family.Text, points), mainSize, stopSize);
+                previous.StopSize, "停止画面");
+            bool topmost = stayOnTop.IsChecked == true;
+            var font = new ScriptDialogFont(family.Text, points);
+            var recordingSettings = new RecordingSettings(
+                OmitIdleTimeAndMouseMoves: omitIdle.IsChecked == true,
+                RelativeMouseCoordinates: relativeMouse.IsChecked == true,
+                CopyAfterRecording: copyRecording.IsChecked == true,
+                RecordButtonClicks: highLevel.IsChecked == true,
+                BackgroundPlayback: background.IsChecked == true);
+            bool recordingChanged = recordingSettings != initialRecordingSettings;
             saving = true;
             SetEditorEnabled(false);
             save.IsEnabled = false;
-            await settings.SaveAsync();
-            Result = settings;
+            if (!recordingChanged || topmost != previous.StayOnTop || font.Family != previous.DialogFont?.Family
+                || font.SizePoints != previous.DialogFont?.SizePoints
+                || Dimensions(mainSize) != Dimensions(previous.MainSize)
+                || Dimensions(stopSize) != Dimensions(previous.StopSize))
+            {
+                var settings = new ApplicationWindowSettings(topmost, font, mainSize, stopSize);
+                await settings.SaveAsync();
+                Result = savedWindowSettings = settings;
+            }
+
+            if (recordingChanged)
+            {
+                savingRecording = true;
+                recordingSettings.Save(recordingSettingsPath);
+                RecordingResult = recordingSettings;
+            }
+
             saving = false;
             DialogResult = true;
         }
@@ -167,7 +239,12 @@ internal sealed class WindowSettingsWindow : Window
             or UnauthorizedAccessException or ArgumentException
             or InvalidOperationException)
         {
-            error.Text = "本体設定を保存できませんでした。" + failure.Message;
+            error.Text = (savingRecording ? "記録設定を保存できませんでした。"
+                : "本体設定を保存できませんでした。") + failure.Message;
+            if (Result is not null)
+            {
+                error.Text += " 画面の設定は保存済みです。";
+            }
         }
         finally
         {
@@ -176,6 +253,9 @@ internal sealed class WindowSettingsWindow : Window
             save.IsEnabled = true;
         }
     }
+
+    private static (int? Width, int? Height) Dimensions(ApplicationWindowSize? size) =>
+        (size?.WidthPixels, size?.HeightPixels);
 
     private static ApplicationWindowSize? ReadSize(TextBox widthBox, TextBox heightBox,
         ApplicationWindowSize? previous, string target)
@@ -206,5 +286,6 @@ internal sealed class WindowSettingsWindow : Window
         heightPixels.IsEnabled = enabled;
         stopWidthPixels.IsEnabled = enabled;
         stopHeightPixels.IsEnabled = enabled;
+        recordingOptions.IsEnabled = enabled;
     }
 }
