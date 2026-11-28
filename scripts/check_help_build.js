@@ -53,11 +53,14 @@ try {
     assert.notEqual(run('--output', SOURCE).status, 0);
     assert.notEqual(run('--unknown').status, 0);
 
-    // ヘルプと生成スクリプトだけを移した構成でも、Pythonなしで生成します。
+    // WPFプロジェクトを参照し、Node.jsだけで生成します。
     const isolated = path.join(temporary, 'isolated');
     fs.mkdirSync(path.join(isolated, 'scripts'), { recursive: true });
     fs.copyFileSync(path.join(__dirname, 'build_help.js'), path.join(isolated, 'scripts/build_help.js'));
     fs.cpSync(SOURCE, path.join(isolated, 'docs/user-help'), { recursive: true });
+    const project = 'src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj';
+    fs.mkdirSync(path.dirname(path.join(isolated, project)), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, project), path.join(isolated, project));
     const isolatedRun = (...args) => spawnSync(process.execPath,
         [path.join(isolated, 'scripts/build_help.js'), ...args], {
             cwd: temporary, encoding: 'utf8', windowsHide: true,
@@ -67,6 +70,16 @@ try {
     const isolatedBuild = isolatedRun();
     assert.equal(isolatedBuild.status, 0, isolatedBuild.stderr);
     assert.equal(isolatedRun('--check').status, 0);
+    const isolatedProject = path.join(isolated, project);
+    fs.writeFileSync(isolatedProject, read(isolatedProject).replace(
+        /<UwscWpfVersion>[^<]+<\/UwscWpfVersion>/,
+        '<UwscWpfVersion>17.21.34-preview.1</UwscWpfVersion>'));
+    assert.notEqual(isolatedRun('--check').status, 0);
+    assert.equal(isolatedRun().status, 0);
+    const index = read(path.join(isolated, 'docs/user-help/index.html'));
+    assert(index.includes('<code>17.21.34-preview.1</code>'));
+    assert(index.includes('<code>17.21.34.0</code>'));
+    assert(read(path.join(isolated, 'docs/user-help/assets/search-index.js')).includes('17.21.34-preview.1'));
     fs.appendFileSync(path.join(isolated, 'docs/user-help/index.html'), '古いローカル生成物');
     assert.notEqual(isolatedRun('--check').status, 0);
 } finally {

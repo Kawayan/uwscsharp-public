@@ -33,7 +33,7 @@ jobs:
             exit 0
           fi
 
-          help_paths=(docs/user-help scripts/build_help.js .github/workflows/help-pages.yml)
+          help_paths=(docs/user-help scripts/build_help.js .github/workflows/help-pages.yml src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj)
           if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
             BEFORE_SHA=$(git hash-object -t tree -w /dev/null)
           elif ! git cat-file -e "${BEFORE_SHA}^{commit}"; then

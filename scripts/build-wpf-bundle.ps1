@@ -1,10 +1,8 @@
 #requires -Version 7.0
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)]
     [string]$Version,
 
-    [Parameter(Mandatory)]
     [string]$InstallerVersion,
 
     [Parameter(Mandatory)]
@@ -18,8 +16,14 @@ $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw "未作成の出力先を指定してください: $output" }
 
 $package = Join-Path $output 'package'
-& "$PSScriptRoot/build-wpf-installer.ps1" -Version $Version -InstallerVersion $InstallerVersion `
-    -OutputDirectory $package -AcceptWixEula:$AcceptWixEula
+$installerArguments = @{ OutputDirectory = $package; AcceptWixEula = $AcceptWixEula }
+if ($PSBoundParameters.ContainsKey('Version')) { $installerArguments.Version = $Version }
+if ($PSBoundParameters.ContainsKey('InstallerVersion')) { $installerArguments.InstallerVersion = $InstallerVersion }
+& "$PSScriptRoot/build-wpf-installer.ps1" @installerArguments
+if (!$InstallerVersion) {
+    $release = Get-Content -LiteralPath (Join-Path $package 'app/package/release.json') -Raw | ConvertFrom-Json
+    $InstallerVersion = ($release.version -split '-', 2)[0]
+}
 
 $msiName = "UWSCSharp-$InstallerVersion-win-x64.msi"
 $msi = Join-Path $package "msi/$msiName"
