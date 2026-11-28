@@ -7,7 +7,7 @@
   </Configurations>
   <Folder Name="/src/">
     <Project Path="src/UWSCSharp.Mcp/UWSCSharp.Mcp.csproj" />
-    <Project Path="src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj" />
+    <Project Path="src/UWSCSharp.Wpf/UWSCSharp.Wpf.csproj" DefaultStartup="true" />
     <Project Path="src/UWSCSharp.Wpf.Logic/UWSCSharp.Wpf.Logic.csproj" />
     <Project Path="src/UWSCSharp.Cli/UWSCSharp.Cli.csproj" />
     <Project Path="src/UWSCSharp.Core/UWSCSharp.Core.csproj" />

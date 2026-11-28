@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using UWSCSharp.Wpf;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,27 +22,8 @@ public sealed class SchedulerMonitorLeaseProcessTests(ITestOutputHelper output)
         {
             using SchedulerMonitorLease parent = Assert.IsType<SchedulerMonitorLease>(
                 SchedulerMonitorLease.TryAcquire(path));
-            const string script = """
-                $ErrorActionPreference='Stop'
-                $assembly=[Reflection.Assembly]::LoadFrom($env:UWSC_MONITOR_ASSEMBLY)
-                $type=$assembly.GetType('UWSCSharp.Wpf.SchedulerMonitorLease',$true)
-                $flags=[Reflection.BindingFlags]'Static,NonPublic'
-                $acquire=$type.GetMethod('TryAcquire',$flags)
-                $first=$acquire.Invoke($null,@($env:UWSC_MONITOR_PATH))
-                if($null -ne $first){$first.Dispose();throw 'expected busy'}
-                [Console]::WriteLine('busy')
-                [Console]::Out.Flush()
-                if([Console]::ReadLine() -ne 'acquire'){throw 'missing acquire'}
-                $lease=$acquire.Invoke($null,@($env:UWSC_MONITOR_PATH))
-                if($null -eq $lease){throw 'expected ownership'}
-                try {
-                    $property=$type.GetProperty('Generation',[Reflection.BindingFlags]'Instance,NonPublic')
-                    [Console]::WriteLine($property.GetValue($lease))
-                    [Console]::Out.Flush()
-                    $null=[Console]::ReadLine()
-                } finally { $lease.Dispose() }
-                """;
-            var start = new ProcessStartInfo("pwsh")
+            string executable = FixturePaths.Get("UWSCSharp.ControlFixture", "UWSCSharp.ControlFixture.exe");
+            var start = new ProcessStartInfo(executable)
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -52,19 +32,16 @@ public sealed class SchedulerMonitorLeaseProcessTests(ITestOutputHelper output)
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            start.ArgumentList.Add("-NoProfile");
-            start.ArgumentList.Add("-NonInteractive");
-            start.ArgumentList.Add("-EncodedCommand");
-            start.ArgumentList.Add(Convert.ToBase64String(Encoding.Unicode.GetBytes(script)));
-            start.Environment["UWSC_MONITOR_ASSEMBLY"] = typeof(SchedulerMonitorLease).Assembly.Location;
-            start.Environment["UWSC_MONITOR_PATH"] = path;
+            start.ArgumentList.Add("--scheduler-monitor-lease-probe");
+            start.ArgumentList.Add(path);
             using Process process = Process.Start(start)!;
             Exception? processFailure = null;
             try
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 Task<string> error = process.StandardError.ReadToEndAsync(timeout.Token);
-                Assert.Equal("busy", await process.StandardOutput.ReadLineAsync(timeout.Token));
+                string? busy = await process.StandardOutput.ReadLineAsync(timeout.Token);
+                Assert.True(busy == "busy", busy ?? await error);
                 output.WriteLine($"busy: child={process.Id},exited={process.HasExited}");
                 parent.Dispose();
                 await process.StandardInput.WriteLineAsync("acquire");

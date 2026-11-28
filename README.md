@@ -28,7 +28,8 @@ NEXT
 
 ## ビルド
 
-Windows 11 x64、.NET 10 SDK（`global.json` 参照）、PowerShell 7を使います。  
+Windows 11 x64、.NET 11 SDK（`global.json` 参照）、PowerShell 7を使います。
+
 Windowsテストのネイティブフィクスチャのビルドには、Visual StudioのC++デスクトップ開発ワークロードとWindows SDKが必要です。
 
 ```powershell
@@ -53,7 +54,7 @@ UWSC# を気に入ってもらえたら、GitHub Sponsors で応援していた�
 
 ## WiX バンドル EXE の作成
 
-Windows x64 向けのセットアップ EXE を作成できます。WiX Burn がアプリの MSI を EXE に内蔵します。.NET 10 SDK、PowerShell 7、Visual Studio の C++ デスクトップ開発ワークロードと Windows SDK を用意してください。WiX 7 はビルド時に NuGet から復元します。[WiX 7 の利用条件](https://docs.firegiant.com/wix/osmf/)を確認し、同意する場合は次のコマンドを実行してください。
+Windows x64 向けのセットアップ EXE を作成できます。WiX Burn がアプリの MSI を EXE に内蔵します。.NET 11 SDK、PowerShell 7、Visual Studio の C++ デスクトップ開発ワークロードと Windows SDK を用意してください。WiX 7 はビルド時に NuGet から復元します。[WiX 7 の利用条件](https://docs.firegiant.com/wix/osmf/)を確認し、同意する場合は次のコマンドを実行してください。
 
 ```powershell
 pwsh -NoProfile -File scripts/build-wpf-bundle.ps1 -Version 0.1.0-preview.1 -InstallerVersion 0.1.0 -OutputDirectory artifacts/wpf-bundle -AcceptWixEula

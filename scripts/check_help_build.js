@@ -17,7 +17,7 @@ for (const [page, href] of [
     ['index.html', 'https://github.com/Kawayan/uwscsharp-public/issues/new?template=bug-report.yml'],
     ['index.html', 'https://github.com/sponsors/Kawayan'],
     ['pages/getting-started.html', 'https://github.com/Kawayan/uwscsharp-public/releases'],
-    ['pages/getting-started.html', 'https://dotnet.microsoft.com/ja-jp/download/dotnet/10.0'],
+    ['pages/getting-started.html', 'https://dotnet.microsoft.com/ja-jp/download/dotnet/11.0'],
 ]) {
     const link = `<a href="${href}">リンク</a>`;
     validateLinks({ [page]: link });

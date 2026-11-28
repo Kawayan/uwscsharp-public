@@ -1,7 +1,7 @@
 <Project>
-  <!-- 共通の既定値。各プロジェクトで上書きできます（例: WPFではnet10.0-windows）。 -->
+  <!-- 共通の既定値。各プロジェクトで上書きできます（例: WPFではnet11.0-windows）。 -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <RootNamespace>UWSCSharp</RootNamespace>
     <Product>UWSC#</Product>
     <ImplicitUsings>enable</ImplicitUsings>

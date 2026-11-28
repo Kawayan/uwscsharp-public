@@ -24,8 +24,8 @@
 <li>「スクリプト編集・実行結果」を展開し、PRINTの出力を確認します。</li></ol>
 <p>配布版番号と発行元コミットは同梱の<code>release.json</code>で確認できます。ライセンス表示と案内も保管してください。</p>
 <h2 id="x86-runtime">32ビットDLLを呼び出す</h2>
-<p>ランタイム同梱版でも、<code>DEF_DLL</code>で32ビットDLLを呼び出す場合はx86版の.NET 10 Runtimeが必要です。</p>
-<ol><li><a href="https://dotnet.microsoft.com/ja-jp/download/dotnet/10.0">Microsoftの.NET 10ダウンロードページ</a>を開きます。</li>
+<p>ランタイム同梱版でも、<code>DEF_DLL</code>で32ビットDLLを呼び出す場合はx86版の.NET 11 Runtimeが必要です。</p>
+<ol><li><a href="https://dotnet.microsoft.com/ja-jp/download/dotnet/11.0">Microsoftの.NET 11ダウンロードページ</a>を開きます。</li>
 <li>「.NET Runtime」のWindows用インストーラーで「x86」を選び、インストールします。</li>
 <li>インストールが終わったら、DLLを呼び出すスクリプトを再実行します。</li></ol>
 <h2 id="hello">自分で書いて試す</h2>
@@ -39,7 +39,7 @@ PRINT 1 + 2</code></pre>
 <p>MSIのセットアップでは「.uwsの関連付け候補を登録」を選べます。初期状態では選択されず、選んでも既定アプリは変わりません。MSIのオプションで登録した候補は、変更されていなければ選択解除またはアンインストール時に解除します。画面から登録した場合や解除後に登録し直した場合は、MSIを削除する前に同じ配置の画面で解除してください。</p>
 <p>関連付けで開いたスクリプトは、スクリプトがあるフォルダーを基準に相対パスを解決します。正常終了後は画面を閉じ、失敗時は画面を残します。Windows シェルからファイルを開く経路は検証済みです。Windows の設定で既定アプリを選択する操作、Explorer 画面からの起動、MSI 画面の操作、原版との比較は未確認です。</p>
 <h2 id="source">ソースから起動する</h2>
-<p>Windowsで.NET 10 SDKを用意し、リポジトリのルートで実行します。SDKの基準は<code>global.json</code>の10.0.301です。</p>
+<p>Windowsで.NET 11 SDKを用意し、リポジトリのルートで実行します。SDKの基準は<code>global.json</code>の11.0.100です。</p>
 <pre><code>dotnet run --project src/UWSCSharp.Wpf
 dotnet run --project src/UWSCSharp.Cli -- distribution/wpf-preview/examples/hello.uws</code></pre>
 <p>UWSC# アプリでの編集と保存は<a href="editor.html">読込・編集・保存</a>、引数の指定は<a href="cli.html">コマンドライン版の使い方と起動引数</a>を参照してください。</p>

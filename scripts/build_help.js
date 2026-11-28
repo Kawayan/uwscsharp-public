@@ -12,7 +12,7 @@ const allowedExternalLinks = {
     ]),
     'pages/getting-started.html': new Set([
         'https://github.com/Kawayan/uwscsharp-public/releases',
-        'https://dotnet.microsoft.com/ja-jp/download/dotnet/10.0',
+        'https://dotnet.microsoft.com/ja-jp/download/dotnet/11.0',
     ]),
 };
 const read = file => fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');

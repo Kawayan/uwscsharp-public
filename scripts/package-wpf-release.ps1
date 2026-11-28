@@ -45,8 +45,8 @@ $runtime = Get-Content -LiteralPath $runtimeConfig -Raw | ConvertFrom-Json
 $frameworks = @($runtime.runtimeOptions.includedFrameworks)
 $core = $frameworks | Where-Object name -eq 'Microsoft.NETCore.App'
 $desktop = $frameworks | Where-Object name -eq 'Microsoft.WindowsDesktop.App'
-if ($frameworks.Count -ne 2 -or $core.version -notmatch '^10\.0\.' -or $desktop.version -notmatch '^10\.0\.') {
-    throw '同梱する .NET 10 と Windows Desktop の構成を確認できません。'
+if ($frameworks.Count -ne 2 -or $core.version -notmatch '^11\.0\.' -or $desktop.version -notmatch '^11\.0\.') {
+    throw '同梱する .NET 11 と Windows Desktop の構成を確認できません。'
 }
 
 # 32ビットDLL中継の付属ファイルはバンドル外に置きます。
@@ -81,9 +81,9 @@ $desktopPack = Join-Path $nuget "microsoft.windowsdesktop.app.runtime.win-x64/$(
 $sdkItems = dotnet msbuild $project -nologo '-getItem:KnownAppHostPack'
 if ($LASTEXITCODE -ne 0) { throw 'SDKのホストパック情報を取得できません。' }
 $hostPack = ($sdkItems | ConvertFrom-Json).Items.KnownAppHostPack |
-    Where-Object TargetFramework -eq 'net10.0'
+    Where-Object TargetFramework -eq 'net11.0'
 $hostVersion = $hostPack.AppHostPackVersion
-if ($hostVersion -notmatch '^10\.0\.[0-9]+$') { throw '使用した .NET ホストパックを特定できません。' }
+if ($hostVersion -notmatch '^11\.0\.[0-9]+$') { throw '使用した .NET ホストパックを特定できません。' }
 $hostName = 'microsoft.netcore.app.host.win-x64'
 $hostZip = Join-Path $output 'dotnet-host.zip'
 $hostFiles = Join-Path $output 'dotnet-host'
