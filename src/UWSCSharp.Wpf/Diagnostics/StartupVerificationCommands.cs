@@ -121,6 +121,8 @@ public partial class App
                 RuntimeVerification.RunAsync),
             ["--verify-recording-os"] = WithExitCode(
                 RecordingOsVerification.RunAsync),
+            ["--capture-recording-demo"] = WithReceiptFile(
+                RecordingDemoCapture.RunAsync),
             ["--verify-recording-timeout"] = WithExitCode(
                 RecordingOsVerification.RunTimeoutAsync),
             ["--verify-stop-options"] = WithExitCode(

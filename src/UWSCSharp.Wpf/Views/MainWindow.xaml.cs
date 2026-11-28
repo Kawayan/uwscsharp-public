@@ -103,7 +103,8 @@ public partial class MainWindow : Window
                 includeInjected: verifyRecordingInput,
                 excludedKeys: hotkeys?.ActiveKeys ?? [],
                 excludedModifiers: hotkeySettings.Modifiers,
-                monitorHookHealth: true,
+                // 注入入力を使うSandbox検証では、物理Raw Inputとの照合を行いません。
+                monitorHookHealth: !verifyRecordingInput,
                 additionalControls: launcherHotkeys?.RegisteredShortcuts ?? [])
             {
                 OmitIdleTimeAndMouseMoves = recordingSettings.OmitIdleTimeAndMouseMoves,
